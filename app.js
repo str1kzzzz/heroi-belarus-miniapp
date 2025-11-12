@@ -5,7 +5,7 @@ if (tg) tg.expand();
 const app = document.getElementById('app');
 document.getElementById('startBtn').addEventListener('click', showCategories);
 
-function showCategories() {
+function showCategories() {ы
   app.innerHTML = `
     <h2>Выберы катэгорыю</h2>
     <div>
