@@ -24,7 +24,7 @@
     "field": "Поэт, драматург",
     "category": "Культура",
     "fact": "Янка Купала — один из основателей современной белорусской литературы.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Yanka_Kupala_1920s.jpg"
+    "image": "images/kupala.jpg"
   },
   {
     "id": 4,
@@ -33,7 +33,7 @@
     "field": "Писатель, академик",
     "category": "Культура",
     "fact": "Автор эпопеи «На ростанях» и один из основателей Академии наук Беларуси.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Yakub_Kolas_1930s.jpg"
+    "image": "images/kolas_yakub.jpg"
   },
   {
     "id": 5,
@@ -42,7 +42,7 @@
     "field": "Поэт, критик",
     "category": "Культура",
     "fact": "Автор стихотворения «Пагоня», ставшего символом национального духа Беларуси.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Maksim_Bahdanovič.jpg"
+    "image": "images/maxim_bogdanovich.JPG"
   },
   {
     "id": 6,
@@ -51,7 +51,7 @@
     "field": "Государственный деятель",
     "category": "Политика",
     "fact": "Герой Советского Союза, руководивший Белоруссией в 1960–1980-е годы.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Piotr_Masherau_1970s.jpg"
+    "image": "images/masherov.jpg"
   },
   {
     "id": 7,
@@ -60,7 +60,7 @@
     "field": "Писатель, фронтовик",
     "category": "Культура",
     "fact": "Василь Быков писал о моральных испытаниях человека во время войны.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Vasil_Bykau.jpg"
+    "image": "images/bykov.jpg"
   },
   {
     "id": 8,
@@ -69,7 +69,7 @@
     "field": "Писатель, публицист",
     "category": "Культура",
     "fact": "Соавтор книги «Я из огненной деревни…», посвящённой жертвам войны.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/0/00/Ales_Adamovich_1985.jpg"
+    "image": "images/adamovich.jpg"
   },
   {
     "id": 9,
@@ -78,7 +78,7 @@
     "field": "Поэт, переводчик, академик",
     "category": "Культура",
     "fact": "Народный поэт Беларуси, автор десятков сборников стихов и переводов.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/4/46/Nil_Hilevich_2008.jpg"
+    "image": "images/gilevich.jpg"
   },
   {
     "id": 10,
@@ -96,7 +96,7 @@
     "field": "Партизанка, Герой Советского Союза",
     "category": "Война",
     "fact": "Командовала разведгруппой в годы Великой Отечественной войны.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/3/36/Zinaida_Bandarenka.jpg"
+    "image": "images/zinaida_bondarenko.webp"
   },
   {
     "id": 12,
@@ -114,7 +114,7 @@
     "field": "Партизан, Герой Советского Союза",
     "category": "Война",
     "fact": "Легендарный командир партизанского движения, после войны возглавил колхоз.",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/2/26/Kiryl_Arloŭski_1960.jpg"
+    "image": "images/kirill_orlovski.jpg"
   },
   {
     "id": 14,
