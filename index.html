@@ -6,42 +6,118 @@
   <title>Героі Беларусі</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div class="liquid-background"></div>
+  
   <div class="ui-root">
-    <header class="topbar glass">
-      <div class="logo">⭐</div>
-      <div class="title">
-        <div class="app-name">Героі Беларусі</div>
-        <div class="subtitle">Памяць пра тых, хто змагаўся</div>
+    <!-- Animated Header -->
+    <header class="topbar glass premium-glass">
+      <div class="header-content">
+        <div class="logo-container">
+          <div class="logo-shine"></div>
+          <div class="logo">🇧🇾</div>
+        </div>
+        <div class="title">
+          <div class="app-name">Героі Беларусі</div>
+          <div class="subtitle">Жывая памяць народа</div>
+        </div>
+        <button class="icon-btn premium-btn" id="refreshBtn">
+          <div class="btn-inner">⟳</div>
+        </button>
       </div>
-      <button class="icon-btn" id="refreshBtn">↻</button>
     </header>
 
-    <section class="hero glass">
-      <h1 class="hero-title">Даведайся пра герояў</h1>
-      <p class="hero-sub">Натхняйся подзвігамі нашых суайчыннікаў</p>
-      <div class="hero-actions">
-        <button class="btn-primary" id="startBtn">Пачаць</button>
-        <button class="btn-ghost" id="aboutBtn">Аб праекце</button>
+    <!-- Hero Section -->
+    <section class="hero glass premium-glass floating">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          <span class="title-gradient">Гісторыя ў асобах</span>
+        </h1>
+        <p class="hero-sub">Адкрыйце подзвігі тых, хто ствараў нашу зямлю</p>
+        <div class="hero-actions">
+          <button class="btn-primary liquid-btn" id="startBtn">
+            <span class="btn-sparkle">✨</span>
+            Пачаць падарожжа
+          </button>
+          <button class="btn-ghost glass-ghost" id="aboutBtn">
+            <span class="btn-icon">ℹ️</span>
+            Аб праекце
+          </button>
+        </div>
       </div>
     </section>
 
-    <div class="category-bar" id="categories"></div>
-    <div class="cards-area" id="heroesGrid"></div>
+    <!-- Categories -->
+    <div class="categories-container">
+      <div class="category-bar" id="categories"></div>
+    </div>
 
-    <footer class="footer glass">
-      © 2025 Героі Беларусі · Зроблена з любоўю ❤️
+    <!-- Heroes Grid -->
+    <main class="cards-container">
+      <div class="cards-area" id="heroesGrid">
+        <div class="loading-state">
+          <div class="liquid-loader"></div>
+          <p>Загружаем гісторыі...</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer glass premium-glass">
+      <div class="footer-content">
+        <div class="footer-heart">❤️</div>
+        <div class="footer-text">
+          <div>Героі Беларусі</div>
+          <div class="footer-sub">Зроблена з павагай да нашай гісторыі</div>
+        </div>
+      </div>
     </footer>
   </div>
 
+  <!-- Premium Modal -->
   <div class="modal hidden" id="heroModal">
-    <div class="modal-card glass">
-      <button class="close-btn" id="closeModal">✕</button>
-      <img id="modalImg" class="thumb" src="" alt="">
-      <h3 id="modalName"></h3>
-      <div id="modalDesc"></div>
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-card premium-glass floating-scale">
+        <button class="close-btn premium-close" id="closeModal">
+          <div class="close-icon">×</div>
+        </button>
+        
+        <div class="modal-hero">
+          <div class="hero-image-container">
+            <img id="modalImg" class="hero-image" src="" alt="">
+            <div class="image-shine"></div>
+          </div>
+          
+          <div class="hero-info">
+            <h3 id="modalName" class="hero-name"></h3>
+            <div id="modalMeta" class="hero-meta"></div>
+          </div>
+        </div>
+
+        <div id="modalDesc" class="hero-description"></div>
+
+        <div class="modal-actions">
+          <button class="btn-primary liquid-btn share-btn" id="shareBtn">
+            <span class="btn-sparkle">📤</span>
+            Падзяліцца гісторыяй
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Floating Particles -->
+  <div class="particles-container">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
   </div>
 
   <script src="app.js"></script>

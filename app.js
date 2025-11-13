@@ -1,291 +1,412 @@
-// app.js - FIXED PATHS VERSION
-(function(){
-  console.log('=== APP START - FIXED PATHS ===');
-  
-  // Telegram WebApp initialization
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    try { 
-      tg.expand(); 
-      tg.enableClosingConfirmation();
-      console.log('Telegram WebApp initialized');
-    } catch(e){ 
-      console.warn('Telegram init failed', e); 
-    }
-  }
-
-  function safeQuery(id) { 
-    const element = document.getElementById(id);
-    if (!element) console.warn(`Element #${id} not found`);
-    return element;
-  }
-
-  function init() {
-    console.log('Initializing app with fixed paths...');
+// app.js - ULTIMATE LIQUID GLASS EXPERIENCE
+class BelarusHeroesApp {
+  constructor() {
+    this.tg = window.Telegram?.WebApp;
+    this.heroes = [];
+    this.facts = [];
+    this.currentCategory = null;
     
-    // Проверяем элементы
-    const elements = ['startBtn', 'aboutBtn', 'refreshBtn', 'heroesGrid', 'categories', 'heroModal'];
-    elements.forEach(id => {
-      const el = safeQuery(id);
-      console.log(`${id}:`, el ? 'FOUND' : 'MISSING');
-    });
+    this.init();
+  }
 
-    let HEROES = [];
-    let FACTS = [];
+  async init() {
+    console.log('🚀 Initializing Premium Belarus Heroes App...');
+    
+    // Initialize Telegram WebApp
+    this.initTelegram();
+    
+    // Load data
+    await this.loadData();
+    
+    // Setup event listeners
+    this.setupEventListeners();
+    
+    // Initial render
+    this.renderCategoriesAndHeroes();
+    
+    console.log('✅ App initialized successfully');
+  }
 
-    // Функции загрузки с исправленными путями
-    async function loadHeroes(){
+  initTelegram() {
+    if (this.tg) {
       try {
-        console.log('Loading heroes...');
-        // Пробуем все возможные пути
-        const paths = [
-          'heroes.json',
-          './heroes.json',
-          '/heroes.json'
-        ];
+        this.tg.expand();
+        this.tg.enableClosingConfirmation();
         
-        for (const path of paths) {
-          try {
-            const res = await fetch(path);
-            if (res.ok) {
-              HEROES = await res.json();
-              console.log(`✅ Heroes loaded from: ${path}`);
-              return HEROES;
-            }
-          } catch (e) {
-            console.warn(`Failed from ${path}:`, e);
-          }
-        }
-        
-        throw new Error('All paths failed');
-        
-      } catch (err) {
-        console.error('Failed to load heroes:', err);
-        // Fallback данные
-        HEROES = [
-          {
-            "id": 1,
-            "name": "Франциск Скорина",
-            "years": "ок. 1490 — ок. 1551",
-            "field": "Просветитель, первопечатник", 
-            "category": "Культура",
-            "fact": "Франциск Скорина напечатал первую книгу на белорусской земле в 1517 году — «Псалтыр».",
-            "image": "./images/francisk.jpg"
-          },
-          {
-            "id": 2,
-            "name": "Кастусь Калиновский", 
-            "years": "1838 — 1864",
-            "field": "Революционер, публицист",
-            "category": "История",
-            "fact": "Калиновский был одним из лидеров восстания 1863 года против Российской империи.",
-            "image": "https://upload.wikimedia.org/wikipedia/commons/1/16/Kastuś_Kalinouski.jpg"
-          }
-        ];
-        console.log('Using fallback heroes');
-        return HEROES;
-      }
-    }
-
-    async function loadFacts(){
-      try {
-        console.log('Loading facts...');
-        const paths = [
-          'facts.json',
-          './facts.json', 
-          '/facts.json'
-        ];
-        
-        for (const path of paths) {
-          try {
-            const res = await fetch(path);
-            if (res.ok) {
-              FACTS = await res.json();
-              console.log(`✅ Facts loaded from: ${path}`);
-              return FACTS;
-            }
-          } catch (e) {
-            console.warn(`Failed from ${path}:`, e);
-          }
-        }
-        
-        throw new Error('All paths failed');
-        
-      } catch (err) {
-        console.error('Failed to load facts:', err);
-        FACTS = [
-          {"id": 1, "name": "Франциск Скорина", "fact": "Первый белорусский книгопечатник издал «Псалтыр» в Праге в 1517 году."},
-          {"id": 2, "name": "Кастусь Калиновский", "fact": "Его письма «Мужыцкая праўда» стали символом борьбы за свободу."}
-        ];
-        console.log('Using fallback facts');
-        return FACTS;
-      }
-    }
-
-    // Остальные функции остаются без изменений
-    function closeModalFunc() {
-      const heroModal = safeQuery('heroModal');
-      if (heroModal) heroModal.classList.add('hidden');
-      if (tg && tg.BackButton) tg.BackButton.hide();
-    }
-
-    function openModalWithHero(hero){
-      if (!hero) return;
-      
-      const modal = safeQuery('heroModal');
-      const modalImg = safeQuery('modalImg');
-      const modalName = safeQuery('modalName');
-      const modalDesc = safeQuery('modalDesc');
-      
-      if (modalImg) {
-        modalImg.src = hero.image;
-        modalImg.alt = hero.name;
-        modalImg.onerror = function() {
-          this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="12" fill="%23666" text-anchor="middle" dy=".3em">Няма выявы</text></svg>';
-        };
-      }
-      
-      if (modalName) modalName.textContent = hero.name;
-      if (modalDesc) modalDesc.innerHTML = `
-        <p><strong>${hero.years || 'Даты не указаны'}</strong></p>
-        <p><em>${hero.field}</em> • ${hero.category}</p>
-        <p style="margin-top: 12px">${hero.fact}</p>
-        <button class="btn-primary" onclick="shareHero(${JSON.stringify(hero).replace(/"/g, '&quot;')})" style="margin-top: 16px; width: 100%">Падзяліцца</button>
-      `;
-      
-      if (modal) modal.classList.remove('hidden');
-      
-      if (tg && tg.BackButton) {
-        tg.BackButton.show();
-        tg.BackButton.onClick(closeModalFunc);
-      }
-    }
-
-    function showRandomFact() {
-      if (!FACTS.length) return;
-      const fact = FACTS[Math.floor(Math.random() * FACTS.length)];
-      openModalWithHero({
-        id: 'fact',
-        name: `📚 Факт: ${fact.name}`,
-        image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="16" fill="white" text-anchor="middle" dy=".3em">💡</text></svg>',
-        years: '',
-        field: 'Цікавы факт',
-        category: 'Факт', 
-        fact: fact.fact
-      });
-    }
-
-    function renderCategoriesAndDefault(){
-      const cats = [...new Set(HEROES.map(h => h.category).filter(Boolean))];
-      const categoriesEl = safeQuery('categories');
-      const gridEl = safeQuery('heroesGrid');
-      
-      if (categoriesEl) {
-        categoriesEl.innerHTML = '';
-        
-        cats.forEach((cat, idx) => {
-          const btn = document.createElement('button');
-          btn.className = `cat-btn ${idx === 0 ? 'active' : ''}`;
-          btn.textContent = cat;
-          btn.onclick = () => {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            showCategory(cat);
-          };
-          categoriesEl.appendChild(btn);
+        // Handle theme changes
+        this.tg.onEvent('themeChanged', () => {
+          document.body.className = this.tg.colorScheme;
         });
         
-        const randomBtn = document.createElement('button');
-        randomBtn.className = 'cat-btn';
-        randomBtn.innerHTML = '🎲 Выпадковы факт';
-        randomBtn.onclick = showRandomFact;
-        categoriesEl.appendChild(randomBtn);
-      }
-      
-      if (cats.length > 0) {
-        showCategory(cats[0]);
-      }
-    }
-
-    function showCategory(category) {
-      const gridEl = safeQuery('heroesGrid');
-      const heroes = HEROES.filter(h => h.category === category);
-      
-      if (gridEl) {
-        gridEl.innerHTML = heroes.map(hero => `
-          <div class="card glass" onclick="appOpenModal(${JSON.stringify(hero).replace(/"/g, '&quot;')})">
-            <img class="thumb" src="${hero.image}" alt="${hero.name}" 
-                 onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><rect width=&quot;100&quot; height=&quot;100&quot; fill=&quot;%23f0f0f0&quot;/><text x=&quot;50&quot; y=&quot;50&quot; font-family=&quot;Arial&quot; font-size=&quot;10&quot; fill=&quot;%23666&quot; text-anchor=&quot;middle&quot; dy=&quot;.3em&quot;>${hero.name}</text></svg>'">
-            <h3>${hero.name}</h3>
-            <p><small>${hero.years} • ${hero.field}</small></p>
-            <p>${hero.fact.substring(0, 80)}...</p>
-            <div class="card-actions">
-              <button class="btn-ghost" onclick="event.stopPropagation(); appOpenModal(${JSON.stringify(hero).replace(/"/g, '&quot;')})">Дэталі</button>
-            </div>
-          </div>
-        `).join('');
+        // Handle back button
+        this.tg.onEvent('backButtonClicked', () => {
+          if (this.isModalOpen()) {
+            this.closeModal();
+            return false;
+          }
+          return true;
+        });
+        
+        console.log('✅ Telegram WebApp initialized');
+      } catch (error) {
+        console.warn('⚠️ Telegram init failed:', error);
       }
     }
+  }
 
-    function shareHero(hero) {
-      const text = `${hero.name} — ${hero.fact}`;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(
-          () => alert('Тэкст скапіяваны!'),
-          () => alert('Памылка капіравання')
-        );
+  async loadData() {
+    try {
+      // Load heroes
+      const heroesResponse = await fetch('./heroes.json');
+      if (heroesResponse.ok) {
+        this.heroes = await heroesResponse.json();
+        console.log(`✅ Loaded ${this.heroes.length} heroes`);
       } else {
-        alert(text + '\n\n(Скапіруйце тэкст)');
+        throw new Error('Failed to load heroes');
       }
+      
+      // Load facts
+      const factsResponse = await fetch('./facts.json');
+      if (factsResponse.ok) {
+        this.facts = await factsResponse.json();
+        console.log(`✅ Loaded ${this.facts.length} facts`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to load data:', error);
+      this.useFallbackData();
     }
+  }
 
-    // Глобальные функции для onclick
-    window.appOpenModal = openModalWithHero;
-    window.shareHero = shareHero;
-    window.closeModalFunc = closeModalFunc;
-    window.showRandomFact = showRandomFact;
+  useFallbackData() {
+    this.heroes = [
+      {
+        "id": 1,
+        "name": "Франциск Скорина",
+        "years": "ок. 1490 — ок. 1551",
+        "field": "Просветитель, первопечатник",
+        "category": "Культура",
+        "fact": "Франциск Скорина напечатал первую книгу на белорусской земле в 1517 году — «Псалтыр».",
+        "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop"
+      },
+      {
+        "id": 2,
+        "name": "Кастусь Калиновский",
+        "years": "1838 — 1864",
+        "field": "Революционер, публицист",
+        "category": "История",
+        "fact": "Калиновский был одним из лидеров восстания 1863 года против Российской империи.",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
+      }
+    ];
+    
+    this.facts = [
+      {"id": 1, "name": "Франциск Скорина", "fact": "Первый белорусский книгопечатник издал «Псалтыр» в Праге в 1517 году."},
+      {"id": 2, "name": "Кастусь Калиновский", "fact": "Его письма «Мужыцкая праўда» стали символом борьбы за свободу."}
+    ];
+    
+    console.log('🔄 Using fallback data');
+  }
 
-    // Назначаем обработчики
-    safeQuery('startBtn')?.addEventListener('click', async function() {
-      await loadHeroes();
-      renderCategoriesAndDefault();
-      this.textContent = 'Абнавіць';
+  setupEventListeners() {
+    // Main buttons
+    this.on('#startBtn', 'click', () => this.renderCategoriesAndHeroes());
+    this.on('#aboutBtn', 'click', () => this.showAboutModal());
+    this.on('#refreshBtn', 'click', () => location.reload());
+    this.on('#closeModal', 'click', () => this.closeModal());
+    this.on('#shareBtn', 'click', () => this.shareCurrentHero());
+    
+    // Modal backdrop click
+    this.on('#heroModal', 'click', (e) => {
+      if (e.target.id === 'heroModal') this.closeModal();
     });
+  }
 
-    safeQuery('aboutBtn')?.addEventListener('click', function() {
-      openModalWithHero({
-        id: 'about',
-        name: 'Аб праекце',
-        image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">ℹ️</text></svg>',
-        years: '2025',
-        field: 'Гісторыя і культура', 
-        category: 'Адукацыя',
-        fact: 'Гэты праект прысвечаны памяці герояў Беларусі.'
+  on(selector, event, handler) {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.addEventListener(event, handler);
+    }
+  }
+
+  getCategories() {
+    return [...new Set(this.heroes.map(hero => hero.category).filter(Boolean))];
+  }
+
+  renderCategoriesAndHeroes() {
+    const categories = this.getCategories();
+    const categoriesContainer = document.getElementById('categories');
+    const heroesGrid = document.getElementById('heroesGrid');
+    
+    if (!categoriesContainer || !heroesGrid) return;
+    
+    // Render categories
+    categoriesContainer.innerHTML = categories.map((category, index) => `
+      <button class="cat-btn ${index === 0 ? 'active' : ''}" 
+              onclick="app.selectCategory('${category}')">
+        ${category}
+      </button>
+    `).join('') + `
+      <button class="cat-btn" onclick="app.showRandomFact()">
+        🎲 Выпадковы факт
+      </button>
+    `;
+    
+    // Show first category
+    if (categories.length > 0) {
+      this.currentCategory = categories[0];
+      this.renderHeroes(this.currentCategory);
+    }
+    
+    // Update start button
+    const startBtn = document.getElementById('startBtn');
+    if (startBtn) {
+      startBtn.innerHTML = '<span class="btn-sparkle">🔄</span>Абнавіць';
+    }
+  }
+
+  selectCategory(category) {
+    this.currentCategory = category;
+    
+    // Update active state
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    this.renderHeroes(category);
+  }
+
+  renderHeroes(category) {
+    const heroesGrid = document.getElementById('heroesGrid');
+    if (!heroesGrid) return;
+    
+    const categoryHeroes = this.heroes.filter(hero => hero.category === category);
+    
+    if (categoryHeroes.length === 0) {
+      heroesGrid.innerHTML = `
+        <div class="card premium-glass" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+          <p>Нічога не знойдзена для "${category}"</p>
+        </div>
+      `;
+      return;
+    }
+    
+    heroesGrid.innerHTML = categoryHeroes.map(hero => `
+      <div class="card premium-glass" onclick="app.showHeroModal(${hero.id})">
+        <img class="thumb" src="${hero.image}" alt="${hero.name}" 
+             onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" fill=\"%23f0f0f0\"/><text x=\"50\" y=\"50\" font-family=\"Arial\" font-size=\"10\" fill=\"%23666\" text-anchor=\"middle\" dy=\".3em\">${hero.name}</text></svg>'">
+        <h3>${hero.name}</h3>
+        <p class="card-meta">${hero.years} • ${hero.field}</p>
+        <p>${hero.fact.substring(0, 100)}...</p>
+        <div class="card-actions">
+          <button class="btn-ghost glass-ghost" onclick="event.stopPropagation(); app.showHeroModal(${hero.id})">
+            <span class="btn-icon">📖</span>Дэталі
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  showHeroModal(heroId) {
+    const hero = this.heroes.find(h => h.id === heroId);
+    if (!hero) return;
+    
+    const modal = document.getElementById('heroModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalName = document.getElementById('modalName');
+    const modalMeta = document.getElementById('modalMeta');
+    const modalDesc = document.getElementById('modalDesc');
+    
+    if (!modal || !modalImg || !modalName || !modalMeta || !modalDesc) return;
+    
+    // Set content
+    modalImg.src = hero.image;
+    modalImg.alt = hero.name;
+    modalName.textContent = hero.name;
+    modalMeta.innerHTML = `
+      <div>${hero.years}</div>
+      <div>${hero.field} • ${hero.category}</div>
+    `;
+    
+    // Get additional fact
+    const additionalFact = this.getRandomFactForHero(hero.name);
+    modalDesc.innerHTML = `
+      <p>${hero.fact}</p>
+      ${additionalFact ? `
+        <div style="margin-top: 16px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; border-left: 4px solid var(--accent-primary);">
+          <strong>📌 Дадатковы факт:</strong>
+          <p style="margin: 8px 0 0; color: var(--text-secondary);">${additionalFact.fact}</p>
+        </div>
+      ` : ''}
+    `;
+    
+    // Store current hero for sharing
+    modal.dataset.currentHero = heroId;
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    
+    // Show Telegram back button
+    if (this.tg && this.tg.BackButton) {
+      this.tg.BackButton.show();
+      this.tg.BackButton.onClick(() => this.closeModal());
+    }
+  }
+
+  showAboutModal() {
+    this.showHeroModal({
+      id: 'about',
+      name: 'Аб праекце',
+      image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">🇧🇾</text></svg>',
+      years: '2024',
+      field: 'Гісторыя і культура',
+      category: 'Адукацыя',
+      fact: 'Гэты праект прысвечаны памяці герояў Беларусі. Мы хочам захаваць і перадаць гісторыю подзвігаў нашых суайчыннікаў. Выкарыстоўвайце кнопку "🎲 Выпадковы факт" для адкрыцця цікавых фактаў!'
+    });
+  }
+
+  showRandomFact() {
+    if (this.facts.length === 0) return;
+    
+    const randomFact = this.facts[Math.floor(Math.random() * this.facts.length)];
+    const hero = this.heroes.find(h => h.name === randomFact.name);
+    
+    this.showHeroModal({
+      id: 'random-fact',
+      name: `📚 ${randomFact.name}`,
+      image: hero?.image || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="16" fill="white" text-anchor="middle" dy=".3em">💡</text></svg>',
+      years: hero?.years || '',
+      field: 'Цікавы факт',
+      category: 'Факт',
+      fact: randomFact.fact
+    });
+  }
+
+  getRandomFactForHero(heroName) {
+    const heroFacts = this.facts.filter(fact => fact.name === heroName);
+    return heroFacts.length > 0 ? heroFacts[Math.floor(Math.random() * heroFacts.length)] : null;
+  }
+
+  closeModal() {
+    const modal = document.getElementById('heroModal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+    
+    if (this.tg && this.tg.BackButton) {
+      this.tg.BackButton.hide();
+    }
+  }
+
+  isModalOpen() {
+    const modal = document.getElementById('heroModal');
+    return modal && !modal.classList.contains('hidden');
+  }
+
+  shareCurrentHero() {
+    const modal = document.getElementById('heroModal');
+    const heroId = modal?.dataset.currentHero;
+    const hero = this.heroes.find(h => h.id == heroId);
+    
+    if (!hero) return;
+    
+    const shareText = `🇧🇾 ${hero.name}\n${hero.years}\n${hero.fact}\n\n#ГероіБеларусі`;
+    
+    if (this.tg) {
+      try {
+        this.tg.showPopup({
+          title: 'Падзяліцца',
+          message: `Хочаце падзяліцца інфармацыяй пра ${hero.name}?`,
+          buttons: [
+            {id: 'copy', type: 'default', text: '📋 Скапіяваць'},
+            {id: 'close', type: 'cancel', text: '✕ Адмяніць'}
+          ]
+        }, (buttonId) => {
+          if (buttonId === 'copy') {
+            navigator.clipboard.writeText(shareText).then(
+              () => this.showNotification('Тэкст скапіяваны! 🎉'),
+              () => this.showNotification('Памылка капіравання 😔')
+            );
+          }
+        });
+      } catch (error) {
+        this.fallbackShare(shareText);
+      }
+    } else {
+      this.fallbackShare(shareText);
+    }
+  }
+
+  fallbackShare(text) {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Герой Беларусі',
+        text: text
+      }).catch(() => {
+        this.copyToClipboard(text);
       });
-    });
-
-    safeQuery('refreshBtn')?.addEventListener('click', function() {
-      location.reload();
-    });
-
-    safeQuery('closeModal')?.addEventListener('click', closeModalFunc);
-
-    safeQuery('heroModal')?.addEventListener('click', function(e) {
-      if (e.target === this) closeModalFunc();
-    });
-
-    // Автозагрузка
-    Promise.all([loadHeroes(), loadFacts()]).then(() => {
-      renderCategoriesAndDefault();
-    });
-
-    console.log('App initialized successfully');
+    } else {
+      this.copyToClipboard(text);
+    }
   }
 
-  // Запуск
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    setTimeout(init, 100);
+  copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(
+      () => this.showNotification('Тэкст скапіяваны! 📋'),
+      () => this.showNotification('Скапіруйце тэкст:\n\n' + text)
+    );
   }
-})();
+
+  showNotification(message) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-weight: 500;
+      z-index: 10000;
+      text-align: center;
+      box-shadow: var(--glass-shadow);
+      animation: toastIn 0.3s ease-out;
+    `;
+    
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'toastOut 0.3s ease-in forwards';
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
+  }
+}
+
+// Add toast animations
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes toastIn {
+    from { opacity: 0; transform: translate(-50%, -40%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; transform: translate(-50%, -50%); }
+    to { opacity: 0; transform: translate(-50%, -60%); }
+  }
+`;
+document.head.appendChild(style);
+
+// Initialize app when DOM is ready
+let app;
+document.addEventListener('DOMContentLoaded', () => {
+  app = new BelarusHeroesApp();
+});
+
+// Make app globally available
+window.app = app;
