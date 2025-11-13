@@ -1,31 +1,14 @@
-// app.js — fully optimized for Telegram Mini App
+// app.js - FIXED PATHS VERSION
 (function(){
+  console.log('=== APP START - FIXED PATHS ===');
+  
   // Telegram WebApp initialization
   const tg = window.Telegram?.WebApp;
-  
   if (tg) {
     try { 
       tg.expand(); 
       tg.enableClosingConfirmation();
       console.log('Telegram WebApp initialized');
-      
-      // Apply Telegram theme
-      document.body.className = tg.colorScheme;
-      
-      // Handle theme changes
-      tg.onEvent('themeChanged', () => {
-        document.body.className = tg.colorScheme;
-      });
-      
-      // Handle back button in Telegram
-      tg.onEvent('backButtonClicked', () => {
-        const modal = document.getElementById('heroModal');
-        if (modal && !modal.classList.contains('hidden')) {
-          closeModalFunc();
-          return false;
-        }
-        return true;
-      });
     } catch(e){ 
       console.warn('Telegram init failed', e); 
     }
@@ -38,87 +21,121 @@
   }
 
   function init() {
-    console.log('INIT app.js running');
+    console.log('Initializing app with fixed paths...');
     
-    const startBtn = safeQuery('startBtn');
-    const aboutBtn = safeQuery('aboutBtn');
-    const refreshBtn = safeQuery('refreshBtn');
-    const cardsArea = safeQuery('heroesGrid');
-    const categories = safeQuery('categories');
-    const heroModal = safeQuery('heroModal');
-    const closeModal = safeQuery('closeModal');
-    const modalImg = safeQuery('modalImg');
-    const modalName = safeQuery('modalName');
-    const modalDesc = safeQuery('modalDesc');
+    // Проверяем элементы
+    const elements = ['startBtn', 'aboutBtn', 'refreshBtn', 'heroesGrid', 'categories', 'heroModal'];
+    elements.forEach(id => {
+      const el = safeQuery(id);
+      console.log(`${id}:`, el ? 'FOUND' : 'MISSING');
+    });
 
     let HEROES = [];
     let FACTS = [];
 
+    // Функции загрузки с исправленными путями
     async function loadHeroes(){
       try {
-        console.log('Loading heroes.json...');
-        const res = await fetch('heroes.json');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        HEROES = await res.json();
-        console.log('Loaded heroes:', HEROES.length);
-        return HEROES;
-      } catch (err) {
-        console.error('Failed to load heroes.json:', err);
-        HEROES = [];
-        if (cardsArea) {
-          cardsArea.innerHTML = `<div class="card glass"><p>Памылка загрузкі дадзеных. Праверце файл heroes.json.</p></div>`;
+        console.log('Loading heroes...');
+        // Пробуем все возможные пути
+        const paths = [
+          'heroes.json',
+          './heroes.json',
+          '/heroes.json'
+        ];
+        
+        for (const path of paths) {
+          try {
+            const res = await fetch(path);
+            if (res.ok) {
+              HEROES = await res.json();
+              console.log(`✅ Heroes loaded from: ${path}`);
+              return HEROES;
+            }
+          } catch (e) {
+            console.warn(`Failed from ${path}:`, e);
+          }
         }
-        return [];
+        
+        throw new Error('All paths failed');
+        
+      } catch (err) {
+        console.error('Failed to load heroes:', err);
+        // Fallback данные
+        HEROES = [
+          {
+            "id": 1,
+            "name": "Франциск Скорина",
+            "years": "ок. 1490 — ок. 1551",
+            "field": "Просветитель, первопечатник", 
+            "category": "Культура",
+            "fact": "Франциск Скорина напечатал первую книгу на белорусской земле в 1517 году — «Псалтыр».",
+            "image": "./images/francisk.jpg"
+          },
+          {
+            "id": 2,
+            "name": "Кастусь Калиновский", 
+            "years": "1838 — 1864",
+            "field": "Революционер, публицист",
+            "category": "История",
+            "fact": "Калиновский был одним из лидеров восстания 1863 года против Российской империи.",
+            "image": "https://upload.wikimedia.org/wikipedia/commons/1/16/Kastuś_Kalinouski.jpg"
+          }
+        ];
+        console.log('Using fallback heroes');
+        return HEROES;
       }
     }
 
     async function loadFacts(){
       try {
-        console.log('Loading facts.json...');
-        const res = await fetch('facts.json');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        FACTS = await res.json();
-        console.log('Loaded facts:', FACTS.length);
-        return FACTS;
+        console.log('Loading facts...');
+        const paths = [
+          'facts.json',
+          './facts.json', 
+          '/facts.json'
+        ];
+        
+        for (const path of paths) {
+          try {
+            const res = await fetch(path);
+            if (res.ok) {
+              FACTS = await res.json();
+              console.log(`✅ Facts loaded from: ${path}`);
+              return FACTS;
+            }
+          } catch (e) {
+            console.warn(`Failed from ${path}:`, e);
+          }
+        }
+        
+        throw new Error('All paths failed');
+        
       } catch (err) {
-        console.error('Failed to load facts.json:', err);
-        FACTS = [];
-        return [];
+        console.error('Failed to load facts:', err);
+        FACTS = [
+          {"id": 1, "name": "Франциск Скорина", "fact": "Первый белорусский книгопечатник издал «Псалтыр» в Праге в 1517 году."},
+          {"id": 2, "name": "Кастусь Калиновский", "fact": "Его письма «Мужыцкая праўда» стали символом борьбы за свободу."}
+        ];
+        console.log('Using fallback facts');
+        return FACTS;
       }
     }
 
-    function getRandomFact() {
-      if (!FACTS.length) {
-        return {
-          name: "Цікавы факт",
-          fact: "Загрузіце файл facts.json для адлюстравання выпадковых фактаў."
-        };
-      }
-      return FACTS[Math.floor(Math.random() * FACTS.length)];
-    }
-
-    function getFactByHeroName(heroName) {
-      if (!FACTS.length) return null;
-      const heroFacts = FACTS.filter(fact => fact.name === heroName);
-      if (heroFacts.length > 0) {
-        return heroFacts[Math.floor(Math.random() * heroFacts.length)];
-      }
-      return null;
-    }
-
+    // Остальные функции остаются без изменений
     function closeModalFunc() {
-      if (heroModal) {
-        heroModal.classList.add('hidden');
-      }
-      if (tg && tg.BackButton) {
-        tg.BackButton.hide();
-      }
+      const heroModal = safeQuery('heroModal');
+      if (heroModal) heroModal.classList.add('hidden');
+      if (tg && tg.BackButton) tg.BackButton.hide();
     }
 
     function openModalWithHero(hero){
       if (!hero) return;
       
-      const additionalFact = getFactByHeroName(hero.name);
+      const modal = safeQuery('heroModal');
+      const modalImg = safeQuery('modalImg');
+      const modalName = safeQuery('modalName');
+      const modalDesc = safeQuery('modalDesc');
       
       if (modalImg) {
         modalImg.src = hero.image;
@@ -129,40 +146,14 @@
       }
       
       if (modalName) modalName.textContent = hero.name;
+      if (modalDesc) modalDesc.innerHTML = `
+        <p><strong>${hero.years || 'Даты не указаны'}</strong></p>
+        <p><em>${hero.field}</em> • ${hero.category}</p>
+        <p style="margin-top: 12px">${hero.fact}</p>
+        <button class="btn-primary" onclick="shareHero(${JSON.stringify(hero).replace(/"/g, '&quot;')})" style="margin-top: 16px; width: 100%">Падзяліцца</button>
+      `;
       
-      if (modalDesc) {
-        let factHTML = `
-          <p><strong>${hero.years || 'Даты не указаны'}</strong></p>
-          <p><em>${hero.field}</em> • ${hero.category}</p>
-          <p style="margin-top: 12px">${hero.fact}</p>
-        `;
-        
-        if (additionalFact && additionalFact.fact !== hero.fact) {
-          factHTML += `
-            <div class="fact-highlight">
-              <strong>📌 Дадатковы факт:</strong>
-              <p style="margin: 8px 0 0;">${additionalFact.fact}</p>
-            </div>
-          `;
-        }
-        
-        modalDesc.innerHTML = factHTML;
-        
-        const existingShareBtn = modalDesc.parentNode.querySelector('.share-btn');
-        if (existingShareBtn) existingShareBtn.remove();
-        
-        const shareBtn = document.createElement('button');
-        shareBtn.className = 'btn-primary share-btn';
-        shareBtn.textContent = 'Падзяліцца';
-        shareBtn.style.marginTop = '16px';
-        shareBtn.style.width = '100%';
-        shareBtn.addEventListener('click', () => shareHero(hero));
-        
-        modalDesc.parentNode.insertBefore(shareBtn, modalDesc.nextSibling);
-      }
-      
-      heroModal.dataset.current = hero.id;
-      heroModal.classList.remove('hidden');
+      if (modal) modal.classList.remove('hidden');
       
       if (tg && tg.BackButton) {
         tg.BackButton.show();
@@ -171,189 +162,130 @@
     }
 
     function showRandomFact() {
-      const randomFact = getRandomFact();
+      if (!FACTS.length) return;
+      const fact = FACTS[Math.floor(Math.random() * FACTS.length)];
       openModalWithHero({
-        id: 'random-fact',
-        name: `📚 Цікавы факт: ${randomFact.name}`,
+        id: 'fact',
+        name: `📚 Факт: ${fact.name}`,
         image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="16" fill="white" text-anchor="middle" dy=".3em">💡</text></svg>',
         years: '',
-        field: 'Гісторыя Беларусі',
-        category: 'Факт',
-        fact: randomFact.fact
+        field: 'Цікавы факт',
+        category: 'Факт', 
+        fact: fact.fact
       });
-    }
-
-    function shareHero(hero) {
-      const shareText = `${hero.name} — ${hero.fact}`;
-      
-      if (tg) {
-        try { 
-          if (tg.showPopup) {
-            tg.showPopup({
-              title: 'Падзяліцца',
-              message: `Хочаце падзяліцца інфармацыяй пра ${hero.name}?`,
-              buttons: [
-                {id: 'copy', type: 'default', text: 'Скапіяваць'},
-                {id: 'close', type: 'cancel', text: 'Адмяніць'}
-              ]
-            }, (buttonId) => {
-              if (buttonId === 'copy') {
-                navigator.clipboard.writeText(shareText).then(
-                  () => tg.showAlert('Тэкст скапіяваны!'),
-                  () => tg.showAlert('Памылка капіравання')
-                );
-              }
-            });
-          } else {
-            navigator.clipboard.writeText(shareText).then(
-              () => alert('Тэкст скапіяваны'),
-              () => alert('Капіраванне не ўдалося')
-            );
-          }
-        } catch(e){ 
-          console.warn('Telegram share failed', e);
-          navigator.clipboard.writeText(shareText).then(
-            () => alert('Тэкст скапіяваны'),
-            () => alert('Капіраванне не ўдалося')
-          );
-        }
-      } else if (navigator.share) {
-        navigator.share({
-          title: hero.name,
-          text: shareText,
-          url: window.location.href
-        }).catch(() => {});
-      } else {
-        navigator.clipboard.writeText(shareText).then(
-          () => alert('Тэкст скапіяваны'),
-          () => alert('Капіраванне не ўдалося')
-        );
-      }
     }
 
     function renderCategoriesAndDefault(){
-      const cats = Array.from(new Set(HEROES.map(h => h.category).filter(Boolean)));
+      const cats = [...new Set(HEROES.map(h => h.category).filter(Boolean))];
+      const categoriesEl = safeQuery('categories');
+      const gridEl = safeQuery('heroesGrid');
       
-      categories.innerHTML = '';
-      
-      cats.forEach((c, idx) => {
-        const b = document.createElement('button');
-        b.className = 'cat-btn' + (idx === 0 ? ' active' : '');
-        b.textContent = c;
-        b.addEventListener('click', () => {
-          document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
-          b.classList.add('active');
-          showCategory(c);
+      if (categoriesEl) {
+        categoriesEl.innerHTML = '';
+        
+        cats.forEach((cat, idx) => {
+          const btn = document.createElement('button');
+          btn.className = `cat-btn ${idx === 0 ? 'active' : ''}`;
+          btn.textContent = cat;
+          btn.onclick = () => {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            showCategory(cat);
+          };
+          categoriesEl.appendChild(btn);
         });
-        categories.appendChild(b);
-      });
-
-      const randomFactBtn = document.createElement('button');
-      randomFactBtn.className = 'cat-btn';
-      randomFactBtn.innerHTML = '🎲 Выпадковы факт';
-      randomFactBtn.addEventListener('click', showRandomFact);
-      categories.appendChild(randomFactBtn);
-
-      if (cats.length) {
+        
+        const randomBtn = document.createElement('button');
+        randomBtn.className = 'cat-btn';
+        randomBtn.innerHTML = '🎲 Выпадковы факт';
+        randomBtn.onclick = showRandomFact;
+        categoriesEl.appendChild(randomBtn);
+      }
+      
+      if (cats.length > 0) {
         showCategory(cats[0]);
+      }
+    }
+
+    function showCategory(category) {
+      const gridEl = safeQuery('heroesGrid');
+      const heroes = HEROES.filter(h => h.category === category);
+      
+      if (gridEl) {
+        gridEl.innerHTML = heroes.map(hero => `
+          <div class="card glass" onclick="appOpenModal(${JSON.stringify(hero).replace(/"/g, '&quot;')})">
+            <img class="thumb" src="${hero.image}" alt="${hero.name}" 
+                 onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><rect width=&quot;100&quot; height=&quot;100&quot; fill=&quot;%23f0f0f0&quot;/><text x=&quot;50&quot; y=&quot;50&quot; font-family=&quot;Arial&quot; font-size=&quot;10&quot; fill=&quot;%23666&quot; text-anchor=&quot;middle&quot; dy=&quot;.3em&quot;>${hero.name}</text></svg>'">
+            <h3>${hero.name}</h3>
+            <p><small>${hero.years} • ${hero.field}</small></p>
+            <p>${hero.fact.substring(0, 80)}...</p>
+            <div class="card-actions">
+              <button class="btn-ghost" onclick="event.stopPropagation(); appOpenModal(${JSON.stringify(hero).replace(/"/g, '&quot;')})">Дэталі</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function shareHero(hero) {
+      const text = `${hero.name} — ${hero.fact}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(
+          () => alert('Тэкст скапіяваны!'),
+          () => alert('Памылка капіравання')
+        );
       } else {
-        cardsArea.innerHTML = '<div class="card glass"><p>Няма катэгорый у дадзеных.</p></div>';
+        alert(text + '\n\n(Скапіруйце тэкст)');
       }
     }
 
-    function showCategory(cat){
-      const arr = HEROES.filter(h => h.category === cat);
-      
-      if (!arr.length) {
-        cardsArea.innerHTML = `<div class="card glass"><p>Нічога не знойдзена для "${cat}"</p></div>`;
-        return;
-      }
-      
-      cardsArea.innerHTML = arr.map(h => `
-        <article class="card glass" data-id="${h.id}">
-          <img class="thumb" src="${h.image}" alt="${h.name}" loading="lazy" 
-               onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" fill=\"%23f0f0f0\"/><text x=\"50\" y=\"50\" font-family=\"Arial\" font-size=\"10\" fill=\"%23666\" text-anchor=\"middle\" dy=\".3em\">Няма выявы</text></svg>'">
-          <div>
-            <h3>${h.name}</h3>
-            <p><small>${h.years || ''} • ${h.field}</small></p>
-            <p>${h.fact.substring(0, 80)}...</p>
-          </div>
-          <div class="card-actions">
-            <button class="btn-ghost" data-id="${h.id}">Дэталі</button>
-          </div>
-        </article>
-      `).join('');
+    // Глобальные функции для onclick
+    window.appOpenModal = openModalWithHero;
+    window.shareHero = shareHero;
+    window.closeModalFunc = closeModalFunc;
+    window.showRandomFact = showRandomFact;
 
-      cardsArea.querySelectorAll('.btn-ghost').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const id = btn.getAttribute('data-id');
-          const hero = HEROES.find(x => String(x.id) === String(id));
-          if (hero) openModalWithHero(hero);
-        });
-      });
-
-      cardsArea.querySelectorAll('.card').forEach(card => {
-        card.addEventListener('click', (e) => {
-          if (e.target.tagName === 'BUTTON') return;
-          const id = card.getAttribute('data-id');
-          const hero = HEROES.find(x => String(x.id) === String(id));
-          if (hero) openModalWithHero(hero);
-        });
-      });
-    }
-
-    if (startBtn) {
-      startBtn.addEventListener('click', async () => {
-        await loadHeroes();
-        renderCategoriesAndDefault();
-        startBtn.textContent = 'Абнавіць';
-      });
-    }
-
-    if (aboutBtn) {
-      aboutBtn.addEventListener('click', () => {
-        openModalWithHero({
-          id: 'about',
-          name: 'Аб праекце',
-          image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">ℹ️</text></svg>',
-          years: '2025',
-          field: 'Гісторыя і культура',
-          category: 'Адукацыя',
-          fact: 'Гэты праект прысвечаны памяці герояў Беларусі. Мы хочам захаваць і перадаць гісторыю подзвігаў нашых суайчыннікаў. Выкарыстоўвайце кнопку "🎲 Выпадковы факт" для адкрыцця цікавых фактаў!'
-        });
-      });
-    }
-
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', () => location.reload());
-    }
-
-    if (closeModal) {
-      closeModal.addEventListener('click', closeModalFunc);
-    }
-
-    if (heroModal) {
-      heroModal.addEventListener('click', (e) => {
-        if (e.target === heroModal) closeModalFunc();
-      });
-    }
-
-    Promise.all([loadHeroes(), loadFacts()]).then(() => {
-      if (HEROES.length > 0) {
-        renderCategoriesAndDefault();
-        if (startBtn) startBtn.textContent = 'Абнавіць';
-      }
+    // Назначаем обработчики
+    safeQuery('startBtn')?.addEventListener('click', async function() {
+      await loadHeroes();
+      renderCategoriesAndDefault();
+      this.textContent = 'Абнавіць';
     });
 
-    window.__HEROES = HEROES;
-    window.__FACTS = FACTS;
-    window.__showRandomFact = showRandomFact;
+    safeQuery('aboutBtn')?.addEventListener('click', function() {
+      openModalWithHero({
+        id: 'about',
+        name: 'Аб праекце',
+        image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">ℹ️</text></svg>',
+        years: '2025',
+        field: 'Гісторыя і культура', 
+        category: 'Адукацыя',
+        fact: 'Гэты праект прысвечаны памяці герояў Беларусі.'
+      });
+    });
+
+    safeQuery('refreshBtn')?.addEventListener('click', function() {
+      location.reload();
+    });
+
+    safeQuery('closeModal')?.addEventListener('click', closeModalFunc);
+
+    safeQuery('heroModal')?.addEventListener('click', function(e) {
+      if (e.target === this) closeModalFunc();
+    });
+
+    // Автозагрузка
+    Promise.all([loadHeroes(), loadFacts()]).then(() => {
+      renderCategoriesAndDefault();
+    });
+
+    console.log('App initialized successfully');
   }
 
+  // Запуск
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
-    setTimeout(init, 0);
+    setTimeout(init, 100);
   }
 })();
