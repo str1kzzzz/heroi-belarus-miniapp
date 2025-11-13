@@ -1,61 +1,39 @@
 <!DOCTYPE html>
 <html lang="be">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Героі Беларусі — Mini App</title>
-
-  <!-- Telegram Web App SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Героі Беларусі</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="root" class="ui-root">
+  <div class="ui-root">
     <header class="topbar glass">
       <div class="topbar-left">
-        <div class="logo">🇧🇾</div>
+        <div class="logo">⭐️</div>
         <div class="title">
           <div class="app-name">Героі Беларусі</div>
-          <div class="subtitle">Караточкі • Факты • Викторына</div>
+          <div class="subtitle">Нацыянальная спадчына</div>
         </div>
       </div>
-      <div class="topbar-right">
-        <button id="openMenu" class="icon-btn" aria-label="Меню">☰</button>
-      </div>
+      <button class="icon-btn" onclick="location.reload()">⟳</button>
     </header>
 
-    <main id="app" class="content">
-      <section class="hero glass">
-        <h1 class="hero-title">Прывiтанне!</h1>
-        <p class="hero-sub">Даведайся пра выбітных асобаў Беларусі — паглядзi карткі і правер сябе ў віктарыне.</p>
+    <main class="content" id="app">
+      <section class="hero glass" id="startScreen">
+        <h1 class="hero-title">Даведайся пра герояў Беларусі</h1>
+        <p class="hero-sub">Выберы катэгорыю і адкрывай натхняльныя гісторыі.</p>
         <div class="hero-actions">
-          <button id="startBtn" class="btn-primary">Пачаць</button>
-          <button id="factBtn" class="btn-ghost">Цікаўны факт</button>
-        </div>
-      </section>
-
-      <section id="cardsArea" class="cards-area hidden" aria-live="polite">
-        <!-- categories + cards injected by JS -->
-      </section>
-
-      <section id="detailModal" class="modal hidden" role="dialog" aria-hidden="true">
-        <div class="modal-card glass">
-          <button id="closeModal" class="close-btn" aria-label="Закрыць">✕</button>
-          <div id="modalContent"></div>
-          <div class="modal-actions">
-            <button id="shareBtn" class="btn-primary small">Падзяліцца</button>
-            <button id="moreBtn" class="btn-ghost small">Викторина</button>
-          </div>
+          <button class="btn-primary" id="startBtn">Пачаць</button>
         </div>
       </section>
     </main>
 
     <footer class="footer glass">
-      <small>© 2025 — Героі Беларусі</small>
+      © 2025 Герои Беларусі — створана з любоўю 🇧🇾
     </footer>
   </div>
 
-  <script src="app.js" defer></script>
+  <script src="app.js"></script>
 </body>
 </html>
