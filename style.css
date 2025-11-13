@@ -1,4 +1,4 @@
-/* === TINDER-STYLE SWIPE INTERFACE === */
+/* === TINDER-STYLE SWIPE INTERFACE - FIXED === */
 :root {
   --bg-primary: #000000;
   --bg-secondary: rgba(255, 255, 255, 0.08);
@@ -287,34 +287,37 @@ body {
   -webkit-backdrop-filter: blur(20px);
 }
 
-.swipe-left .like-indicator {
-  opacity: 1;
+.like-indicator {
   left: 20px;
   background: var(--accent-success);
   color: white;
 }
 
-.swipe-right .dislike-indicator {
-  opacity: 1;
+.dislike-indicator {
   right: 20px;
   background: var(--accent-danger);
   color: white;
 }
 
-.swipe-up .detail-indicator {
-  opacity: 1;
+.detail-indicator {
   left: 50%;
   transform: translateX(-50%);
   background: var(--accent-primary);
   color: white;
 }
 
-.swipe-down .favorite-indicator {
-  opacity: 1;
+.favorite-indicator {
   left: 50%;
   transform: translateX(-50%);
   background: var(--accent-warning);
   color: white;
+}
+
+.swipe-left .like-indicator,
+.swipe-right .dislike-indicator,
+.swipe-up .detail-indicator,
+.swipe-down .favorite-indicator {
+  opacity: 1;
 }
 
 /* Action Buttons */
@@ -634,6 +637,7 @@ body {
   width: 100%;
   color: var(--text-primary);
   font-size: 16px;
+  border: none;
 }
 
 .menu-item:hover {
@@ -827,6 +831,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  border: none;
 }
 
 .btn-ghost:hover {

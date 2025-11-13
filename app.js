@@ -1,8 +1,9 @@
-// app.js - TINDER-STYLE SWIPE INTERFACE
+// app.js - COMPLETELY FIXED SWIPE INTERFACE
 class SwipeHeroesApp {
   constructor() {
     this.tg = window.Telegram?.WebApp;
     this.heroes = [];
+    this.facts = [];
     this.favorites = new Set();
     this.currentIndex = 0;
     this.isSwiping = false;
@@ -22,14 +23,17 @@ class SwipeHeroesApp {
     // Initialize Telegram WebApp
     this.initTelegram();
     
+    // Setup event listeners first
+    this.setupEventListeners();
+    
+    // Show loading state
+    this.showLoadingState();
+    
     // Load data
     await this.loadData();
     
     // Load favorites from localStorage
     this.loadFavorites();
-    
-    // Setup event listeners
-    this.setupEventListeners();
     
     // Initialize UI
     this.initializeUI();
@@ -57,33 +61,62 @@ class SwipeHeroesApp {
 
   async loadData() {
     try {
-      // Show loading state
-      this.showLoadingState();
+      console.log('📥 Loading data...');
       
-      // Load heroes
-      const heroesResponse = await fetch('./heroes.json');
-      if (heroesResponse.ok) {
+      // Try multiple paths for JSON files
+      const heroesPromises = [
+        fetch('./heroes.json').catch(() => null),
+        fetch('heroes.json').catch(() => null),
+        fetch('/heroes.json').catch(() => null)
+      ];
+      
+      const factsPromises = [
+        fetch('./facts.json').catch(() => null),
+        fetch('facts.json').catch(() => null),
+        fetch('/facts.json').catch(() => null)
+      ];
+      
+      // Wait for first successful heroes load
+      let heroesResponse = null;
+      for (const promise of heroesPromises) {
+        const response = await promise;
+        if (response && response.ok) {
+          heroesResponse = response;
+          break;
+        }
+      }
+      
+      if (heroesResponse) {
         this.heroes = await heroesResponse.json();
         console.log(`✅ Loaded ${this.heroes.length} heroes`);
       } else {
-        throw new Error('Failed to load heroes');
+        throw new Error('All heroes paths failed');
       }
       
-      // Load facts
-      const factsResponse = await fetch('./facts.json');
-      if (factsResponse.ok) {
+      // Wait for first successful facts load
+      let factsResponse = null;
+      for (const promise of factsPromises) {
+        const response = await promise;
+        if (response && response.ok) {
+          factsResponse = response;
+          break;
+        }
+      }
+      
+      if (factsResponse) {
         this.facts = await factsResponse.json();
         console.log(`✅ Loaded ${this.facts.length} facts`);
       }
+      
     } catch (error) {
       console.error('❌ Failed to load data:', error);
       this.useFallbackData();
-    } finally {
-      this.hideLoadingState();
     }
   }
 
   useFallbackData() {
+    console.log('🔄 Using fallback data');
+    
     this.heroes = [
       {
         "id": 1,
@@ -111,30 +144,59 @@ class SwipeHeroesApp {
         "category": "Культура",
         "fact": "Янка Купала — один из основателей современной белорусской литературы.",
         "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop"
+      },
+      {
+        "id": 4,
+        "name": "Якуб Колас",
+        "years": "1882 — 1956", 
+        "field": "Писатель, академик",
+        "category": "Культура",
+        "fact": "Автор эпопеи «На ростанях» и один из основателей Академии наук Беларуси.",
+        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop"
+      },
+      {
+        "id": 5,
+        "name": "Максим Богданович",
+        "years": "1891 — 1917",
+        "field": "Поэт, критик",
+        "category": "Культура",
+        "fact": "Автор стихотворения «Пагоня», ставшего символом национального духа Беларуси.",
+        "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop"
       }
     ];
     
     this.facts = [
       {"id": 1, "name": "Франциск Скорина", "fact": "Первый белорусский книгопечатник издал «Псалтыр» в Праге в 1517 году."},
       {"id": 2, "name": "Кастусь Калиновский", "fact": "Его письма «Мужыцкая праўда» стали символом борьбы за свободу."},
-      {"id": 3, "name": "Янка Купала", "fact": "Настоящее имя — Иван Луцевич."}
+      {"id": 3, "name": "Янка Купала", "fact": "Настоящее имя — Иван Луцевич."},
+      {"id": 4, "name": "Якуб Колас", "fact": "Псевдоним означает «Колос» — символ родной земли."},
+      {"id": 5, "name": "Максим Богданович", "fact": "Умер в возрасте 25 лет, но успел изменить белорусскую литературу навсегда."}
     ];
-    
-    console.log('🔄 Using fallback data');
   }
 
   loadFavorites() {
-    const saved = localStorage.getItem('heroesFavorites');
-    if (saved) {
-      this.favorites = new Set(JSON.parse(saved));
+    try {
+      const saved = localStorage.getItem('heroesFavorites');
+      if (saved) {
+        this.favorites = new Set(JSON.parse(saved));
+        console.log(`⭐ Loaded ${this.favorites.size} favorites`);
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to load favorites:', error);
     }
   }
 
   saveFavorites() {
-    localStorage.setItem('heroesFavorites', JSON.stringify([...this.favorites]));
+    try {
+      localStorage.setItem('heroesFavorites', JSON.stringify([...this.favorites]));
+    } catch (error) {
+      console.warn('⚠️ Failed to save favorites:', error);
+    }
   }
 
   setupEventListeners() {
+    console.log('🔗 Setting up event listeners...');
+    
     // Button events
     this.on('#menuBtn', 'click', () => this.showMenu());
     this.on('#closeMenuBtn', 'click', () => this.hideMenu());
@@ -159,29 +221,37 @@ class SwipeHeroesApp {
     
     // Touch events for swiping
     this.setupSwipeEvents();
+    
+    console.log('✅ Event listeners setup complete');
   }
 
   on(selector, event, handler) {
     const element = document.querySelector(selector);
     if (element) {
       element.addEventListener(event, handler);
+    } else {
+      console.warn(`❌ Element not found: ${selector}`);
     }
   }
 
   setupSwipeEvents() {
     const stack = document.getElementById('cardsStack');
-    if (!stack) return;
+    if (!stack) {
+      console.error('❌ cardsStack element not found!');
+      return;
+    }
+
+    console.log('👆 Setting up swipe events...');
 
     // Mouse events for desktop
     stack.addEventListener('mousedown', this.handleTouchStart.bind(this));
-    stack.addEventListener('mousemove', this.handleTouchMove.bind(this));
-    stack.addEventListener('mouseup', this.handleTouchEnd.bind(this));
-    stack.addEventListener('mouseleave', this.handleTouchEnd.bind(this));
+    document.addEventListener('mousemove', this.handleTouchMove.bind(this));
+    document.addEventListener('mouseup', this.handleTouchEnd.bind(this));
 
     // Touch events for mobile
     stack.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
-    stack.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
-    stack.addEventListener('touchend', this.handleTouchEnd.bind(this));
+    document.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+    document.addEventListener('touchend', this.handleTouchEnd.bind(this));
   }
 
   handleTouchStart(e) {
@@ -197,7 +267,9 @@ class SwipeHeroesApp {
       currentCard.classList.add('swiping');
     }
     
-    e.preventDefault();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
   }
 
   handleTouchMove(e) {
@@ -216,7 +288,9 @@ class SwipeHeroesApp {
       this.updateSwipeIndicators();
     }
     
-    e.preventDefault();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
   }
 
   handleTouchEnd() {
@@ -287,6 +361,10 @@ class SwipeHeroesApp {
   }
 
   initializeUI() {
+    console.log('🎨 Initializing UI...');
+    
+    this.hideLoadingState();
+    
     if (this.heroes.length === 0) {
       this.showEmptyState();
       return;
@@ -297,19 +375,26 @@ class SwipeHeroesApp {
     
     // Show instructions for first-time users
     if (!localStorage.getItem('instructionsShown')) {
-      this.showInstructions();
+      setTimeout(() => this.showInstructions(), 1000);
       localStorage.setItem('instructionsShown', 'true');
     }
+    
+    console.log('✅ UI initialized');
   }
 
   renderCards() {
     const stack = document.getElementById('cardsStack');
-    if (!stack) return;
+    if (!stack) {
+      console.error('❌ cardsStack element not found!');
+      return;
+    }
     
+    console.log(`🃏 Rendering cards from index ${this.currentIndex}`);
     stack.innerHTML = '';
     
     // Show next 3 cards
     const cardsToShow = Math.min(3, this.heroes.length - this.currentIndex);
+    console.log(`🃏 Showing ${cardsToShow} cards`);
     
     for (let i = 0; i < cardsToShow; i++) {
       const hero = this.heroes[this.currentIndex + i];
@@ -350,6 +435,7 @@ class SwipeHeroesApp {
   swipeLeft() {
     if (this.currentIndex >= this.heroes.length) return;
     
+    console.log('👈 Swipe left - Like');
     const currentCard = this.getCurrentCard();
     if (currentCard) {
       currentCard.classList.add('swipe-left');
@@ -362,6 +448,7 @@ class SwipeHeroesApp {
   swipeRight() {
     if (this.currentIndex >= this.heroes.length) return;
     
+    console.log('👉 Swipe right - Dislike');
     const currentCard = this.getCurrentCard();
     if (currentCard) {
       currentCard.classList.add('swipe-right');
@@ -374,6 +461,7 @@ class SwipeHeroesApp {
   swipeUp() {
     if (this.currentIndex >= this.heroes.length) return;
     
+    console.log('⬆️ Swipe up - Details');
     this.showDetailModal(this.heroes[this.currentIndex]);
     
     const currentCard = this.getCurrentCard();
@@ -388,6 +476,7 @@ class SwipeHeroesApp {
   swipeDown() {
     if (this.currentIndex >= this.heroes.length) return;
     
+    console.log('⬇️ Swipe down - Favorite');
     this.addToFavorites();
     
     const currentCard = this.getCurrentCard();
@@ -427,6 +516,7 @@ class SwipeHeroesApp {
     this.saveFavorites();
     this.updateFavoritesCount();
     this.renderFavoritesList();
+    this.showNotification('🗑️ Выдалена з закладак');
   }
 
   // UI State Management
@@ -446,11 +536,14 @@ class SwipeHeroesApp {
   }
 
   showEmptyState() {
+    console.log('🏁 Showing empty state');
     const empty = document.getElementById('emptyState');
     const stack = document.getElementById('cardsStack');
+    const loading = document.getElementById('loadingState');
     
     if (empty) empty.classList.remove('hidden');
     if (stack) stack.classList.add('hidden');
+    if (loading) loading.classList.add('hidden');
   }
 
   updateProgress() {
@@ -623,6 +716,7 @@ class SwipeHeroesApp {
     this.currentIndex = 0;
     this.hideMenu();
     this.hideFavoritesModal();
+    this.hideDetailModal();
     this.initializeUI();
     this.showNotification('🗂️ Пачалі нанова!');
   }
