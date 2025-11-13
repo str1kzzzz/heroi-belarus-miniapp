@@ -1,17 +1,23 @@
-// app.js - FIXED VERSION
-class BelarusHeroesApp {
+// app.js - TINDER-STYLE SWIPE INTERFACE
+class SwipeHeroesApp {
   constructor() {
     this.tg = window.Telegram?.WebApp;
     this.heroes = [];
-    this.facts = [];
-    this.currentCategory = null;
-    this.isInitialized = false;
+    this.favorites = new Set();
+    this.currentIndex = 0;
+    this.isSwiping = false;
+    this.startX = 0;
+    this.startY = 0;
+    this.currentX = 0;
+    this.currentY = 0;
+    this.swipeThreshold = 50;
+    this.verticalSwipeThreshold = 80;
     
     this.init();
   }
 
   async init() {
-    console.log('🚀 Initializing Premium Belarus Heroes App...');
+    console.log('🎯 Initializing Swipe Heroes App...');
     
     // Initialize Telegram WebApp
     this.initTelegram();
@@ -19,14 +25,16 @@ class BelarusHeroesApp {
     // Load data
     await this.loadData();
     
+    // Load favorites from localStorage
+    this.loadFavorites();
+    
     // Setup event listeners
     this.setupEventListeners();
     
-    // FIX: Не рендерить сразу, ждать клика на "Пачаць"
-    this.showWelcomeState();
+    // Initialize UI
+    this.initializeUI();
     
     console.log('✅ App initialized successfully');
-    this.isInitialized = true;
   }
 
   initTelegram() {
@@ -40,15 +48,6 @@ class BelarusHeroesApp {
           document.body.className = this.tg.colorScheme;
         });
         
-        // Handle back button
-        this.tg.onEvent('backButtonClicked', () => {
-          if (this.isModalOpen()) {
-            this.closeModal();
-            return false;
-          }
-          return true;
-        });
-        
         console.log('✅ Telegram WebApp initialized');
       } catch (error) {
         console.warn('⚠️ Telegram init failed:', error);
@@ -58,6 +57,9 @@ class BelarusHeroesApp {
 
   async loadData() {
     try {
+      // Show loading state
+      this.showLoadingState();
+      
       // Load heroes
       const heroesResponse = await fetch('./heroes.json');
       if (heroesResponse.ok) {
@@ -76,6 +78,8 @@ class BelarusHeroesApp {
     } catch (error) {
       console.error('❌ Failed to load data:', error);
       this.useFallbackData();
+    } finally {
+      this.hideLoadingState();
     }
   }
 
@@ -98,29 +102,63 @@ class BelarusHeroesApp {
         "category": "История",
         "fact": "Калиновский был одним из лидеров восстания 1863 года против Российской империи.",
         "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
+      },
+      {
+        "id": 3,
+        "name": "Янка Купала",
+        "years": "1882 — 1942",
+        "field": "Поэт, драматург",
+        "category": "Культура",
+        "fact": "Янка Купала — один из основателей современной белорусской литературы.",
+        "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop"
       }
     ];
     
     this.facts = [
       {"id": 1, "name": "Франциск Скорина", "fact": "Первый белорусский книгопечатник издал «Псалтыр» в Праге в 1517 году."},
-      {"id": 2, "name": "Кастусь Калиновский", "fact": "Его письма «Мужыцкая праўда» стали символом борьбы за свободу."}
+      {"id": 2, "name": "Кастусь Калиновский", "fact": "Его письма «Мужыцкая праўда» стали символом борьбы за свободу."},
+      {"id": 3, "name": "Янка Купала", "fact": "Настоящее имя — Иван Луцевич."}
     ];
     
     console.log('🔄 Using fallback data');
   }
 
+  loadFavorites() {
+    const saved = localStorage.getItem('heroesFavorites');
+    if (saved) {
+      this.favorites = new Set(JSON.parse(saved));
+    }
+  }
+
+  saveFavorites() {
+    localStorage.setItem('heroesFavorites', JSON.stringify([...this.favorites]));
+  }
+
   setupEventListeners() {
-    // Main buttons
-    this.on('#startBtn', 'click', () => this.startApp());
-    this.on('#aboutBtn', 'click', () => this.showAboutModal());
-    this.on('#refreshBtn', 'click', () => location.reload());
-    this.on('#closeModal', 'click', () => this.closeModal());
-    this.on('#shareBtn', 'click', () => this.shareCurrentHero());
+    // Button events
+    this.on('#menuBtn', 'click', () => this.showMenu());
+    this.on('#closeMenuBtn', 'click', () => this.hideMenu());
+    this.on('#closeModal', 'click', () => this.hideDetailModal());
+    this.on('#closeDetailBtn', 'click', () => this.hideDetailModal());
+    this.on('#closeFavoritesBtn', 'click', () => this.hideFavoritesModal());
+    this.on('#closeInstructions', 'click', () => this.hideInstructions());
     
-    // Modal backdrop click
-    this.on('#heroModal', 'click', (e) => {
-      if (e.target.id === 'heroModal') this.closeModal();
-    });
+    // Action buttons
+    this.on('#dislikeBtn', 'click', () => this.swipeRight());
+    this.on('#likeBtn', 'click', () => this.swipeLeft());
+    this.on('#favoriteBtn', 'click', () => this.addToFavorites());
+    
+    // Menu actions
+    this.on('#favoritesBtn', 'click', () => this.showFavorites());
+    this.on('#resetAppBtn', 'click', () => this.resetApp());
+    this.on('#aboutAppBtn', 'click', () => this.showAbout());
+    this.on('#resetBtn', 'click', () => this.resetApp());
+    
+    // Share button
+    this.on('#shareDetailBtn', 'click', () => this.shareCurrentHero());
+    
+    // Touch events for swiping
+    this.setupSwipeEvents();
   }
 
   on(selector, event, handler) {
@@ -130,157 +168,444 @@ class BelarusHeroesApp {
     }
   }
 
-  // FIX: Показывать приветственное состояние
-  showWelcomeState() {
-    const heroesGrid = document.getElementById('heroesGrid');
-    const categories = document.getElementById('categories');
+  setupSwipeEvents() {
+    const stack = document.getElementById('cardsStack');
+    if (!stack) return;
+
+    // Mouse events for desktop
+    stack.addEventListener('mousedown', this.handleTouchStart.bind(this));
+    stack.addEventListener('mousemove', this.handleTouchMove.bind(this));
+    stack.addEventListener('mouseup', this.handleTouchEnd.bind(this));
+    stack.addEventListener('mouseleave', this.handleTouchEnd.bind(this));
+
+    // Touch events for mobile
+    stack.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+    stack.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+    stack.addEventListener('touchend', this.handleTouchEnd.bind(this));
+  }
+
+  handleTouchStart(e) {
+    if (this.currentIndex >= this.heroes.length) return;
     
-    if (heroesGrid) {
-      heroesGrid.innerHTML = `
-        <div class="welcome-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-          <div style="font-size: 64px; margin-bottom: 20px;">🇧🇾</div>
-          <h3 style="margin-bottom: 16px; color: var(--text-secondary);">Гатовы да падарожжа?</h3>
-          <p style="color: var(--text-tertiary); margin-bottom: 30px;">Націсніце "Пачаць падарожжа" каб адкрыць гісторыі герояў</p>
-        </div>
-      `;
+    this.isSwiping = true;
+    const touch = e.type.includes('mouse') ? e : e.touches[0];
+    this.startX = touch.clientX;
+    this.startY = touch.clientY;
+    
+    const currentCard = this.getCurrentCard();
+    if (currentCard) {
+      currentCard.classList.add('swiping');
     }
     
-    if (categories) {
-      categories.innerHTML = '';
+    e.preventDefault();
+  }
+
+  handleTouchMove(e) {
+    if (!this.isSwiping || this.currentIndex >= this.heroes.length) return;
+    
+    const touch = e.type.includes('mouse') ? e : e.touches[0];
+    this.currentX = touch.clientX - this.startX;
+    this.currentY = touch.clientY - this.startY;
+    
+    const currentCard = this.getCurrentCard();
+    if (currentCard) {
+      const rotate = this.currentX * 0.1;
+      currentCard.style.transform = `translate(${this.currentX}px, ${this.currentY}px) rotate(${rotate}deg)`;
+      
+      // Update swipe indicators
+      this.updateSwipeIndicators();
+    }
+    
+    e.preventDefault();
+  }
+
+  handleTouchEnd() {
+    if (!this.isSwiping || this.currentIndex >= this.heroes.length) return;
+    
+    this.isSwiping = false;
+    const currentCard = this.getCurrentCard();
+    
+    if (currentCard) {
+      currentCard.classList.remove('swiping');
+      
+      // Check swipe direction
+      if (Math.abs(this.currentY) > this.verticalSwipeThreshold) {
+        // Vertical swipe
+        if (this.currentY < 0) {
+          this.swipeUp(); // Swipe up for details
+        } else {
+          this.swipeDown(); // Swipe down for favorites
+        }
+      } else if (Math.abs(this.currentX) > this.swipeThreshold) {
+        // Horizontal swipe
+        if (this.currentX > 0) {
+          this.swipeRight(); // Swipe right to skip
+        } else {
+          this.swipeLeft(); // Swipe left to like
+        }
+      } else {
+        // Return to original position
+        this.resetCardPosition();
+      }
+    }
+    
+    // Reset values
+    this.currentX = 0;
+    this.currentY = 0;
+  }
+
+  updateSwipeIndicators() {
+    const currentCard = this.getCurrentCard();
+    if (!currentCard) return;
+    
+    // Remove all indicator classes
+    currentCard.classList.remove('swipe-left', 'swipe-right', 'swipe-up', 'swipe-down');
+    
+    if (Math.abs(this.currentY) > Math.abs(this.currentX)) {
+      // Vertical swipe dominant
+      if (this.currentY < -this.verticalSwipeThreshold) {
+        currentCard.classList.add('swipe-up');
+      } else if (this.currentY > this.verticalSwipeThreshold) {
+        currentCard.classList.add('swipe-down');
+      }
+    } else {
+      // Horizontal swipe dominant
+      if (this.currentX < -this.swipeThreshold) {
+        currentCard.classList.add('swipe-left');
+      } else if (this.currentX > this.swipeThreshold) {
+        currentCard.classList.add('swipe-right');
+      }
     }
   }
 
-  // FIX: Запуск приложения по клику
-  startApp() {
-    this.renderCategoriesAndHeroes();
-    
-    // Обновить кнопку
-    const startBtn = document.getElementById('startBtn');
-    if (startBtn) {
-      startBtn.innerHTML = '<span class="btn-sparkle">🔄</span>Абнавіць';
+  resetCardPosition() {
+    const currentCard = this.getCurrentCard();
+    if (currentCard) {
+      currentCard.style.transform = '';
+      currentCard.classList.remove('swipe-left', 'swipe-right', 'swipe-up', 'swipe-down');
     }
   }
 
-  getCategories() {
-    return [...new Set(this.heroes.map(hero => hero.category).filter(Boolean))];
-  }
-
-  renderCategoriesAndHeroes() {
-    const categories = this.getCategories();
-    const categoriesContainer = document.getElementById('categories');
-    const heroesGrid = document.getElementById('heroesGrid');
-    
-    if (!categoriesContainer || !heroesGrid) return;
-    
-    // Render categories
-    categoriesContainer.innerHTML = categories.map((category, index) => `
-      <button class="cat-btn ${index === 0 ? 'active' : ''}" 
-              onclick="app.selectCategory('${category}')">
-        ${category}
-      </button>
-    `).join('') + `
-      <button class="cat-btn" onclick="app.showRandomFact()">
-        🎲 Выпадковы факт
-      </button>
-    `;
-    
-    // Show first category
-    if (categories.length > 0) {
-      this.currentCategory = categories[0];
-      this.renderHeroes(this.currentCategory);
-    }
-  }
-
-  selectCategory(category) {
-    this.currentCategory = category;
-    
-    // Update active state
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-    
-    this.renderHeroes(category);
-  }
-
-  renderHeroes(category) {
-    const heroesGrid = document.getElementById('heroesGrid');
-    if (!heroesGrid) return;
-    
-    const categoryHeroes = this.heroes.filter(hero => hero.category === category);
-    
-    if (categoryHeroes.length === 0) {
-      heroesGrid.innerHTML = `
-        <div class="card premium-glass" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-          <p>Нічога не знойдзена для "${category}"</p>
-        </div>
-      `;
+  initializeUI() {
+    if (this.heroes.length === 0) {
+      this.showEmptyState();
       return;
     }
     
-    heroesGrid.innerHTML = categoryHeroes.map(hero => `
-      <div class="card premium-glass" onclick="app.showHeroModal(${hero.id})">
-        <img class="thumb" src="${hero.image}" alt="${hero.name}" 
-             onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" fill=\"%23f0f0f0\"/><text x=\"50\" y=\"50\" font-family=\"Arial\" font-size=\"10\" fill=\"%23666\" text-anchor=\"middle\" dy=\".3em\">${hero.name}</text></svg>'">
-        <h3>${hero.name}</h3>
-        <p class="card-meta">${hero.years} • ${hero.field}</p>
-        <p>${hero.fact.substring(0, 100)}...</p>
-        <div class="card-actions">
-          <button class="btn-ghost glass-ghost" onclick="event.stopPropagation(); app.showHeroModal(${hero.id})">
-            <span class="btn-icon">📖</span>Дэталі
-          </button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  showHeroModal(heroId) {
-    const hero = this.heroes.find(h => h.id === heroId);
-    if (!hero) return;
+    this.renderCards();
+    this.updateProgress();
     
-    const modal = document.getElementById('heroModal');
-    const modalImg = document.getElementById('modalImg');
-    const modalName = document.getElementById('modalName');
-    const modalMeta = document.getElementById('modalMeta');
-    const modalDesc = document.getElementById('modalDesc');
-    
-    if (!modal || !modalImg || !modalName || !modalMeta || !modalDesc) return;
-    
-    // Set content
-    modalImg.src = hero.image;
-    modalImg.alt = hero.name;
-    modalName.textContent = hero.name;
-    modalMeta.innerHTML = `
-      <div>${hero.years}</div>
-      <div>${hero.field} • ${hero.category}</div>
-    `;
-    
-    // Get additional fact
-    const additionalFact = this.getRandomFactForHero(hero.name);
-    modalDesc.innerHTML = `
-      <p>${hero.fact}</p>
-      ${additionalFact ? `
-        <div style="margin-top: 16px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; border-left: 4px solid var(--accent-primary);">
-          <strong>📌 Дадатковы факт:</strong>
-          <p style="margin: 8px 0 0; color: var(--text-secondary);">${additionalFact.fact}</p>
-        </div>
-      ` : ''}
-    `;
-    
-    // Store current hero for sharing
-    modal.dataset.currentHero = heroId;
-    
-    // Show modal
-    modal.classList.remove('hidden');
-    
-    // Show Telegram back button
-    if (this.tg && this.tg.BackButton) {
-      this.tg.BackButton.show();
-      this.tg.BackButton.onClick(() => this.closeModal());
+    // Show instructions for first-time users
+    if (!localStorage.getItem('instructionsShown')) {
+      this.showInstructions();
+      localStorage.setItem('instructionsShown', 'true');
     }
   }
 
-  showAboutModal() {
+  renderCards() {
+    const stack = document.getElementById('cardsStack');
+    if (!stack) return;
+    
+    stack.innerHTML = '';
+    
+    // Show next 3 cards
+    const cardsToShow = Math.min(3, this.heroes.length - this.currentIndex);
+    
+    for (let i = 0; i < cardsToShow; i++) {
+      const hero = this.heroes[this.currentIndex + i];
+      const card = this.createCard(hero, i);
+      stack.appendChild(card);
+    }
+  }
+
+  createCard(hero, index) {
+    const card = document.createElement('div');
+    card.className = 'hero-card premium-glass';
+    card.style.zIndex = 10 - index;
+    card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 10}px)`;
+    
+    card.innerHTML = `
+      <img class="card-image" src="${hero.image}" alt="${hero.name}"
+           onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" fill=\"%23f0f0f0\"/><text x=\"50\" y=\"50\" font-family=\"Arial\" font-size=\"10\" fill=\"%23666\" text-anchor=\"middle\" dy=\".3em\">${hero.name}</text></svg>'">
+      <div class="card-content">
+        <h3 class="card-name">${hero.name}</h3>
+        <div class="card-meta">${hero.years} • ${hero.field}</div>
+        <p class="card-fact">${hero.fact}</p>
+      </div>
+      <div class="swipe-indicator like-indicator">👍 Падабаецца</div>
+      <div class="swipe-indicator dislike-indicator">👎 Прапусціць</div>
+      <div class="swipe-indicator detail-indicator">📖 Падрабязнасці</div>
+      <div class="swipe-indicator favorite-indicator">⭐ У закладкі</div>
+    `;
+    
+    return card;
+  }
+
+  getCurrentCard() {
+    const stack = document.getElementById('cardsStack');
+    return stack ? stack.firstElementChild : null;
+  }
+
+  // Swipe Actions
+  swipeLeft() {
+    if (this.currentIndex >= this.heroes.length) return;
+    
+    const currentCard = this.getCurrentCard();
+    if (currentCard) {
+      currentCard.classList.add('swipe-left');
+      setTimeout(() => {
+        this.nextCard();
+      }, 300);
+    }
+  }
+
+  swipeRight() {
+    if (this.currentIndex >= this.heroes.length) return;
+    
+    const currentCard = this.getCurrentCard();
+    if (currentCard) {
+      currentCard.classList.add('swipe-right');
+      setTimeout(() => {
+        this.nextCard();
+      }, 300);
+    }
+  }
+
+  swipeUp() {
+    if (this.currentIndex >= this.heroes.length) return;
+    
+    this.showDetailModal(this.heroes[this.currentIndex]);
+    
+    const currentCard = this.getCurrentCard();
+    if (currentCard) {
+      currentCard.classList.add('swipe-up');
+      setTimeout(() => {
+        this.resetCardPosition();
+      }, 300);
+    }
+  }
+
+  swipeDown() {
+    if (this.currentIndex >= this.heroes.length) return;
+    
+    this.addToFavorites();
+    
+    const currentCard = this.getCurrentCard();
+    if (currentCard) {
+      currentCard.classList.add('swipe-down');
+      setTimeout(() => {
+        this.nextCard();
+      }, 300);
+    }
+  }
+
+  nextCard() {
+    this.currentIndex++;
+    this.updateProgress();
+    
+    if (this.currentIndex >= this.heroes.length) {
+      this.showEmptyState();
+    } else {
+      this.renderCards();
+    }
+  }
+
+  addToFavorites() {
+    if (this.currentIndex >= this.heroes.length) return;
+    
+    const hero = this.heroes[this.currentIndex];
+    this.favorites.add(hero.id);
+    this.saveFavorites();
+    this.updateFavoritesCount();
+    
+    // Show notification
+    this.showNotification(`✅ ${hero.name} даданы ў закладкі`);
+  }
+
+  removeFromFavorite(heroId) {
+    this.favorites.delete(heroId);
+    this.saveFavorites();
+    this.updateFavoritesCount();
+    this.renderFavoritesList();
+  }
+
+  // UI State Management
+  showLoadingState() {
+    const loading = document.getElementById('loadingState');
+    const stack = document.getElementById('cardsStack');
+    const empty = document.getElementById('emptyState');
+    
+    if (loading) loading.classList.remove('hidden');
+    if (stack) stack.classList.add('hidden');
+    if (empty) empty.classList.add('hidden');
+  }
+
+  hideLoadingState() {
+    const loading = document.getElementById('loadingState');
+    if (loading) loading.classList.add('hidden');
+  }
+
+  showEmptyState() {
+    const empty = document.getElementById('emptyState');
+    const stack = document.getElementById('cardsStack');
+    
+    if (empty) empty.classList.remove('hidden');
+    if (stack) stack.classList.add('hidden');
+  }
+
+  updateProgress() {
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressFill && progressText) {
+      const progress = (this.currentIndex / this.heroes.length) * 100;
+      progressFill.style.width = `${progress}%`;
+      progressText.textContent = `${this.currentIndex}/${this.heroes.length}`;
+    }
+  }
+
+  updateFavoritesCount() {
+    const countElement = document.getElementById('favoritesCount');
+    if (countElement) {
+      countElement.textContent = this.favorites.size;
+    }
+  }
+
+  // Modal Management
+  showDetailModal(hero) {
+    const modal = document.getElementById('detailModal');
+    const image = document.getElementById('detailImage');
+    const name = document.getElementById('detailName');
+    const meta = document.getElementById('detailMeta');
+    const description = document.getElementById('detailDescription');
+    
+    if (modal && image && name && meta && description) {
+      image.src = hero.image;
+      image.alt = hero.name;
+      name.textContent = hero.name;
+      meta.innerHTML = `
+        <div>${hero.years}</div>
+        <div>${hero.field} • ${hero.category}</div>
+      `;
+      
+      // Get additional fact
+      const additionalFact = this.getAdditionalFact(hero.name);
+      description.innerHTML = `
+        <p>${hero.fact}</p>
+        ${additionalFact ? `
+          <div style="margin-top: 16px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; border-left: 4px solid var(--accent-primary);">
+            <strong>📌 Дадатковы факт:</strong>
+            <p style="margin: 8px 0 0; color: var(--text-secondary);">${additionalFact.fact}</p>
+          </div>
+        ` : ''}
+      `;
+      
+      modal.classList.remove('hidden');
+      modal.dataset.currentHero = hero.id;
+    }
+  }
+
+  hideDetailModal() {
+    const modal = document.getElementById('detailModal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
+  showMenu() {
+    const modal = document.getElementById('menuModal');
+    if (modal) {
+      this.updateFavoritesCount();
+      modal.classList.remove('hidden');
+    }
+  }
+
+  hideMenu() {
+    const modal = document.getElementById('menuModal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
+  showFavorites() {
+    this.hideMenu();
+    const modal = document.getElementById('favoritesModal');
+    const list = document.getElementById('favoritesList');
+    const empty = document.getElementById('emptyFavorites');
+    
+    if (modal && list && empty) {
+      this.renderFavoritesList();
+      
+      if (this.favorites.size === 0) {
+        list.classList.add('hidden');
+        empty.classList.remove('hidden');
+      } else {
+        list.classList.remove('hidden');
+        empty.classList.add('hidden');
+      }
+      
+      modal.classList.remove('hidden');
+    }
+  }
+
+  hideFavoritesModal() {
+    const modal = document.getElementById('favoritesModal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
+  renderFavoritesList() {
+    const list = document.getElementById('favoritesList');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    
+    this.favorites.forEach(heroId => {
+      const hero = this.heroes.find(h => h.id === heroId);
+      if (hero) {
+        const item = document.createElement('div');
+        item.className = 'favorite-item';
+        item.innerHTML = `
+          <img class="favorite-image" src="${hero.image}" alt="${hero.name}"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" fill=\"%23f0f0f0\"/><text x=\"50\" y=\"50\" font-family=\"Arial\" font-size=\"8\" fill=\"%23666\" text-anchor=\"middle\" dy=\".3em\">${hero.name}</text></svg>'">
+          <div class="favorite-info">
+            <div class="favorite-name">${hero.name}</div>
+            <div class="favorite-meta">${hero.years} • ${hero.field}</div>
+          </div>
+          <button class="remove-favorite" onclick="app.removeFromFavorite(${hero.id})">
+            ✕
+          </button>
+        `;
+        
+        item.addEventListener('click', (e) => {
+          if (!e.target.classList.contains('remove-favorite')) {
+            this.showDetailModal(hero);
+            this.hideFavoritesModal();
+          }
+        });
+        
+        list.appendChild(item);
+      }
+    });
+  }
+
+  showInstructions() {
+    const instructions = document.getElementById('instructions');
+    if (instructions) {
+      instructions.classList.remove('hidden');
+    }
+  }
+
+  hideInstructions() {
+    const instructions = document.getElementById('instructions');
+    if (instructions) {
+      instructions.classList.add('hidden');
+    }
+  }
+
+  showAbout() {
+    this.hideMenu();
     const aboutHero = {
       id: 'about',
       name: 'Аб праекце',
@@ -288,54 +613,28 @@ class BelarusHeroesApp {
       years: '2024',
       field: 'Гісторыя і культура',
       category: 'Адукацыя',
-      fact: 'Гэты праект прысвечаны памяці герояў Беларусі. Мы хочам захаваць і перадаць гісторыю подзвігаў нашых суайчыннікаў. Выкарыстоўвайце кнопку "🎲 Выпадковы факт" для адкрыцця цікавых фактаў!'
+      fact: 'Гэты праект прысвечаны памяці герояў Беларусі. Свайпайце карткі, каб адкрываць гісторыі: управа - прапусціць, улева - падабаецца, уверх - падрабязнасці, уніз - у закладкі.'
     };
     
-    this.showHeroModal(aboutHero);
+    this.showDetailModal(aboutHero);
   }
 
-  showRandomFact() {
-    if (this.facts.length === 0) return;
-    
-    const randomFact = this.facts[Math.floor(Math.random() * this.facts.length)];
-    const hero = this.heroes.find(h => h.name === randomFact.name);
-    
-    const factHero = {
-      id: 'random-fact',
-      name: `📚 ${randomFact.name}`,
-      image: hero?.image || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="16" fill="white" text-anchor="middle" dy=".3em">💡</text></svg>',
-      years: hero?.years || '',
-      field: 'Цікавы факт',
-      category: 'Факт',
-      fact: randomFact.fact
-    };
-    
-    this.showHeroModal(factHero);
+  resetApp() {
+    this.currentIndex = 0;
+    this.hideMenu();
+    this.hideFavoritesModal();
+    this.initializeUI();
+    this.showNotification('🗂️ Пачалі нанова!');
   }
 
-  getRandomFactForHero(heroName) {
+  getAdditionalFact(heroName) {
+    if (!this.facts) return null;
     const heroFacts = this.facts.filter(fact => fact.name === heroName);
     return heroFacts.length > 0 ? heroFacts[Math.floor(Math.random() * heroFacts.length)] : null;
   }
 
-  closeModal() {
-    const modal = document.getElementById('heroModal');
-    if (modal) {
-      modal.classList.add('hidden');
-    }
-    
-    if (this.tg && this.tg.BackButton) {
-      this.tg.BackButton.hide();
-    }
-  }
-
-  isModalOpen() {
-    const modal = document.getElementById('heroModal');
-    return modal && !modal.classList.contains('hidden');
-  }
-
   shareCurrentHero() {
-    const modal = document.getElementById('heroModal');
+    const modal = document.getElementById('detailModal');
     const heroId = modal?.dataset.currentHero;
     const hero = this.heroes.find(h => h.id == heroId);
     
@@ -343,47 +642,21 @@ class BelarusHeroesApp {
     
     const shareText = `🇧🇾 ${hero.name}\n${hero.years}\n${hero.fact}\n\n#ГероіБеларусі`;
     
-    if (this.tg) {
-      try {
-        this.tg.showPopup({
-          title: 'Падзяліцца',
-          message: `Хочаце падзяліцца інфармацыяй пра ${hero.name}?`,
-          buttons: [
-            {id: 'copy', type: 'default', text: '📋 Скапіяваць'},
-            {id: 'close', type: 'cancel', text: '✕ Адмяніць'}
-          ]
-        }, (buttonId) => {
-          if (buttonId === 'copy') {
-            navigator.clipboard.writeText(shareText).then(
-              () => this.showNotification('Тэкст скапіяваны! 🎉'),
-              () => this.showNotification('Памылка капіравання 😔')
-            );
-          }
-        });
-      } catch (error) {
-        this.fallbackShare(shareText);
-      }
-    } else {
-      this.fallbackShare(shareText);
-    }
-  }
-
-  fallbackShare(text) {
     if (navigator.share) {
       navigator.share({
         title: 'Герой Беларусі',
-        text: text
+        text: shareText
       }).catch(() => {
-        this.copyToClipboard(text);
+        this.copyToClipboard(shareText);
       });
     } else {
-      this.copyToClipboard(text);
+      this.copyToClipboard(shareText);
     }
   }
 
   copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(
-      () => this.showNotification('Тэкст скапіяваны! 📋'),
+      () => this.showNotification('📋 Тэкст скапіяваны!'),
       () => this.showNotification('Скапіруйце тэкст:\n\n' + text)
     );
   }
@@ -436,7 +709,7 @@ document.head.appendChild(style);
 // Initialize app when DOM is ready
 let app;
 document.addEventListener('DOMContentLoaded', () => {
-  app = new BelarusHeroesApp();
+  app = new SwipeHeroesApp();
 });
 
 // Make app globally available

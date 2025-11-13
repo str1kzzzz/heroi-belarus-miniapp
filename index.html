@@ -13,111 +13,182 @@
 <body>
   <div class="liquid-background"></div>
   
-  <div class="ui-root">
-    <!-- Animated Header -->
-    <header class="topbar glass premium-glass">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header glass premium-glass">
       <div class="header-content">
-        <div class="logo-container">
-          <div class="logo-shine"></div>
-          <div class="logo">🇧🇾</div>
-        </div>
+        <div class="logo">🇧🇾</div>
         <div class="title">
-          <div class="app-name">Героі Беларусі</div>
-          <div class="subtitle">Жывая памяць народа</div>
+          <h1>Героі Беларусі</h1>
+          <p>Свайпайце, каб адкрываць гісторыі</p>
         </div>
-        <button class="icon-btn premium-btn" id="refreshBtn">
-          <div class="btn-inner">⟳</div>
+        <button class="icon-btn" id="menuBtn">
+          <span>⋮</span>
         </button>
       </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero glass premium-glass floating">
-      <div class="hero-content">
-        <h1 class="hero-title">
-          <span class="title-gradient">Гісторыя ў асобах</span>
-        </h1>
-        <p class="hero-sub">Адкрыйце подзвігі тых, хто ствараў нашу зямлю</p>
-        <div class="hero-actions">
-          <button class="btn-primary liquid-btn" id="startBtn">
-            <span class="btn-sparkle">✨</span>
-            Пачаць падарожжа
-          </button>
-          <button class="btn-ghost glass-ghost" id="aboutBtn">
-            <span class="btn-icon">ℹ️</span>
-            Аб праекце
-          </button>
-        </div>
+    <!-- Main Swipe Area -->
+    <main class="swipe-container">
+      <!-- Stack of Cards -->
+      <div class="cards-stack" id="cardsStack">
+        <!-- Cards will be dynamically inserted here -->
       </div>
-    </section>
 
-    <!-- Categories -->
-    <div class="categories-container">
-      <div class="category-bar" id="categories"></div>
-    </div>
+      <!-- Empty State -->
+      <div class="empty-state glass premium-glass hidden" id="emptyState">
+        <div class="empty-icon">🎉</div>
+        <h3>Вы прагледзелі ўсіх герояў!</h3>
+        <p>Праверце закладкі або пачніце нанова</p>
+        <button class="btn-primary liquid-btn" id="resetBtn">
+          <span class="btn-sparkle">🔄</span>
+          Пачаць нанова
+        </button>
+      </div>
 
-    <!-- Heroes Grid -->
-    <main class="cards-container">
-      <div class="cards-area" id="heroesGrid">
-        <div class="loading-state">
-          <div class="liquid-loader"></div>
-          <p>Загружаем гісторыі...</p>
-        </div>
+      <!-- Loading State -->
+      <div class="loading-state glass premium-glass" id="loadingState">
+        <div class="liquid-loader"></div>
+        <p>Загружаем гісторыі герояў...</p>
       </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer glass premium-glass">
-      <div class="footer-content">
-        <div class="footer-heart">❤️</div>
-        <div class="footer-text">
-          <div>Героі Беларусі</div>
-          <div class="footer-sub">Зроблена з павагай да нашай гісторыі</div>
-        </div>
+    <!-- Action Buttons -->
+    <div class="actions-container">
+      <button class="action-btn dislike-btn" id="dislikeBtn">
+        <div class="btn-icon">✕</div>
+      </button>
+      
+      <button class="action-btn favorite-btn" id="favoriteBtn">
+        <div class="btn-icon">⭐</div>
+      </button>
+      
+      <button class="action-btn like-btn" id="likeBtn">
+        <div class="btn-icon">♥</div>
+      </button>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
       </div>
-    </footer>
+      <div class="progress-text" id="progressText">0/0</div>
+    </div>
   </div>
 
-  <!-- Premium Modal -->
-  <div class="modal hidden" id="heroModal">
+  <!-- Detail Modal -->
+  <div class="modal hidden" id="detailModal">
     <div class="modal-backdrop"></div>
     <div class="modal-container">
-      <div class="modal-card premium-glass floating-scale">
+      <div class="modal-card premium-glass">
         <button class="close-btn premium-close" id="closeModal">
           <div class="close-icon">×</div>
         </button>
         
         <div class="modal-hero">
           <div class="hero-image-container">
-            <img id="modalImg" class="hero-image" src="" alt="">
+            <img id="detailImage" class="hero-image" src="" alt="">
             <div class="image-shine"></div>
           </div>
           
           <div class="hero-info">
-            <h3 id="modalName" class="hero-name"></h3>
-            <div id="modalMeta" class="hero-meta"></div>
+            <h2 id="detailName"></h2>
+            <div class="hero-meta" id="detailMeta"></div>
           </div>
         </div>
 
-        <div id="modalDesc" class="hero-description"></div>
+        <div class="hero-description" id="detailDescription"></div>
 
         <div class="modal-actions">
-          <button class="btn-primary liquid-btn share-btn" id="shareBtn">
-            <span class="btn-sparkle">📤</span>
-            Падзяліцца гісторыяй
+          <button class="btn-ghost glass-ghost" id="shareDetailBtn">
+            <span class="btn-icon">📤</span>
+            Падзяліцца
+          </button>
+          <button class="btn-primary liquid-btn" id="closeDetailBtn">
+            <span class="btn-sparkle">←</span>
+            Вярнуцца
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Floating Particles -->
-  <div class="particles-container">
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
+  <!-- Menu Modal -->
+  <div class="modal hidden" id="menuModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-card premium-glass">
+        <button class="close-btn premium-close" id="closeMenuBtn">
+          <div class="close-icon">×</div>
+        </button>
+        
+        <h2 style="text-align: center; margin-bottom: 30px;">Меню</h2>
+        
+        <div class="menu-actions">
+          <button class="menu-item" id="favoritesBtn">
+            <span class="menu-icon">⭐</span>
+            <span class="menu-text">Закладкі</span>
+            <span class="menu-badge" id="favoritesCount">0</span>
+          </button>
+          
+          <button class="menu-item" id="resetAppBtn">
+            <span class="menu-icon">🔄</span>
+            <span class="menu-text">Пачаць нанова</span>
+          </button>
+          
+          <button class="menu-item" id="aboutAppBtn">
+            <span class="menu-icon">ℹ️</span>
+            <span class="menu-text">Аб праекце</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Favorites Modal -->
+  <div class="modal hidden" id="favoritesModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-card premium-glass">
+        <button class="close-btn premium-close" id="closeFavoritesBtn">
+          <div class="close-icon">×</div>
+        </button>
+        
+        <h2 style="text-align: center; margin-bottom: 20px;">Закладкі</h2>
+        
+        <div class="favorites-list" id="favoritesList">
+          <!-- Favorites will be dynamically inserted here -->
+        </div>
+        
+        <div class="empty-favorites hidden" id="emptyFavorites">
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-tertiary);">
+            <div style="font-size: 48px; margin-bottom: 16px;">⭐</div>
+            <p>Тут будуць вашы закладкі</p>
+            <p style="font-size: 14px; margin-top: 8px;">Дадавайце герояў, націскаючы зорачку</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Swipe Instructions -->
+  <div class="instructions glass premium-glass hidden" id="instructions">
+    <div class="instruction-item">
+      <div class="instruction-icon">←</div>
+      <span>Свайп управа - прапусціць</span>
+    </div>
+    <div class="instruction-item">
+      <div class="instruction-icon">↑</div>
+      <span>Свайп уверх - падрабязнасці</span>
+    </div>
+    <div class="instruction-item">
+      <div class="instruction-icon">↓</div>
+      <span>Свайп уніз - у закладкі</span>
+    </div>
+    <button class="btn-ghost glass-ghost" id="closeInstructions" style="margin-top: 15px; width: 100%;">
+      Зразумела!
+    </button>
   </div>
 
   <script src="app.js"></script>
