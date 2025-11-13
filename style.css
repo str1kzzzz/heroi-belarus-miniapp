@@ -1,4 +1,4 @@
-/* === LIQUID GLASS iOS STYLE === */
+/* === LIQUID GLASS iOS STYLE - FIXED === */
 :root {
   --bg-primary: #000000;
   --bg-secondary: rgba(255, 255, 255, 0.08);
@@ -27,16 +27,18 @@
 
 html, body {
   height: 100%;
-  overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* FIX: Включить скроллинг для body */
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
+  overflow: auto; /* ВКЛЮЧИТЬ СКРОЛЛИНГ */
+  -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
 }
 
 /* Liquid Background Animation */
@@ -93,7 +95,7 @@ body {
   left: 100%;
 }
 
-/* UI Root */
+/* FIX: UI Root - ВКЛЮЧИТЬ СКРОЛЛИНГ */
 .ui-root {
   width: 100%;
   max-width: 800px;
@@ -101,7 +103,7 @@ body {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh; /* Изменить height на min-height */
   position: relative;
   z-index: 1;
 }
@@ -361,6 +363,9 @@ body {
 .cards-container {
   flex: 1;
   margin-bottom: 20px;
+  /* FIX: Включить скроллинг для контейнера карточек */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cards-area {
@@ -368,6 +373,8 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
   align-content: start;
+  /* FIX: Убрать фиксированную высоту */
+  min-height: auto;
 }
 
 /* Premium Cards */
@@ -462,6 +469,7 @@ body {
 /* Footer */
 .footer {
   margin-top: auto;
+  flex-shrink: 0; /* FIX: Не давать футеру сжиматься */
 }
 
 .footer-content {
@@ -534,7 +542,8 @@ body {
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
-  overflow: hidden;
+  overflow-y: auto; /* FIX: Скроллинг в модалке */
+  -webkit-overflow-scrolling: touch;
 }
 
 .floating-scale {

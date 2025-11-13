@@ -1,10 +1,11 @@
-// app.js - ULTIMATE LIQUID GLASS EXPERIENCE
+// app.js - FIXED VERSION
 class BelarusHeroesApp {
   constructor() {
     this.tg = window.Telegram?.WebApp;
     this.heroes = [];
     this.facts = [];
     this.currentCategory = null;
+    this.isInitialized = false;
     
     this.init();
   }
@@ -21,10 +22,11 @@ class BelarusHeroesApp {
     // Setup event listeners
     this.setupEventListeners();
     
-    // Initial render
-    this.renderCategoriesAndHeroes();
+    // FIX: Не рендерить сразу, ждать клика на "Пачаць"
+    this.showWelcomeState();
     
     console.log('✅ App initialized successfully');
+    this.isInitialized = true;
   }
 
   initTelegram() {
@@ -109,7 +111,7 @@ class BelarusHeroesApp {
 
   setupEventListeners() {
     // Main buttons
-    this.on('#startBtn', 'click', () => this.renderCategoriesAndHeroes());
+    this.on('#startBtn', 'click', () => this.startApp());
     this.on('#aboutBtn', 'click', () => this.showAboutModal());
     this.on('#refreshBtn', 'click', () => location.reload());
     this.on('#closeModal', 'click', () => this.closeModal());
@@ -125,6 +127,37 @@ class BelarusHeroesApp {
     const element = document.querySelector(selector);
     if (element) {
       element.addEventListener(event, handler);
+    }
+  }
+
+  // FIX: Показывать приветственное состояние
+  showWelcomeState() {
+    const heroesGrid = document.getElementById('heroesGrid');
+    const categories = document.getElementById('categories');
+    
+    if (heroesGrid) {
+      heroesGrid.innerHTML = `
+        <div class="welcome-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+          <div style="font-size: 64px; margin-bottom: 20px;">🇧🇾</div>
+          <h3 style="margin-bottom: 16px; color: var(--text-secondary);">Гатовы да падарожжа?</h3>
+          <p style="color: var(--text-tertiary); margin-bottom: 30px;">Націсніце "Пачаць падарожжа" каб адкрыць гісторыі герояў</p>
+        </div>
+      `;
+    }
+    
+    if (categories) {
+      categories.innerHTML = '';
+    }
+  }
+
+  // FIX: Запуск приложения по клику
+  startApp() {
+    this.renderCategoriesAndHeroes();
+    
+    // Обновить кнопку
+    const startBtn = document.getElementById('startBtn');
+    if (startBtn) {
+      startBtn.innerHTML = '<span class="btn-sparkle">🔄</span>Абнавіць';
     }
   }
 
@@ -155,12 +188,6 @@ class BelarusHeroesApp {
     if (categories.length > 0) {
       this.currentCategory = categories[0];
       this.renderHeroes(this.currentCategory);
-    }
-    
-    // Update start button
-    const startBtn = document.getElementById('startBtn');
-    if (startBtn) {
-      startBtn.innerHTML = '<span class="btn-sparkle">🔄</span>Абнавіць';
     }
   }
 
@@ -254,7 +281,7 @@ class BelarusHeroesApp {
   }
 
   showAboutModal() {
-    this.showHeroModal({
+    const aboutHero = {
       id: 'about',
       name: 'Аб праекце',
       image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">🇧🇾</text></svg>',
@@ -262,7 +289,9 @@ class BelarusHeroesApp {
       field: 'Гісторыя і культура',
       category: 'Адукацыя',
       fact: 'Гэты праект прысвечаны памяці герояў Беларусі. Мы хочам захаваць і перадаць гісторыю подзвігаў нашых суайчыннікаў. Выкарыстоўвайце кнопку "🎲 Выпадковы факт" для адкрыцця цікавых фактаў!'
-    });
+    };
+    
+    this.showHeroModal(aboutHero);
   }
 
   showRandomFact() {
@@ -271,7 +300,7 @@ class BelarusHeroesApp {
     const randomFact = this.facts[Math.floor(Math.random() * this.facts.length)];
     const hero = this.heroes.find(h => h.name === randomFact.name);
     
-    this.showHeroModal({
+    const factHero = {
       id: 'random-fact',
       name: `📚 ${randomFact.name}`,
       image: hero?.image || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="16" fill="white" text-anchor="middle" dy=".3em">💡</text></svg>',
@@ -279,7 +308,9 @@ class BelarusHeroesApp {
       field: 'Цікавы факт',
       category: 'Факт',
       fact: randomFact.fact
-    });
+    };
+    
+    this.showHeroModal(factHero);
   }
 
   getRandomFactForHero(heroName) {
