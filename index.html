@@ -1,57 +1,48 @@
 <!DOCTYPE html>
 <html lang="be">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Героі Беларусі — Mini App</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Героі Беларусі</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="ui-root">
     <header class="topbar glass">
-      <div class="topbar-left">
-        <div class="logo">🇧🇾</div>
-        <div class="title">
-          <div class="app-name">Героі Беларусі</div>
-          <div class="subtitle">Караточкі • Факты</div>
-        </div>
+      <div class="logo">⭐</div>
+      <div class="title">
+        <div class="app-name">Героі Беларусі</div>
+        <div class="subtitle">Памяць пра тых, хто змагаўся</div>
       </div>
-      <div class="topbar-right">
-        <button id="reloadBtn" class="icon-btn" title="Перезагрузить">⟳</button>
-      </div>
+      <button class="icon-btn" id="refreshBtn">↻</button>
     </header>
 
-    <main id="app" class="content">
-      <section id="startScreen" class="hero glass">
-        <h1 class="hero-title">Прывiтанне!</h1>
-        <p class="hero-sub">Даведайся пра выбітных асобаў Беларусі — паглядзi карткі і правер сябе ў віктарыне.</p>
-        <div class="hero-actions">
-          <button id="startBtn" class="btn-primary">Пачаць</button>
-          <button id="factBtn" class="btn-ghost">Цікаўны факт</button>
-        </div>
-      </section>
+    <section class="hero glass">
+      <h1 class="hero-title">Даведайся пра герояў</h1>
+      <p class="hero-sub">Натхняйся подзвігамі нашых суайчыннікаў</p>
+      <div class="hero-actions">
+        <button class="btn-primary" id="startBtn">Пачаць</button>
+        <button class="btn-ghost" id="aboutBtn">Аб праекце</button>
+      </div>
+    </section>
 
-      <!-- cardsArea появится после нажатия -->
-      <section id="cardsArea" class="cards-area hidden"></section>
-
-      <!-- modal -->
-      <section id="detailModal" class="modal hidden" aria-hidden="true">
-        <div class="modal-card glass">
-          <button id="closeModal" class="close-btn" aria-label="Закрыць">✕</button>
-          <div id="modalContent"></div>
-          <div class="modal-actions">
-            <button id="shareBtn" class="btn-primary small">Падзяліцца</button>
-            <button id="quizBtn" class="btn-ghost small">Викторина</button>
-          </div>
-        </div>
-      </section>
-    </main>
+    <div class="category-bar" id="categories"></div>
+    <div class="cards-area" id="heroesGrid"></div>
 
     <footer class="footer glass">
-      <small>© 2025 Героі Беларусі</small>
+      © 2025 Героі Беларусі · Зроблена з любоўю ❤️
     </footer>
   </div>
 
-  <script src="app.js" defer></script>
+  <div class="modal hidden" id="heroModal">
+    <div class="modal-card glass">
+      <button class="close-btn" id="closeModal">✕</button>
+      <img id="modalImg" class="thumb" src="" alt="">
+      <h3 id="modalName"></h3>
+      <p id="modalDesc"></p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
