@@ -131,12 +131,27 @@
             <span class="menu-text">Закладкі</span>
             <span class="menu-badge" id="favoritesCount">0</span>
           </button>
-          
+
+          <button class="menu-item" id="searchBtn">
+            <span class="menu-icon">🔍</span>
+            <span class="menu-text">Пошук</span>
+          </button>
+
+          <button class="menu-item" id="statsBtn">
+            <span class="menu-icon">📊</span>
+            <span class="menu-text">Статыстыка</span>
+          </button>
+
+          <button class="menu-item" id="randomBtn">
+            <span class="menu-icon">🎲</span>
+            <span class="menu-text">Выпадковы герой</span>
+          </button>
+
           <button class="menu-item" id="resetAppBtn">
             <span class="menu-icon">🔄</span>
             <span class="menu-text">Пачаць нанова</span>
           </button>
-          
+
           <button class="menu-item" id="aboutAppBtn">
             <span class="menu-icon">ℹ️</span>
             <span class="menu-text">Аб праекце</span>
@@ -167,6 +182,72 @@
             <p>Тут будуць вашы закладкі</p>
             <p style="font-size: 14px; margin-top: 8px;">Дадавайце герояў, націскаючы зорачку</p>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Modal -->
+  <div class="modal hidden" id="searchModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-card premium-glass">
+        <button class="close-btn premium-close" id="closeSearchBtn">
+          <div class="close-icon">×</div>
+        </button>
+
+        <h2 style="text-align: center; margin-bottom: 20px;">Пошук герояў</h2>
+
+        <div style="margin-bottom: 20px;">
+          <input type="text" id="searchInput" placeholder="Увядзіце імя героя..."
+                 style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--bg-secondary); color: var(--text-primary); font-size: 16px;">
+        </div>
+
+        <div class="search-results" id="searchResults" style="max-height: 300px; overflow-y: auto;">
+          <!-- Search results will be inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div class="modal hidden" id="statsModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-card premium-glass">
+        <button class="close-btn premium-close" id="closeStatsBtn">
+          <div class="close-icon">×</div>
+        </button>
+
+        <h2 style="text-align: center; margin-bottom: 20px;">Статыстыка</h2>
+
+        <div class="stats-content" id="statsContent">
+          <!-- Stats will be inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Random Hero Modal -->
+  <div class="modal hidden" id="randomModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-card premium-glass">
+        <button class="close-btn premium-close" id="closeRandomBtn">
+          <div class="close-icon">×</div>
+        </button>
+
+        <h2 style="text-align: center; margin-bottom: 20px;">🎲 Выпадковы герой</h2>
+
+        <div class="random-hero" id="randomHeroContent">
+          <!-- Random hero will be inserted here -->
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn-primary liquid-btn" id="anotherRandomBtn">
+            <span class="btn-sparkle">🎲</span>
+            Яшчэ адзін
+          </button>
         </div>
       </div>
     </div>
