@@ -192,6 +192,8 @@ body {
   width: var(--card-width);
   height: var(--card-height);
   perspective: 1000px;
+  background: rgba(255, 0, 0, 0.1); /* Debug background */
+  border: 2px solid red; /* Debug border */
 }
 
 .hero-card {
@@ -205,6 +207,8 @@ body {
   cursor: grab;
   transition: var(--transition-normal);
   border: 1px solid var(--gray-200);
+  background: rgba(0, 255, 0, 0.1); /* Debug background */
+  border: 2px solid green; /* Debug border */
 }
 
 .hero-card:active {
