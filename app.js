@@ -152,7 +152,6 @@ class BelarusHeroesApp {
     const card = this.getCurrentCard();
     if (card) {
       card.classList.add('dragging');
-      this.showSwipeIndicators(card);
     }
 
     e.preventDefault();
@@ -170,7 +169,6 @@ class BelarusHeroesApp {
       const rotate = this.currentX * 0.1;
       const scale = Math.max(0.95, 1 - Math.abs(this.currentX) * 0.001);
       card.style.transform = `translate(${this.currentX}px, ${this.currentY}px) rotate(${rotate}deg) scale(${scale})`;
-      this.updateSwipeIndicators(card);
     }
 
     e.preventDefault();
@@ -184,7 +182,6 @@ class BelarusHeroesApp {
 
     if (card) {
       card.classList.remove('dragging');
-      this.hideSwipeIndicators(card);
 
       // Determine swipe direction
       if (Math.abs(this.currentY) > this.verticalSwipeThreshold) {
@@ -208,41 +205,12 @@ class BelarusHeroesApp {
     this.currentY = 0;
   }
 
-  showSwipeIndicators(card) {
-    const indicators = card.querySelectorAll('.swipe-indicator');
-    indicators.forEach(indicator => indicator.classList.remove('visible'));
-  }
-
-  updateSwipeIndicators(card) {
-    const indicators = card.querySelectorAll('.swipe-indicator');
-    indicators.forEach(indicator => indicator.classList.remove('visible'));
-
-    if (Math.abs(this.currentY) > Math.abs(this.currentX)) {
-      if (this.currentY < -this.verticalSwipeThreshold) {
-        card.querySelector('.swipe-indicator.detail').classList.add('visible');
-      } else if (this.currentY > this.verticalSwipeThreshold) {
-        card.querySelector('.swipe-indicator.favorite').classList.add('visible');
-      }
-    } else {
-      if (this.currentX < -this.swipeThreshold) {
-        card.querySelector('.swipe-indicator.like').classList.add('visible');
-      } else if (this.currentX > this.swipeThreshold) {
-        card.querySelector('.swipe-indicator.dislike').classList.add('visible');
-      }
-    }
-  }
-
-  hideSwipeIndicators(card) {
-    const indicators = card.querySelectorAll('.swipe-indicator');
-    indicators.forEach(indicator => indicator.classList.remove('visible'));
-  }
 
   resetCard() {
     const card = this.getCurrentCard();
     if (card) {
       card.style.transform = '';
       card.classList.remove('exiting-left', 'exiting-right', 'exiting-up', 'exiting-down', 'dragging');
-      this.hideSwipeIndicators(card);
     }
   }
 
@@ -250,39 +218,21 @@ class BelarusHeroesApp {
     const stack = document.getElementById('cardsStack');
     if (!stack) return;
 
-    // Clean up any existing cards with animation classes
-    const existingCards = stack.querySelectorAll('.hero-card');
-    existingCards.forEach(card => {
-      if (card.classList.contains('exiting-left') ||
-          card.classList.contains('exiting-right') ||
-          card.classList.contains('exiting-up') ||
-          card.classList.contains('exiting-down')) {
-        card.remove();
-      }
-    });
-
-    // Clear the stack
+    // Clear the stack completely
     stack.innerHTML = '';
 
-    const cardsToShow = Math.min(3, this.heroes.length - this.currentIndex);
-
-    for (let i = 0; i < cardsToShow; i++) {
-      const hero = this.heroes[this.currentIndex + i];
-      const card = this.createCard(hero, i);
-
-      if (i === 0) {
-        card.classList.add('entering');
-      }
-
+    // Only render the current card
+    if (this.currentIndex < this.heroes.length) {
+      const hero = this.heroes[this.currentIndex];
+      const card = this.createCard(hero);
+      card.classList.add('entering');
       stack.appendChild(card);
     }
   }
 
-  createCard(hero, index) {
+  createCard(hero) {
     const card = document.createElement('div');
     card.className = 'hero-card';
-    card.style.zIndex = 10 - index;
-    card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 10}px)`;
 
     // Image container
     const imageContainer = document.createElement('div');
@@ -319,34 +269,8 @@ class BelarusHeroesApp {
     content.appendChild(meta);
     content.appendChild(description);
 
-    // Swipe indicators
-    const indicators = document.createElement('div');
-    indicators.className = 'swipe-indicators';
-
-    const likeIndicator = document.createElement('div');
-    likeIndicator.className = 'swipe-indicator like';
-    likeIndicator.textContent = '👍 Падабаецца';
-
-    const dislikeIndicator = document.createElement('div');
-    dislikeIndicator.className = 'swipe-indicator dislike';
-    dislikeIndicator.textContent = '👎 Прапусціць';
-
-    const detailIndicator = document.createElement('div');
-    detailIndicator.className = 'swipe-indicator detail';
-    detailIndicator.textContent = '📖 Падрабязнасці';
-
-    const favoriteIndicator = document.createElement('div');
-    favoriteIndicator.className = 'swipe-indicator favorite';
-    favoriteIndicator.textContent = '⭐ У закладкі';
-
-    indicators.appendChild(likeIndicator);
-    indicators.appendChild(dislikeIndicator);
-    indicators.appendChild(detailIndicator);
-    indicators.appendChild(favoriteIndicator);
-
     card.appendChild(imageContainer);
     card.appendChild(content);
-    card.appendChild(indicators);
 
     return card;
   }
@@ -409,8 +333,7 @@ class BelarusHeroesApp {
     if (this.currentIndex >= this.heroes.length) {
       this.showEmptyState();
     } else {
-      // Small delay to ensure animation cleanup
-      setTimeout(() => this.renderCards(), 50);
+      this.renderCards();
     }
   }
 

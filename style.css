@@ -273,64 +273,6 @@ body {
   overflow: hidden;
 }
 
-/* Swipe Indicators */
-.swipe-indicators {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.swipe-indicator {
-  position: absolute;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--border-radius-xl);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  opacity: 0;
-  transition: var(--transition-fast);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.swipe-indicator.like {
-  top: var(--space-4);
-  left: var(--space-4);
-  background: rgba(5, 150, 105, 0.9);
-  color: var(--white);
-  transform: rotate(-15deg);
-}
-
-.swipe-indicator.dislike {
-  top: var(--space-4);
-  right: var(--space-4);
-  background: rgba(220, 38, 38, 0.9);
-  color: var(--white);
-  transform: rotate(15deg);
-}
-
-.swipe-indicator.detail {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(37, 99, 235, 0.9);
-  color: var(--white);
-}
-
-.swipe-indicator.favorite {
-  bottom: var(--space-4);
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(217, 119, 6, 0.9);
-  color: var(--white);
-}
-
-.swipe-indicator.visible {
-  opacity: 1;
-}
 
 /* Actions */
 .actions {
