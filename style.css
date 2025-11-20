@@ -50,6 +50,8 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  padding: clamp(16px, 5vh, 32px) clamp(20px, 8vw, 40px);
+  box-sizing: border-box;
 }
 
 /* Liquid Background */
@@ -130,30 +132,46 @@ body {
 .app-container {
   width: 100%;
   min-height: 100vh;
-  max-width: 500px;
+  max-width: 520px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 0 clamp(12px, 4vw, 20px);
+  padding: clamp(24px, 6vh, 40px) clamp(24px, 6vw, 32px);
   box-sizing: border-box;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
 /* Header */
 .header {
-  margin: clamp(16px, 4vh, 24px) 0 clamp(12px, 2vh, 20px);
-  border-radius: var(--card-radius);
+  margin: clamp(20px, 5vh, 32px) 0 clamp(24px, 4vh, 36px);
+  border-radius: 28px;
   padding: 0;
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px);
+  padding: clamp(16px, 4vw, 20px) clamp(20px, 5vw, 24px);
   width: 100%;
   box-sizing: border-box;
 }
@@ -223,18 +241,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 0 clamp(120px, 20vh, 160px);
+  margin: clamp(32px, 8vh, 48px) 0 clamp(140px, 24vh, 180px);
   min-height: 0;
+  padding: 0 clamp(16px, 4vw, 24px);
 }
 
 /* Cards Stack */
 .cards-stack {
   position: relative;
   width: 100%;
-  height: clamp(380px, 70vh, 520px);
-  max-width: min(360px, 90vw);
+  height: clamp(400px, 75vh, 540px);
+  max-width: min(380px, 95vw);
   perspective: 1000px;
   margin: 0 auto;
+  padding: 0 clamp(12px, 3vw, 16px);
 }
 
 /* Card Styles */
@@ -242,7 +262,7 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: var(--glass-bg);
+  background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   border: 1px solid var(--glass-border);
@@ -440,18 +460,27 @@ body {
 /* Action Buttons */
 .actions-container {
   position: fixed;
-  bottom: clamp(20px, 4vh, 40px);
+  bottom: clamp(32px, 6vh, 48px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: clamp(16px, 4vw, 24px);
+  gap: clamp(20px, 5vw, 28px);
   align-items: center;
   z-index: 100;
-  padding: 0 clamp(12px, 3vw, 20px);
+  padding: clamp(16px, 4vh, 20px) clamp(24px, 6vw, 32px);
   width: 100%;
-  max-width: 500px;
+  max-width: 520px;
   justify-content: center;
   box-sizing: border-box;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  margin: 0 clamp(16px, 4vw, 24px);
 }
 
 .action-btn {
@@ -525,12 +554,21 @@ body {
 /* Progress */
 .progress-container {
   position: fixed;
-  bottom: clamp(110px, 18vh, 150px);
+  bottom: clamp(140px, 22vh, 170px);
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(180px, 40vw, 220px);
+  width: clamp(200px, 45vw, 240px);
   text-align: center;
   z-index: 90;
+  padding: clamp(12px, 3vh, 16px) clamp(16px, 4vw, 20px);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .progress-bar {
@@ -559,17 +597,24 @@ body {
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: clamp(40px, 10vh, 80px) clamp(20px, 6vw, 40px);
-  border-radius: var(--card-radius);
-  max-width: min(340px, 90vw);
+  padding: clamp(48px, 12vh, 88px) clamp(24px, 7vw, 44px);
+  border-radius: 32px;
+  max-width: min(360px, 95vw);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: clamp(280px, 50vh, 400px);
+  min-height: clamp(320px, 55vh, 440px);
   width: 100%;
   box-sizing: border-box;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .empty-icon {
@@ -634,7 +679,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(16px, 4vw, 24px);
+  padding: clamp(24px, 6vw, 32px);
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
@@ -653,27 +698,36 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .modal-container {
   position: relative;
   width: 100%;
-  max-width: min(480px, 95vw);
-  max-height: min(90vh, 600px);
+  max-width: min(500px, 96vw);
+  max-height: min(92vh, 640px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
+  padding: 0 clamp(12px, 3vw, 16px);
 }
 
 .modal-card {
-  border-radius: 24px;
+  border-radius: 32px;
   padding: 0;
   overflow: hidden;
   transform: scale(0.9);
   transition: var(--transition-bounce);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
 .modal:not(.hidden) .modal-card {
@@ -1088,233 +1142,344 @@ body {
 
 /* Responsive Design - Mobile First */
 @media (max-width: 480px) {
+  body {
+    padding: clamp(12px, 4vh, 20px) clamp(16px, 6vw, 24px);
+  }
+
   .app-container {
-    padding: 0 12px;
+    padding: clamp(20px, 5vh, 28px) clamp(20px, 5vw, 24px);
+    max-width: 480px;
   }
 
   .header {
-    margin: 12px 0 8px;
+    margin: clamp(16px, 4vh, 24px) 0 clamp(20px, 3vh, 28px);
   }
 
   .header-content {
-    padding: 12px 16px;
+    padding: clamp(14px, 3.5vw, 18px) clamp(18px, 4.5vw, 22px);
   }
 
   .logo {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-  }
-
-  .title h1 {
+    width: 40px;
+    height: 40px;
     font-size: 17px;
   }
 
+  .title h1 {
+    font-size: 18px;
+  }
+
   .title p {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .swipe-container {
-    margin: 0 0 160px;
+    margin: clamp(24px, 6vh, 32px) 0 clamp(160px, 24vh, 180px);
+    padding: 0 clamp(12px, 3vw, 16px);
   }
 
   .progress-container {
-    bottom: 150px;
-    width: 160px;
+    bottom: clamp(150px, 22vh, 165px);
+    width: clamp(170px, 38vw, 200px);
   }
 
   .cards-stack {
-    height: 360px;
-    max-width: 320px;
+    height: clamp(380px, 68vh, 460px);
+    max-width: min(340px, 92vw);
   }
 
   .card-image {
-    height: 200px;
+    height: clamp(210px, 42vh, 260px);
   }
 
   .card-content {
-    padding: 16px;
+    padding: clamp(18px, 4.5vw, 22px);
   }
 
   .card-name {
-    font-size: 20px;
+    font-size: clamp(21px, 5.5vw, 24px);
   }
 
   .card-meta {
-    font-size: 13px;
+    font-size: clamp(13px, 3.5vw, 14px);
   }
 
   .card-fact {
-    font-size: 14px;
+    font-size: clamp(14px, 3.8vw, 15px);
   }
 
   .actions-container {
-    bottom: 15px;
-    gap: 14px;
-    padding: 0 12px;
+    bottom: clamp(24px, 5vh, 32px);
+    gap: clamp(16px, 4vw, 20px);
+    padding: clamp(14px, 3.5vh, 16px) clamp(20px, 5vw, 24px);
+    margin: 0 clamp(12px, 3vw, 16px);
   }
 
   .action-btn {
-    width: 50px;
-    height: 50px;
+    width: clamp(52px, 11vw, 58px);
+    height: clamp(52px, 11vw, 58px);
   }
 
   .action-btn .btn-icon {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .empty-state {
-    padding: 40px 20px;
-    min-height: 280px;
+    padding: clamp(44px, 11vh, 64px) clamp(22px, 6.5vw, 32px);
+    min-height: clamp(300px, 52vh, 360px);
+    max-width: min(340px, 92vw);
   }
 
   .empty-icon {
-    font-size: 56px;
+    font-size: clamp(56px, 14vw, 68px);
+  }
+
+  .modal {
+    padding: clamp(20px, 5vw, 24px);
   }
 
   .modal-container {
-    padding: 8px;
-    max-height: 85vh;
+    padding: 0 clamp(8px, 2vw, 12px);
+    max-height: min(88vh, 580px);
   }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
+  body {
+    padding: clamp(20px, 6vh, 28px) clamp(24px, 8vw, 32px);
+  }
+
   .app-container {
-    padding: 0 16px;
+    padding: clamp(28px, 7vh, 36px) clamp(28px, 7vw, 32px);
+    max-width: 500px;
+  }
+
+  .header {
+    margin: clamp(20px, 5vh, 28px) 0 clamp(24px, 4vh, 32px);
   }
 
   .swipe-container {
-    margin: 0 0 170px;
+    margin: clamp(28px, 7vh, 36px) 0 clamp(170px, 26vh, 190px);
+    padding: 0 clamp(16px, 4vw, 20px);
   }
 
   .progress-container {
-    bottom: 155px;
-    width: 200px;
+    bottom: clamp(155px, 24vh, 170px);
+    width: clamp(200px, 42vw, 220px);
   }
 
   .cards-stack {
-    height: 440px;
-    max-width: 340px;
+    height: clamp(440px, 72vh, 480px);
+    max-width: min(360px, 94vw);
   }
 
   .card-image {
-    height: 260px;
+    height: clamp(260px, 44vh, 280px);
   }
 
   .actions-container {
-    bottom: 20px;
-    gap: 18px;
+    bottom: clamp(28px, 6vh, 36px);
+    gap: clamp(20px, 5vw, 24px);
+    padding: clamp(16px, 4vh, 18px) clamp(24px, 6vw, 28px);
+    margin: 0 clamp(16px, 4vw, 20px);
   }
 
   .action-btn {
-    width: 58px;
-    height: 58px;
+    width: clamp(58px, 12vw, 62px);
+    height: clamp(58px, 12vw, 62px);
+  }
+
+  .modal {
+    padding: clamp(24px, 6vw, 28px);
   }
 
   .modal-container {
-    padding: 12px;
-    max-height: 88vh;
+    padding: 0 clamp(12px, 3vw, 16px);
+    max-height: min(90vh, 620px);
   }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
+  body {
+    padding: clamp(24px, 7vh, 32px) clamp(28px, 9vw, 36px);
+  }
+
   .app-container {
-    max-width: 450px;
+    max-width: 480px;
+    padding: clamp(32px, 8vh, 40px) clamp(32px, 8vw, 36px);
+  }
+
+  .header {
+    margin: clamp(24px, 6vh, 32px) 0 clamp(28px, 5vh, 36px);
+  }
+
+  .swipe-container {
+    margin: clamp(32px, 8vh, 40px) 0 clamp(180px, 28vh, 200px);
+    padding: 0 clamp(18px, 4.5vw, 22px);
+  }
+
+  .progress-container {
+    bottom: clamp(165px, 26vh, 180px);
+    width: clamp(220px, 45vw, 240px);
   }
 
   .cards-stack {
-    height: 480px;
-    max-width: 360px;
+    height: clamp(480px, 75vh, 500px);
+    max-width: min(380px, 95vw);
   }
 
   .card-image {
-    height: 280px;
+    height: clamp(280px, 45vh, 300px);
   }
 
   .actions-container {
-    bottom: 25px;
-    gap: 20px;
+    bottom: clamp(32px, 7vh, 40px);
+    gap: clamp(22px, 5.5vw, 26px);
+    padding: clamp(18px, 4.5vh, 20px) clamp(28px, 7vw, 32px);
+    margin: 0 clamp(20px, 5vw, 24px);
   }
 
   .action-btn {
-    width: 60px;
-    height: 60px;
+    width: clamp(60px, 13vw, 64px);
+    height: clamp(60px, 13vw, 64px);
+  }
+
+  .modal {
+    padding: clamp(28px, 7vw, 32px);
+  }
+
+  .modal-container {
+    padding: 0 clamp(16px, 4vw, 20px);
+    max-height: min(92vh, 640px);
   }
 }
 
 @media (min-width: 1025px) {
+  body {
+    padding: clamp(28px, 8vh, 36px) clamp(32px, 10vw, 40px);
+  }
+
   .app-container {
-    max-width: 500px;
+    max-width: 520px;
+    padding: clamp(36px, 9vh, 44px) clamp(36px, 9vw, 40px);
+  }
+
+  .header {
+    margin: clamp(28px, 7vh, 36px) 0 clamp(32px, 6vh, 40px);
+  }
+
+  .swipe-container {
+    margin: clamp(36px, 9vh, 44px) 0 clamp(190px, 30vh, 210px);
+    padding: 0 clamp(20px, 5vw, 24px);
+  }
+
+  .progress-container {
+    bottom: clamp(175px, 28vh, 190px);
+    width: clamp(240px, 48vw, 260px);
   }
 
   .cards-stack {
-    height: 520px;
+    height: clamp(520px, 78vh, 540px);
+    max-width: min(400px, 96vw);
   }
 
   .card-image {
-    height: 320px;
+    height: clamp(320px, 48vh, 340px);
   }
 
   .actions-container {
-    bottom: 30px;
-    gap: 24px;
+    bottom: clamp(36px, 8vh, 44px);
+    gap: clamp(24px, 6vw, 28px);
+    padding: clamp(20px, 5vh, 22px) clamp(32px, 8vw, 36px);
+    margin: 0 clamp(24px, 6vw, 28px);
   }
 
   .action-btn {
-    width: 64px;
-    height: 64px;
+    width: clamp(64px, 14vw, 68px);
+    height: clamp(64px, 14vw, 68px);
   }
 
   .action-btn .btn-icon {
-    font-size: 26px;
+    font-size: 28px;
+  }
+
+  .modal {
+    padding: clamp(32px, 8vw, 36px);
+  }
+
+  .modal-container {
+    padding: 0 clamp(20px, 5vw, 24px);
+    max-height: min(94vh, 660px);
   }
 }
 
 /* Landscape orientation adjustments */
 @media (max-height: 500px) and (orientation: landscape) {
+  body {
+    padding: clamp(8px, 3vh, 12px) clamp(12px, 5vw, 16px);
+  }
+
+  .app-container {
+    padding: clamp(16px, 5vh, 20px) clamp(20px, 6vw, 24px);
+  }
+
   .header {
-    margin: 8px 0 4px;
+    margin: clamp(12px, 4vh, 16px) 0 clamp(8px, 2vh, 12px);
   }
 
   .header-content {
-    padding: 8px 12px;
+    padding: clamp(10px, 3vw, 12px) clamp(14px, 4vw, 16px);
   }
 
   .title h1 {
-    font-size: 16px;
+    font-size: clamp(16px, 4.5vw, 18px);
   }
 
   .title p {
-    font-size: 10px;
+    font-size: clamp(10px, 3vw, 11px);
   }
 
   .swipe-container {
-    margin: 0 0 120px;
+    margin: clamp(16px, 5vh, 20px) 0 clamp(120px, 20vh, 130px);
+    padding: 0 clamp(10px, 3vw, 12px);
   }
 
   .progress-container {
-    bottom: 110px;
+    bottom: clamp(110px, 18vh, 115px);
+    width: clamp(160px, 35vw, 180px);
   }
 
   .cards-stack {
-    height: 280px;
+    height: clamp(280px, 55vh, 300px);
+    max-width: min(300px, 88vw);
   }
 
   .card-image {
-    height: 160px;
+    height: clamp(160px, 32vh, 180px);
   }
 
   .card-content {
-    padding: 12px;
+    padding: clamp(14px, 4vw, 16px);
   }
 
   .actions-container {
-    bottom: 8px;
+    bottom: clamp(12px, 4vh, 16px);
+    gap: clamp(14px, 4vw, 16px);
+    padding: clamp(10px, 3vh, 12px) clamp(16px, 5vw, 20px);
+    margin: 0 clamp(8px, 2.5vw, 12px);
   }
 
   .action-btn {
-    width: 44px;
-    height: 44px;
+    width: clamp(44px, 10vw, 48px);
+    height: clamp(44px, 10vw, 48px);
+  }
+
+  .modal {
+    padding: clamp(16px, 5vw, 20px);
+  }
+
+  .modal-container {
+    max-height: min(80vh, 400px);
   }
 }
 
@@ -1387,69 +1552,221 @@ body {
 
 /* Very small screens */
 @media (max-width: 360px) {
+  body {
+    padding: clamp(8px, 3vh, 12px) clamp(12px, 5vw, 16px);
+  }
+
   .app-container {
-    padding: 0 8px;
+    padding: clamp(16px, 4vh, 20px) clamp(16px, 4vw, 18px);
+    max-width: 460px;
   }
 
-  .actions-container {
-    gap: 12px;
-    padding: 0 8px;
+  .header {
+    margin: clamp(12px, 3vh, 16px) 0 clamp(16px, 2.5vh, 20px);
   }
 
-  .action-btn {
-    width: 46px;
-    height: 46px;
+  .header-content {
+    padding: clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px);
+  }
+
+  .logo {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+
+  .title h1 {
+    font-size: 16px;
+  }
+
+  .title p {
+    font-size: 11px;
+  }
+
+  .swipe-container {
+    margin: clamp(20px, 5vh, 24px) 0 clamp(150px, 22vh, 160px);
+    padding: 0 clamp(8px, 2vw, 10px);
   }
 
   .progress-container {
-    width: 140px;
+    bottom: clamp(140px, 20vh, 150px);
+    width: clamp(140px, 35vw, 160px);
+  }
+
+  .cards-stack {
+    height: clamp(340px, 65vh, 380px);
+    max-width: min(320px, 90vw);
+  }
+
+  .card-image {
+    height: clamp(190px, 38vh, 220px);
+  }
+
+  .card-content {
+    padding: clamp(16px, 4vw, 18px);
+  }
+
+  .card-name {
+    font-size: clamp(19px, 5vw, 21px);
+  }
+
+  .card-meta {
+    font-size: clamp(12px, 3vw, 13px);
+  }
+
+  .card-fact {
+    font-size: clamp(13px, 3.5vw, 14px);
+  }
+
+  .actions-container {
+    bottom: clamp(20px, 4vh, 24px);
+    gap: clamp(14px, 3.5vw, 16px);
+    padding: clamp(12px, 3vh, 14px) clamp(16px, 4vw, 18px);
+    margin: 0 clamp(8px, 2vw, 10px);
+  }
+
+  .action-btn {
+    width: clamp(46px, 10vw, 50px);
+    height: clamp(46px, 10vw, 50px);
+  }
+
+  .action-btn .btn-icon {
+    font-size: 20px;
   }
 
   .empty-state {
-    padding: 30px 16px;
+    padding: clamp(36px, 9vh, 48px) clamp(18px, 5vw, 22px);
+    min-height: clamp(260px, 48vh, 300px);
+    max-width: min(320px, 90vw);
+  }
+
+  .empty-icon {
+    font-size: clamp(52px, 13vw, 60px);
   }
 
   .modal {
-    padding: 12px;
+    padding: clamp(16px, 4vw, 20px);
+  }
+
+  .modal-container {
+    padding: 0 clamp(6px, 1.5vw, 8px);
+    max-height: min(84vh, 520px);
   }
 }
 
 /* Large screens and tablets in portrait */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  body {
+    padding: clamp(24px, 7vh, 32px) clamp(28px, 9vw, 36px);
+  }
+
   .app-container {
-    max-width: 400px;
+    max-width: 440px;
+    padding: clamp(32px, 8vh, 40px) clamp(32px, 8vw, 36px);
+  }
+
+  .header {
+    margin: clamp(24px, 6vh, 32px) 0 clamp(28px, 5vh, 36px);
+  }
+
+  .swipe-container {
+    margin: clamp(32px, 8vh, 40px) 0 clamp(180px, 28vh, 200px);
+    padding: 0 clamp(18px, 4.5vw, 22px);
+  }
+
+  .progress-container {
+    bottom: clamp(165px, 26vh, 180px);
+    width: clamp(220px, 45vw, 240px);
   }
 
   .cards-stack {
-    height: 460px;
+    height: clamp(460px, 74vh, 480px);
+    max-width: min(380px, 95vw);
   }
 
   .card-image {
-    height: 270px;
+    height: clamp(270px, 44vh, 290px);
+  }
+
+  .actions-container {
+    bottom: clamp(32px, 7vh, 40px);
+    gap: clamp(22px, 5.5vw, 26px);
+    padding: clamp(18px, 4.5vh, 20px) clamp(28px, 7vw, 32px);
+    margin: 0 clamp(20px, 5vw, 24px);
+  }
+
+  .action-btn {
+    width: clamp(62px, 13vw, 66px);
+    height: clamp(62px, 13vw, 66px);
+  }
+
+  .modal {
+    padding: clamp(28px, 7vw, 32px);
+  }
+
+  .modal-container {
+    padding: 0 clamp(16px, 4vw, 20px);
+    max-height: min(92vh, 640px);
   }
 }
 
 /* Desktop optimizations */
 @media (min-width: 1200px) {
+  body {
+    padding: clamp(32px, 9vh, 40px) clamp(36px, 12vw, 48px);
+  }
+
   .app-container {
-    max-width: 520px;
+    max-width: 560px;
+    padding: clamp(40px, 10vh, 48px) clamp(40px, 10vw, 44px);
+  }
+
+  .header {
+    margin: clamp(32px, 8vh, 40px) 0 clamp(36px, 7vh, 44px);
+  }
+
+  .swipe-container {
+    margin: clamp(40px, 10vh, 48px) 0 clamp(200px, 32vh, 220px);
+    padding: 0 clamp(22px, 5.5vw, 26px);
+  }
+
+  .progress-container {
+    bottom: clamp(185px, 30vh, 200px);
+    width: clamp(260px, 50vw, 280px);
   }
 
   .cards-stack {
-    height: 540px;
+    height: clamp(560px, 80vh, 580px);
+    max-width: min(420px, 97vw);
   }
 
   .card-image {
-    height: 340px;
+    height: clamp(340px, 50vh, 360px);
+  }
+
+  .actions-container {
+    bottom: clamp(40px, 9vh, 48px);
+    gap: clamp(26px, 6.5vw, 30px);
+    padding: clamp(22px, 5.5vh, 24px) clamp(36px, 9vw, 40px);
+    margin: 0 clamp(28px, 7vw, 32px);
   }
 
   .action-btn {
-    width: 68px;
-    height: 68px;
+    width: clamp(68px, 15vw, 72px);
+    height: clamp(68px, 15vw, 72px);
   }
 
   .action-btn .btn-icon {
-    font-size: 28px;
+    font-size: 30px;
+  }
+
+  .modal {
+    padding: clamp(36px, 9vw, 40px);
+  }
+
+  .modal-container {
+    padding: 0 clamp(24px, 6vw, 28px);
+    max-height: min(96vh, 700px);
   }
 }
 
