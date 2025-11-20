@@ -420,6 +420,12 @@ class BelarusHeroesApp {
     for (let i = 0; i < cardsToShow; i++) {
       const hero = this.heroes[this.currentIndex + i];
       const card = this.createCard(hero, i);
+
+      // Add entry animation for the top card
+      if (i === 0) {
+        card.classList.add('entering');
+      }
+
       stack.appendChild(card);
     }
 
@@ -467,12 +473,27 @@ class BelarusHeroesApp {
     favoriteIndicator.className = 'swipe-indicator favorite-indicator';
     favoriteIndicator.textContent = '⭐ У закладкі';
 
+    // Create sparkle container
+    const sparkles = document.createElement('div');
+    sparkles.className = 'swipe-sparkles';
+
+    // Add sparkle particles
+    for (let i = 0; i < 8; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.left = Math.random() * 100 + '%';
+      sparkle.style.top = Math.random() * 100 + '%';
+      sparkle.style.animationDelay = Math.random() * 0.5 + 's';
+      sparkles.appendChild(sparkle);
+    }
+
     card.appendChild(img);
     card.appendChild(content);
     card.appendChild(likeIndicator);
     card.appendChild(dislikeIndicator);
     card.appendChild(detailIndicator);
     card.appendChild(favoriteIndicator);
+    card.appendChild(sparkles);
 
     return card;
   }
@@ -484,12 +505,14 @@ class BelarusHeroesApp {
 
   like() {
     console.log('❤️ Like');
+    this.showSuccessFeedback('❤️');
     this.animateCard('swipe-left');
     setTimeout(() => this.nextCard(), 300);
   }
 
   dislike() {
     console.log('👎 Dislike');
+    this.showSuccessFeedback('👎');
     this.animateCard('swipe-right');
     setTimeout(() => this.nextCard(), 300);
   }
@@ -503,6 +526,7 @@ class BelarusHeroesApp {
     this.updateFavoritesCount();
 
     console.log('⭐ Added to favorites:', hero.name);
+    this.showSuccessFeedback('⭐');
     this.showToast(`✅ ${hero.name} даданы ў закладкі`);
 
     this.animateCard('swipe-down');
@@ -961,6 +985,22 @@ class BelarusHeroesApp {
   hideRandom() {
     const modal = document.getElementById('randomModal');
     if (modal) modal.classList.add('hidden');
+  }
+
+  showSuccessFeedback(icon) {
+    const feedback = document.createElement('div');
+    feedback.className = 'success-feedback';
+
+    const iconElement = document.createElement('div');
+    iconElement.className = 'success-icon';
+    iconElement.textContent = icon;
+
+    feedback.appendChild(iconElement);
+    document.body.appendChild(feedback);
+
+    setTimeout(() => {
+      feedback.remove();
+    }, 600);
   }
 
   showToast(message) {

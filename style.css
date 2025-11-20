@@ -36,6 +36,8 @@ html, body {
   height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -44,6 +46,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
 
 /* Liquid Background */
@@ -53,17 +59,37 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
+  background:
     radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(255, 149, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(52, 199, 89, 0.08) 0%, transparent 50%);
-  animation: liquidFlow 20s ease-in-out infinite;
+    radial-gradient(circle at 40% 40%, rgba(52, 199, 89, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 60% 10%, rgba(0, 122, 255, 0.06) 0%, transparent 40%);
+  animation: liquidFlow 25s ease-in-out infinite, liquidPulse 8s ease-in-out infinite;
   z-index: -1;
 }
 
 @keyframes liquidFlow {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.1) rotate(180deg); }
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: scale(1.05) rotate(90deg);
+    filter: hue-rotate(15deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    filter: hue-rotate(30deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(270deg);
+    filter: hue-rotate(15deg);
+  }
+}
+
+@keyframes liquidPulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
 }
 
 /* Premium Glass Effect */
@@ -103,51 +129,71 @@ body {
 /* App Container */
 .app-container {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   max-width: 500px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 0 16px;
+  padding: 0 clamp(12px, 4vw, 20px);
+  box-sizing: border-box;
 }
 
 /* Header */
 .header {
-  margin: 20px 0 16px;
+  margin: clamp(16px, 4vh, 24px) 0 clamp(12px, 2vh, 20px);
   border-radius: var(--card-radius);
   padding: 0;
   flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
+  width: clamp(32px, 8vw, 44px);
+  height: clamp(32px, 8vw, 44px);
   border-radius: 12px;
   background: var(--accent-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: clamp(14px, 4vw, 18px);
+  flex-shrink: 0;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  margin: 0 clamp(8px, 2vw, 12px);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .title h1 {
   font-weight: 800;
-  font-size: 18px;
+  font-size: clamp(16px, 4.5vw, 20px);
   letter-spacing: -0.5px;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .title p {
-  font-size: 12px;
+  font-size: clamp(11px, 3vw, 13px);
   color: var(--text-tertiary);
-  margin-top: 2px;
+  margin: 2px 0 0 0;
+  line-height: 1.3;
 }
 
 .icon-btn {
@@ -177,16 +223,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 0 140px;
+  margin: 0 0 clamp(120px, 20vh, 160px);
+  min-height: 0;
 }
 
 /* Cards Stack */
 .cards-stack {
   position: relative;
   width: 100%;
-  height: 480px;
-  max-width: 360px;
+  height: clamp(380px, 70vh, 520px);
+  max-width: min(360px, 90vw);
   perspective: 1000px;
+  margin: 0 auto;
 }
 
 /* Card Styles */
@@ -201,11 +249,12 @@ body {
   border-radius: var(--card-radius);
   overflow: hidden;
   cursor: grab;
-  transition: var(--transition-swipe);
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease;
   transform-style: preserve-3d;
-  box-shadow: 
+  box-shadow:
     var(--glass-shadow),
     0 8px 40px rgba(0, 0, 0, 0.3);
+  will-change: transform, opacity;
 }
 
 .hero-card:active {
@@ -214,57 +263,125 @@ body {
 
 .hero-card.swiping {
   transition: none;
+  box-shadow:
+    var(--glass-shadow),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 30px rgba(0, 122, 255, 0.3);
+  filter: brightness(1.05) saturate(1.1);
+}
+
+.hero-card.swipe-left.swiping {
+  box-shadow:
+    var(--glass-shadow),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(52, 199, 89, 0.3),
+    0 0 40px rgba(52, 199, 89, 0.4);
+}
+
+.hero-card.swipe-right.swiping {
+  box-shadow:
+    var(--glass-shadow),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 59, 48, 0.3),
+    0 0 40px rgba(255, 59, 48, 0.4);
+}
+
+.hero-card.swipe-up.swiping {
+  box-shadow:
+    var(--glass-shadow),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(0, 122, 255, 0.3),
+    0 0 40px rgba(0, 122, 255, 0.4);
+}
+
+.hero-card.swipe-down.swiping {
+  box-shadow:
+    var(--glass-shadow),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 149, 0, 0.3),
+    0 0 40px rgba(255, 149, 0, 0.4);
 }
 
 .hero-card.swipe-left {
-  transform: translateX(-1000px) rotate(-30deg) !important;
+  transform: translateX(-1200px) rotate(-45deg) scale(0.9) !important;
   opacity: 0;
+  animation: swipeLeftExit 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 .hero-card.swipe-right {
-  transform: translateX(1000px) rotate(30deg) !important;
+  transform: translateX(1200px) rotate(45deg) scale(0.9) !important;
   opacity: 0;
+  animation: swipeRightExit 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 .hero-card.swipe-up {
-  transform: translateY(-1000px) scale(0.8) !important;
+  transform: translateY(-1200px) scale(0.7) rotate(-10deg) !important;
   opacity: 0;
+  animation: swipeUpExit 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 
 .hero-card.swipe-down {
-  transform: translateY(1000px) scale(0.8) !important;
+  transform: translateY(1200px) scale(0.7) rotate(10deg) !important;
   opacity: 0;
+  animation: swipeDownExit 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+@keyframes swipeLeftExit {
+  0% { transform: translateX(0) rotate(0deg) scale(1); opacity: 1; }
+  50% { transform: translateX(-300px) rotate(-15deg) scale(1.05); opacity: 0.8; }
+  100% { transform: translateX(-1200px) rotate(-45deg) scale(0.9); opacity: 0; }
+}
+
+@keyframes swipeRightExit {
+  0% { transform: translateX(0) rotate(0deg) scale(1); opacity: 1; }
+  50% { transform: translateX(300px) rotate(15deg) scale(1.05); opacity: 0.8; }
+  100% { transform: translateX(1200px) rotate(45deg) scale(0.9); opacity: 0; }
+}
+
+@keyframes swipeUpExit {
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  30% { transform: translateY(-200px) rotate(-5deg) scale(1.1); opacity: 0.9; }
+  100% { transform: translateY(-1200px) rotate(-10deg) scale(0.7); opacity: 0; }
+}
+
+@keyframes swipeDownExit {
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  30% { transform: translateY(200px) rotate(5deg) scale(1.1); opacity: 0.9; }
+  100% { transform: translateY(1200px) rotate(10deg) scale(0.7); opacity: 0; }
 }
 
 .card-image {
   width: 100%;
-  height: 280px;
+  height: clamp(220px, 45vh, 320px);
   object-fit: cover;
   background: var(--bg-secondary);
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
 .card-content {
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   position: relative;
 }
 
 .card-name {
   font-weight: 800;
-  font-size: 24px;
-  margin-bottom: 8px;
+  font-size: clamp(20px, 5vw, 26px);
+  margin-bottom: clamp(6px, 1.5vw, 10px);
   line-height: 1.2;
 }
 
 .card-meta {
   color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 12px;
+  font-size: clamp(12px, 3vw, 15px);
+  margin-bottom: clamp(8px, 2vw, 12px);
   font-weight: 500;
+  line-height: 1.3;
 }
 
 .card-fact {
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: clamp(13px, 3.5vw, 16px);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -323,22 +440,23 @@ body {
 /* Action Buttons */
 .actions-container {
   position: fixed;
-  bottom: 30px;
+  bottom: clamp(20px, 4vh, 40px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 20px;
+  gap: clamp(16px, 4vw, 24px);
   align-items: center;
   z-index: 100;
-  padding: 0 16px;
+  padding: 0 clamp(12px, 3vw, 20px);
   width: 100%;
   max-width: 500px;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .action-btn {
-  width: 60px;
-  height: 60px;
+  width: clamp(52px, 12vw, 68px);
+  height: clamp(52px, 12vw, 68px);
   border-radius: 50%;
   border: none;
   display: flex;
@@ -351,14 +469,25 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
+  flex-shrink: 0;
 }
 
 .action-btn:hover {
   transform: scale(1.1);
+  box-shadow:
+    0 8px 25px rgba(0, 122, 255, 0.3),
+    0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .action-btn:active {
   transform: scale(0.95);
+  animation: buttonPress 0.1s ease-out;
+}
+
+@keyframes buttonPress {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(0.95); }
 }
 
 .action-btn .btn-icon {
@@ -396,21 +525,21 @@ body {
 /* Progress */
 .progress-container {
   position: fixed;
-  bottom: 130px;
+  bottom: clamp(110px, 18vh, 150px);
   left: 50%;
   transform: translateX(-50%);
-  width: 200px;
+  width: clamp(180px, 40vw, 220px);
   text-align: center;
   z-index: 90;
 }
 
 .progress-bar {
   width: 100%;
-  height: 4px;
+  height: clamp(3px, 0.8vw, 5px);
   background: var(--bg-secondary);
   border-radius: 2px;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: clamp(6px, 1.5vw, 10px);
 }
 
 .progress-fill {
@@ -422,7 +551,7 @@ body {
 }
 
 .progress-text {
-  font-size: 12px;
+  font-size: clamp(11px, 2.5vw, 13px);
   color: var(--text-tertiary);
   font-weight: 600;
 }
@@ -430,36 +559,45 @@ body {
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: 60px 40px;
+  padding: clamp(40px, 10vh, 80px) clamp(20px, 6vw, 40px);
   border-radius: var(--card-radius);
-  max-width: 320px;
+  max-width: min(340px, 90vw);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  min-height: clamp(280px, 50vh, 400px);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .empty-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
+  font-size: clamp(48px, 12vw, 72px);
+  margin-bottom: clamp(16px, 4vh, 24px);
 }
 
 .empty-state h3 {
-  margin-bottom: 12px;
+  margin-bottom: clamp(8px, 2vh, 16px);
   font-weight: 700;
+  font-size: clamp(18px, 5vw, 24px);
+  line-height: 1.3;
 }
 
 .empty-state p {
   color: var(--text-tertiary);
-  margin-bottom: 30px;
+  margin-bottom: clamp(20px, 5vh, 40px);
   flex-grow: 1;
+  font-size: clamp(14px, 3.5vw, 16px);
+  line-height: 1.4;
+  max-width: 280px;
 }
 
 .empty-state .btn-primary {
-  margin-top: 20px;
+  margin-top: auto;
   align-self: center;
+  width: 100%;
+  max-width: 200px;
 }
 
 /* Loading State */
@@ -496,11 +634,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: clamp(16px, 4vw, 24px);
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
   transition: var(--transition-smooth);
+  box-sizing: border-box;
 }
 
 .modal:not(.hidden) {
@@ -522,10 +661,11 @@ body {
 .modal-container {
   position: relative;
   width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
+  max-width: min(480px, 95vw);
+  max-height: min(90vh, 600px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .modal-card {
@@ -865,15 +1005,113 @@ body {
   50% { opacity: 0.7; transform: scale(1.1); }
 }
 
+/* Swipe Sparkle Effects */
+.swipe-sparkles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+  border-radius: var(--card-radius);
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.3) 70%, transparent 100%);
+  border-radius: 50%;
+  animation: sparkleFloat 1.5s ease-out forwards;
+}
+
+.sparkle:nth-child(odd) {
+  animation-duration: 1.2s;
+  animation-delay: 0.1s;
+}
+
+.sparkle:nth-child(3n) {
+  animation-duration: 1.8s;
+  animation-delay: 0.2s;
+}
+
+.sparkle:nth-child(5n) {
+  animation-duration: 1.0s;
+  animation-delay: 0.3s;
+}
+
+@keyframes sparkleFloat {
+  0% {
+    opacity: 0;
+    transform: scale(0) translateY(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) translateY(-10px) rotate(90deg);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.2) translateY(-30px) rotate(270deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0) translateY(-50px) rotate(360deg);
+  }
+}
+
+/* Enhanced card entry animation */
+@keyframes cardEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(50px) rotateY(15deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05) translateY(-10px) rotateY(-5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotateY(0deg);
+  }
+}
+
+.hero-card.entering {
+  animation: cardEnter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
 /* Hidden State */
 .hidden {
   display: none !important;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+/* Responsive Design - Mobile First */
+@media (max-width: 480px) {
   .app-container {
     padding: 0 12px;
+  }
+
+  .header {
+    margin: 12px 0 8px;
+  }
+
+  .header-content {
+    padding: 12px 16px;
+  }
+
+  .logo {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .title h1 {
+    font-size: 17px;
+  }
+
+  .title p {
+    font-size: 11px;
   }
 
   .swipe-container {
@@ -882,63 +1120,201 @@ body {
 
   .progress-container {
     bottom: 150px;
+    width: 160px;
   }
 
   .cards-stack {
-    height: 420px;
-  }
-
-  .card-image {
-    height: 240px;
-  }
-
-  .card-content {
-    padding: 20px;
-  }
-
-  .card-name {
-    font-size: 22px;
-  }
-
-  .actions-container {
-    bottom: 20px;
-    gap: 16px;
-  }
-
-  .action-btn {
-    width: 56px;
-    height: 56px;
-  }
-
-  .modal-container {
-    padding: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .swipe-container {
-    margin: 0 0 170px;
-  }
-
-  .progress-container {
-    bottom: 160px;
-    width: 180px;
-  }
-
-  .cards-stack {
-    height: 380px;
+    height: 360px;
+    max-width: 320px;
   }
 
   .card-image {
     height: 200px;
   }
 
-  .header {
-    margin: 16px 0 12px;
+  .card-content {
+    padding: 16px;
+  }
+
+  .card-name {
+    font-size: 20px;
+  }
+
+  .card-meta {
+    font-size: 13px;
+  }
+
+  .card-fact {
+    font-size: 14px;
   }
 
   .actions-container {
     bottom: 15px;
+    gap: 14px;
+    padding: 0 12px;
+  }
+
+  .action-btn {
+    width: 50px;
+    height: 50px;
+  }
+
+  .action-btn .btn-icon {
+    font-size: 20px;
+  }
+
+  .empty-state {
+    padding: 40px 20px;
+    min-height: 280px;
+  }
+
+  .empty-icon {
+    font-size: 56px;
+  }
+
+  .modal-container {
+    padding: 8px;
+    max-height: 85vh;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .app-container {
+    padding: 0 16px;
+  }
+
+  .swipe-container {
+    margin: 0 0 170px;
+  }
+
+  .progress-container {
+    bottom: 155px;
+    width: 200px;
+  }
+
+  .cards-stack {
+    height: 440px;
+    max-width: 340px;
+  }
+
+  .card-image {
+    height: 260px;
+  }
+
+  .actions-container {
+    bottom: 20px;
+    gap: 18px;
+  }
+
+  .action-btn {
+    width: 58px;
+    height: 58px;
+  }
+
+  .modal-container {
+    padding: 12px;
+    max-height: 88vh;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .app-container {
+    max-width: 450px;
+  }
+
+  .cards-stack {
+    height: 480px;
+    max-width: 360px;
+  }
+
+  .card-image {
+    height: 280px;
+  }
+
+  .actions-container {
+    bottom: 25px;
+    gap: 20px;
+  }
+
+  .action-btn {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .app-container {
+    max-width: 500px;
+  }
+
+  .cards-stack {
+    height: 520px;
+  }
+
+  .card-image {
+    height: 320px;
+  }
+
+  .actions-container {
+    bottom: 30px;
+    gap: 24px;
+  }
+
+  .action-btn {
+    width: 64px;
+    height: 64px;
+  }
+
+  .action-btn .btn-icon {
+    font-size: 26px;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .header {
+    margin: 8px 0 4px;
+  }
+
+  .header-content {
+    padding: 8px 12px;
+  }
+
+  .title h1 {
+    font-size: 16px;
+  }
+
+  .title p {
+    font-size: 10px;
+  }
+
+  .swipe-container {
+    margin: 0 0 120px;
+  }
+
+  .progress-container {
+    bottom: 110px;
+  }
+
+  .cards-stack {
+    height: 280px;
+  }
+
+  .card-image {
+    height: 160px;
+  }
+
+  .card-content {
+    padding: 12px;
+  }
+
+  .actions-container {
+    bottom: 8px;
+  }
+
+  .action-btn {
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -962,12 +1338,199 @@ body {
   .action-btn:hover {
     transform: none;
   }
-  
+
   .menu-item:hover {
     transform: none;
   }
-  
+
   .favorite-item:hover {
     transform: none;
   }
+
+  .action-btn:active {
+    animation: mobileButtonPress 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hero-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* Improve touch targets */
+  .action-btn,
+  .menu-item,
+  .btn-primary,
+  .btn-ghost {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better text selection */
+  .card-name,
+  .card-meta,
+  .card-fact {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .hero-card {
+    border-width: 0.5px;
+  }
+
+  .action-btn {
+    border-width: 0.5px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .app-container {
+    padding: 0 8px;
+  }
+
+  .actions-container {
+    gap: 12px;
+    padding: 0 8px;
+  }
+
+  .action-btn {
+    width: 46px;
+    height: 46px;
+  }
+
+  .progress-container {
+    width: 140px;
+  }
+
+  .empty-state {
+    padding: 30px 16px;
+  }
+
+  .modal {
+    padding: 12px;
+  }
+}
+
+/* Large screens and tablets in portrait */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .app-container {
+    max-width: 400px;
+  }
+
+  .cards-stack {
+    height: 460px;
+  }
+
+  .card-image {
+    height: 270px;
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1200px) {
+  .app-container {
+    max-width: 520px;
+  }
+
+  .cards-stack {
+    height: 540px;
+  }
+
+  .card-image {
+    height: 340px;
+  }
+
+  .action-btn {
+    width: 68px;
+    height: 68px;
+  }
+
+  .action-btn .btn-icon {
+    font-size: 28px;
+  }
+}
+
+@keyframes mobileButtonPress {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    transform: scale(0.92);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Touch ripple effect */
+.touch-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.touch-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Success feedback animations */
+.success-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.success-icon {
+  font-size: 60px;
+  animation: successPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  opacity: 0;
+}
+
+@keyframes successPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-180deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Enhanced progress bar animation */
+.progress-fill {
+  background: linear-gradient(90deg, #007AFF 0%, #5856D6 50%, #007AFF 100%);
+  background-size: 200% 100%;
+  animation: progressShine 3s ease-in-out infinite;
+}
+
+@keyframes progressShine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
