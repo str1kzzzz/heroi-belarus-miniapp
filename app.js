@@ -17,18 +17,13 @@ class BelarusHeroesApp {
   }
 
   init() {
-    console.log('🚀 Initializing Belarus Heroes App...');
-
     this.loadData();
     this.shuffleHeroes();
     this.loadFavorites();
     this.setupEventListeners();
     this.renderCards();
     this.updateProgress();
-    this.hideLoadingState();
     this.showInstructions();
-
-    console.log('✅ App initialized with', this.heroes.length, 'heroes');
   }
 
   loadData() {
@@ -135,31 +130,15 @@ class BelarusHeroesApp {
 
   setupTouchEvents() {
     const stack = document.getElementById('cardsStack');
-    if (!stack) {
-      console.error('Cards stack not found for touch events!');
-      return;
-    }
+    if (!stack) return;
 
-    console.log('Setting up touch events on cards stack');
-
-    // Mouse events
-    stack.addEventListener('mousedown', (e) => {
-      console.log('Mouse down event');
-      this.handleStart(e);
-    });
+    stack.addEventListener('mousedown', (e) => this.handleStart(e));
     document.addEventListener('mousemove', (e) => this.handleMove(e));
     document.addEventListener('mouseup', (e) => this.handleEnd(e));
 
-    // Touch events
-    stack.addEventListener('touchstart', (e) => {
-      console.log('Touch start event');
-      this.handleStart(e);
-    }, { passive: false });
+    stack.addEventListener('touchstart', (e) => this.handleStart(e), { passive: false });
     document.addEventListener('touchmove', (e) => this.handleMove(e), { passive: false });
     document.addEventListener('touchend', (e) => this.handleEnd(e));
-
-    // Prevent default touch behavior
-    stack.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
   }
 
   handleStart(e) {
@@ -267,22 +246,11 @@ class BelarusHeroesApp {
 
   renderCards() {
     const stack = document.getElementById('cardsStack');
-    if (!stack) {
-      console.error('Cards stack not found!');
-      return;
-    }
-
-    // Hide loading state
-    this.hideLoadingState();
+    if (!stack) return;
 
     stack.innerHTML = '';
 
     const cardsToShow = Math.min(3, this.heroes.length - this.currentIndex);
-
-    if (cardsToShow === 0) {
-      this.showEmptyState();
-      return;
-    }
 
     for (let i = 0; i < cardsToShow; i++) {
       const hero = this.heroes[this.currentIndex + i];
@@ -294,8 +262,6 @@ class BelarusHeroesApp {
 
       stack.appendChild(card);
     }
-
-    console.log(`Rendered ${cardsToShow} cards for heroes starting at index ${this.currentIndex}`);
   }
 
   createCard(hero, index) {
@@ -303,9 +269,6 @@ class BelarusHeroesApp {
     card.className = 'hero-card';
     card.style.zIndex = 10 - index;
     card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 10}px)`;
-
-    // Debug logging
-    console.log(`Creating card for ${hero.name} at index ${index}`);
 
     // Image container
     const imageContainer = document.createElement('div');
@@ -317,7 +280,6 @@ class BelarusHeroesApp {
     img.alt = hero.name;
     img.loading = 'lazy';
     img.onerror = () => {
-      console.log(`Image failed to load for ${hero.name}, using fallback`);
       img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
     };
 
@@ -465,13 +427,6 @@ class BelarusHeroesApp {
     document.getElementById('cardsStack').classList.remove('hidden');
   }
 
-  hideLoadingState() {
-    const loadingState = document.getElementById('loadingState');
-    if (loadingState) {
-      loadingState.classList.add('hidden');
-    }
-  }
-
   shuffleHeroes() {
     for (let i = this.heroes.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -501,7 +456,7 @@ class BelarusHeroesApp {
     const meta = modal.querySelector('.hero-meta');
     const description = modal.querySelector('.hero-description');
 
-    if (modal && image && name && meta && description) {
+    if (image && name && meta && description) {
       image.src = hero.image;
       image.alt = hero.name;
       name.textContent = hero.name;
