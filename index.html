@@ -5,274 +5,315 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Героі Беларусі</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="minimalist-bg"></div>
-  
-  <div class="app-container">
+  <div class="app">
     <!-- Header -->
-    <header class="header glass premium-glass">
+    <header class="header">
       <div class="header-content">
         <div class="logo">🇧🇾</div>
-        <div class="title">
-          <h1>Героі Беларусі</h1>
-          <p>Свайпайце, каб адкрываць гісторыі</p>
+        <div class="title-section">
+          <h1 class="title">Героі Беларусі</h1>
+          <p class="subtitle">Свайпайце, каб адкрываць гісторыі</p>
         </div>
-        <button class="menu-btn" id="menuBtn">
-          <span>⋮</span>
+        <button class="menu-button" id="menuBtn" aria-label="Меню">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="12" cy="5" r="1"></circle>
+            <circle cx="12" cy="19" r="1"></circle>
+          </svg>
         </button>
       </div>
     </header>
 
-    <!-- Main Swipe Area -->
-    <main class="swipe-container">
-      <!-- Stack of Cards -->
-      <div class="cards-stack" id="cardsStack">
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Cards Container -->
+      <div class="cards-container" id="cardsContainer">
         <!-- Cards will be dynamically inserted here -->
       </div>
 
       <!-- Empty State -->
-      <div class="empty-state glass premium-glass hidden" id="emptyState">
+      <div class="empty-state" id="emptyState">
         <div class="empty-icon">🎉</div>
-        <h3>Вы прагледзелі ўсіх герояў!</h3>
+        <h2>Вы прагледзелі ўсіх герояў!</h2>
         <p>Праверце закладкі або пачніце нанова</p>
-        <button class="btn-primary liquid-btn" id="resetBtn">
-          <span class="btn-sparkle">🔄</span>
-          Пачаць нанова
-        </button>
+        <button class="primary-button" id="resetBtn">Пачаць нанова</button>
       </div>
 
       <!-- Loading State -->
-      <div class="loading-state glass premium-glass hidden" id="loadingState">
-        <div class="liquid-loader"></div>
-        <p>Загружаем гісторыі герояў...</p>
+      <div class="loading-state" id="loadingState">
+        <div class="loading-spinner"></div>
+        <p>Загружаем герояў...</p>
       </div>
     </main>
 
     <!-- Action Buttons -->
-    <div class="actions-container">
-      <button class="action-btn dislike-btn touch-ripple" id="dislikeBtn">
-        <div class="btn-icon">✕</div>
+    <div class="actions">
+      <button class="action-button dislike-button" id="dislikeBtn" aria-label="Не падабаецца">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"></path>
+        </svg>
       </button>
 
-      <button class="action-btn favorite-btn touch-ripple" id="favoriteBtn">
-        <div class="btn-icon">⭐</div>
+      <button class="action-button favorite-button" id="favoriteBtn" aria-label="Дадаць у закладкі">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
       </button>
 
-      <button class="action-btn like-btn touch-ripple" id="likeBtn">
-        <div class="btn-icon">♥</div>
+      <button class="action-button like-button" id="likeBtn" aria-label="Падабаецца">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
       </button>
     </div>
 
-    <!-- Progress Indicator -->
-    <div class="progress-container">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
       <div class="progress-text" id="progressText">0/0</div>
     </div>
-  </div>
 
-  <!-- Detail Modal -->
-  <div class="modal hidden" id="detailModal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-      <div class="modal-card premium-glass">
-        <button class="close-btn" id="closeModal">
-          <span>×</span>
+    <!-- Modals -->
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeModal" aria-label="Закрыць">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
         </button>
-        
-        <div class="modal-hero">
+
+        <div class="hero-detail">
           <div class="hero-image-container">
-            <img id="detailImage" class="hero-image" src="" alt="">
-            <div class="image-shine"></div>
+            <img id="detailImage" class="hero-image" src="" alt="" loading="lazy">
           </div>
-          
+
           <div class="hero-info">
             <h2 id="detailName"></h2>
             <div class="hero-meta" id="detailMeta"></div>
           </div>
-        </div>
 
-        <div class="hero-description" id="detailDescription"></div>
+          <div class="hero-description" id="detailDescription"></div>
 
-        <div class="modal-actions">
-          <button class="btn-ghost glass-ghost" id="shareDetailBtn">
-            <span class="btn-icon">📤</span>
-            Падзяліцца
-          </button>
-          <button class="btn-primary liquid-btn" id="closeDetailBtn">
-            <span class="btn-sparkle">←</span>
-            Вярнуцца
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Menu Modal -->
-  <div class="modal hidden" id="menuModal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-      <div class="modal-card premium-glass">
-        <button class="close-btn" id="closeMenuBtn">
-          <span>×</span>
-        </button>
-        
-        <h2 style="text-align: center; margin-bottom: 30px;">Меню</h2>
-        
-        <div class="menu-actions">
-          <button class="menu-item" id="favoritesBtn">
-            <span class="menu-icon">⭐</span>
-            <span class="menu-text">Закладкі</span>
-            <span class="menu-badge" id="favoritesCount">0</span>
-          </button>
-
-          <button class="menu-item" id="searchBtn">
-            <span class="menu-icon">🔍</span>
-            <span class="menu-text">Пошук</span>
-          </button>
-
-          <button class="menu-item" id="statsBtn">
-            <span class="menu-icon">📊</span>
-            <span class="menu-text">Статыстыка</span>
-          </button>
-
-          <button class="menu-item" id="randomBtn">
-            <span class="menu-icon">🎲</span>
-            <span class="menu-text">Выпадковы герой</span>
-          </button>
-
-          <button class="menu-item" id="resetAppBtn">
-            <span class="menu-icon">🔄</span>
-            <span class="menu-text">Пачаць нанова</span>
-          </button>
-
-          <button class="menu-item" id="aboutAppBtn">
-            <span class="menu-icon">ℹ️</span>
-            <span class="menu-text">Аб праекце</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Favorites Modal -->
-  <div class="modal hidden" id="favoritesModal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-      <div class="modal-card premium-glass">
-        <button class="close-btn" id="closeFavoritesBtn">
-          <span>×</span>
-        </button>
-        
-        <h2 style="text-align: center; margin-bottom: 20px;">Закладкі</h2>
-        
-        <div class="favorites-list" id="favoritesList">
-          <!-- Favorites will be dynamically inserted here -->
-        </div>
-        
-        <div class="empty-favorites hidden" id="emptyFavorites">
-          <div style="text-align: center; padding: 40px 20px; color: var(--text-tertiary);">
-            <div style="font-size: 48px; margin-bottom: 16px;">⭐</div>
-            <p>Тут будуць вашы закладкі</p>
-            <p style="font-size: 14px; margin-top: 8px;">Дадавайце герояў, націскаючы зорачку</p>
+          <div class="modal-actions">
+            <button class="secondary-button" id="shareDetailBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16,6 12,2 8,6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+              </svg>
+              Падзяліцца
+            </button>
+            <button class="primary-button" id="closeDetailBtn">Вярнуцца</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Search Modal -->
-  <div class="modal hidden" id="searchModal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-      <div class="modal-card premium-glass">
-        <button class="close-btn" id="closeSearchBtn">
-          <span>×</span>
+    <!-- Menu Modal -->
+    <div class="modal" id="menuModal" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeMenuBtn" aria-label="Закрыць">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
         </button>
 
-        <h2 style="text-align: center; margin-bottom: 20px;">Пошук герояў</h2>
+        <div class="menu-content">
+          <h2>Меню</h2>
 
-        <div style="margin-bottom: 20px;">
-          <input type="text" id="searchInput" placeholder="Увядзіце імя героя..."
-                 style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--bg-secondary); color: var(--text-primary); font-size: 16px;">
-        </div>
+          <div class="menu-items">
+            <button class="menu-item" id="favoritesBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <span>Закладкі</span>
+              <span class="badge" id="favoritesCount">0</span>
+            </button>
 
-        <div class="search-results" id="searchResults" style="max-height: 300px; overflow-y: auto;">
-          <!-- Search results will be inserted here -->
+            <button class="menu-item" id="searchBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="M21 21l-4.35-4.35"></path>
+              </svg>
+              <span>Пошук</span>
+            </button>
+
+            <button class="menu-item" id="statsBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3v18h18"></path>
+                <path d="M18 17V9"></path>
+                <path d="M13 17V5"></path>
+                <path d="M8 17v-3"></path>
+              </svg>
+              <span>Статыстыка</span>
+            </button>
+
+            <button class="menu-item" id="randomBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.828 14.828a4 4 0 0 1-5.656 0"></path>
+                <path d="M9 10h1.586a1 1 0 0 1 .707.293l.707.707A1 1 0 0 0 13.414 11H15"></path>
+                <path d="M15 15h-1.586a1 1 0 0 0-.707.293l-.707.707A1 1 0 0 1 10.586 17H9"></path>
+              </svg>
+              <span>Выпадковы герой</span>
+            </button>
+
+            <button class="menu-item" id="resetAppBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                <path d="M21 3v5h-5"></path>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                <path d="M8 16H3v5"></path>
+              </svg>
+              <span>Пачаць нанова</span>
+            </button>
+
+            <button class="menu-item" id="aboutAppBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Аб праекце</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Stats Modal -->
-  <div class="modal hidden" id="statsModal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-      <div class="modal-card premium-glass">
-        <button class="close-btn" id="closeStatsBtn">
-          <span>×</span>
+    <!-- Favorites Modal -->
+    <div class="modal" id="favoritesModal" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeFavoritesBtn" aria-label="Закрыць">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
         </button>
 
-        <h2 style="text-align: center; margin-bottom: 20px;">Статыстыка</h2>
-
-        <div class="stats-content" id="statsContent">
-          <!-- Stats will be inserted here -->
+        <div class="favorites-content">
+          <h2>Закладкі</h2>
+          <div class="favorites-list" id="favoritesList"></div>
+          <div class="empty-favorites" id="emptyFavorites">
+            <div class="empty-icon">⭐</div>
+            <p>Тут будуць вашы закладкі</p>
+            <p class="empty-subtitle">Дадавайце герояў, націскаючы зорачку</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Random Hero Modal -->
-  <div class="modal hidden" id="randomModal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-container">
-      <div class="modal-card premium-glass">
-        <button class="close-btn" id="closeRandomBtn">
-          <span>×</span>
+    <!-- Search Modal -->
+    <div class="modal" id="searchModal" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeSearchBtn" aria-label="Закрыць">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
         </button>
 
-        <h2 style="text-align: center; margin-bottom: 20px;">🎲 Выпадковы герой</h2>
-
-        <div class="random-hero" id="randomHeroContent">
-          <!-- Random hero will be inserted here -->
-        </div>
-
-        <div style="text-align: center; margin-top: 20px;">
-          <button class="btn-primary liquid-btn" id="anotherRandomBtn">
-            <span class="btn-sparkle">🎲</span>
-            Яшчэ адзін
-          </button>
+        <div class="search-content">
+          <h2>Пошук герояў</h2>
+          <div class="search-input-container">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="M21 21l-4.35-4.35"></path>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Увядзіце імя героя..." autocomplete="off">
+          </div>
+          <div class="search-results" id="searchResults"></div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Swipe Instructions -->
-  <div class="instructions glass premium-glass hidden" id="instructions">
-    <div class="instruction-item">
-      <div class="instruction-icon">←</div>
-      <span>Свайп управа - прапусціць</span>
+    <!-- Stats Modal -->
+    <div class="modal" id="statsModal" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeStatsBtn" aria-label="Закрыць">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+
+        <div class="stats-content">
+          <h2>Статыстыка</h2>
+          <div id="statsContent"></div>
+        </div>
+      </div>
     </div>
-    <div class="instruction-item">
-      <div class="instruction-icon">↑</div>
-      <span>Свайп уверх - падрабязнасці</span>
+
+    <!-- Random Hero Modal -->
+    <div class="modal" id="randomModal" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeRandomBtn" aria-label="Закрыць">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+
+        <div class="random-hero-content" id="randomHeroContent"></div>
+        <div class="modal-actions">
+          <button class="primary-button" id="anotherRandomBtn">Яшчэ адзін</button>
+        </div>
+      </div>
     </div>
-    <div class="instruction-item">
-      <div class="instruction-icon">↓</div>
-      <span>Свайп уніз - у закладкі</span>
+
+    <!-- Instructions Modal -->
+    <div class="modal" id="instructionsModal" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <button class="modal-close" id="closeInstructions" aria-label="Закрыць">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+
+        <div class="instructions-content">
+          <h2>Як карыстацца</h2>
+          <div class="instruction-steps">
+            <div class="instruction-step">
+              <div class="step-icon">👆</div>
+              <div class="step-text">
+                <strong>Свайп уверх</strong> - падрабязнасці пра героя
+              </div>
+            </div>
+            <div class="instruction-step">
+              <div class="step-icon">👈</div>
+              <div class="step-text">
+                <strong>Свайп улева</strong> - герой падабаецца
+              </div>
+            </div>
+            <div class="instruction-step">
+              <div class="step-icon">👉</div>
+              <div class="step-text">
+                <strong>Свайп управа</strong> - прапусціць героя
+              </div>
+            </div>
+            <div class="instruction-step">
+              <div class="step-icon">❤️</div>
+              <div class="step-text">
+                <strong>Свайп уніз</strong> - дадаць у закладкі
+              </div>
+            </div>
+          </div>
+          <button class="primary-button" id="startExploring">Пачаць!</button>
+        </div>
+      </div>
     </div>
-    <button class="btn-ghost glass-ghost" id="closeInstructions" style="margin-top: 15px; width: 100%;">
-      Зразумела!
-    </button>
   </div>
 
   <script src="app.js"></script>

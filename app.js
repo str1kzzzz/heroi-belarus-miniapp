@@ -360,11 +360,12 @@ class BelarusHeroesApp {
     // Share button
     this.addEvent('#shareDetailBtn', 'click', () => this.shareCurrent());
 
-    // New modal buttons
+    // Modal buttons
     this.addEvent('#closeSearchBtn', 'click', () => this.hideSearch());
     this.addEvent('#closeStatsBtn', 'click', () => this.hideStats());
     this.addEvent('#closeRandomBtn', 'click', () => this.hideRandom());
     this.addEvent('#anotherRandomBtn', 'click', () => this.showRandomHero());
+    this.addEvent('#startExploring', 'click', () => this.hideInstructions());
 
     // Search functionality
     this.addEvent('#searchInput', 'input', (e) => this.performSearch(e.target.value));
@@ -460,19 +461,21 @@ class BelarusHeroesApp {
   }
 
   updateIndicators(card) {
-    card.classList.remove('swipe-left', 'swipe-right', 'swipe-up', 'swipe-down');
+    // Remove all indicator visibility
+    const indicators = card.querySelectorAll('.swipe-indicator');
+    indicators.forEach(indicator => indicator.classList.remove('visible'));
 
     if (Math.abs(this.currentY) > Math.abs(this.currentX)) {
       if (this.currentY < -this.verticalSwipeThreshold) {
-        card.classList.add('swipe-up');
+        card.querySelector('.swipe-indicator.detail').classList.add('visible');
       } else if (this.currentY > this.verticalSwipeThreshold) {
-        card.classList.add('swipe-down');
+        card.querySelector('.swipe-indicator.favorite').classList.add('visible');
       }
     } else {
       if (this.currentX < -this.swipeThreshold) {
-        card.classList.add('swipe-left');
+        card.querySelector('.swipe-indicator.like').classList.add('visible');
       } else if (this.currentX > this.swipeThreshold) {
-        card.classList.add('swipe-right');
+        card.querySelector('.swipe-indicator.dislike').classList.add('visible');
       }
     }
   }
@@ -481,18 +484,21 @@ class BelarusHeroesApp {
     const card = this.getCurrentCard();
     if (card) {
       card.style.transform = '';
-      card.classList.remove('swipe-left', 'swipe-right', 'swipe-up', 'swipe-down');
+      card.classList.remove('dragging', 'liked', 'disliked', 'favorited');
+      // Hide all indicators
+      const indicators = card.querySelectorAll('.swipe-indicator');
+      indicators.forEach(indicator => indicator.classList.remove('visible'));
     }
   }
 
   renderCards() {
-    const stack = document.getElementById('cardsStack');
-    if (!stack) {
-      console.error('Cards stack not found!');
+    const container = document.getElementById('cardsContainer');
+    if (!container) {
+      console.error('Cards container not found!');
       return;
     }
 
-    stack.innerHTML = '';
+    container.innerHTML = '';
 
     const cardsToShow = Math.min(3, this.heroes.length - this.currentIndex);
 
@@ -505,7 +511,7 @@ class BelarusHeroesApp {
         card.classList.add('entering');
       }
 
-      stack.appendChild(card);
+      container.appendChild(card);
     }
 
     console.log(`Rendered ${cardsToShow} cards`);
@@ -513,73 +519,80 @@ class BelarusHeroesApp {
 
   createCard(hero, index) {
     const card = document.createElement('div');
-    card.className = 'hero-card premium-glass';
+    card.className = 'hero-card';
     card.style.zIndex = 10 - index;
-    card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 10}px)`;
+    card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 8}px)`;
 
-    // Create image
+    // Create image container
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'hero-image-container';
+
     const img = document.createElement('img');
-    img.className = 'card-image';
+    img.className = 'hero-image';
     img.src = hero.image;
     img.alt = hero.name;
+    img.loading = 'lazy';
     img.onerror = () => {
-      img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="10" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
+      img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
     };
+
+    imageContainer.appendChild(img);
 
     // Create content
     const content = document.createElement('div');
     content.className = 'card-content';
-    content.innerHTML = `
-      <h3 class="card-name">${hero.name}</h3>
-      <div class="card-meta">${hero.years} • ${hero.field}</div>
-      <p class="card-fact">${hero.fact}</p>
-    `;
 
-    // Create indicators
+    const name = document.createElement('h3');
+    name.className = 'card-name';
+    name.textContent = hero.name;
+
+    const meta = document.createElement('div');
+    meta.className = 'card-meta';
+    meta.textContent = `${hero.years} • ${hero.field}`;
+
+    const description = document.createElement('p');
+    description.className = 'card-description';
+    description.textContent = hero.fact;
+
+    content.appendChild(name);
+    content.appendChild(meta);
+    content.appendChild(description);
+
+    // Create swipe indicators container
+    const indicators = document.createElement('div');
+    indicators.className = 'swipe-indicators';
+
     const likeIndicator = document.createElement('div');
-    likeIndicator.className = 'swipe-indicator like-indicator';
-    likeIndicator.textContent = '👍 Падабаецца';
+    likeIndicator.className = 'swipe-indicator like';
+    likeIndicator.textContent = 'Падабаецца';
 
     const dislikeIndicator = document.createElement('div');
-    dislikeIndicator.className = 'swipe-indicator dislike-indicator';
-    dislikeIndicator.textContent = '👎 Прапусціць';
+    dislikeIndicator.className = 'swipe-indicator dislike';
+    dislikeIndicator.textContent = 'Прапусціць';
 
     const detailIndicator = document.createElement('div');
-    detailIndicator.className = 'swipe-indicator detail-indicator';
-    detailIndicator.textContent = '📖 Падрабязнасці';
+    detailIndicator.className = 'swipe-indicator detail';
+    detailIndicator.textContent = 'Падрабязнасці';
 
     const favoriteIndicator = document.createElement('div');
-    favoriteIndicator.className = 'swipe-indicator favorite-indicator';
-    favoriteIndicator.textContent = '⭐ У закладкі';
+    favoriteIndicator.className = 'swipe-indicator favorite';
+    favoriteIndicator.textContent = 'У закладкі';
 
-    // Create sparkle container
-    const sparkles = document.createElement('div');
-    sparkles.className = 'swipe-sparkles';
+    indicators.appendChild(likeIndicator);
+    indicators.appendChild(dislikeIndicator);
+    indicators.appendChild(detailIndicator);
+    indicators.appendChild(favoriteIndicator);
 
-    // Add sparkle particles
-    for (let i = 0; i < 8; i++) {
-      const sparkle = document.createElement('div');
-      sparkle.className = 'sparkle';
-      sparkle.style.left = Math.random() * 100 + '%';
-      sparkle.style.top = Math.random() * 100 + '%';
-      sparkle.style.animationDelay = Math.random() * 0.5 + 's';
-      sparkles.appendChild(sparkle);
-    }
-
-    card.appendChild(img);
+    card.appendChild(imageContainer);
     card.appendChild(content);
-    card.appendChild(likeIndicator);
-    card.appendChild(dislikeIndicator);
-    card.appendChild(detailIndicator);
-    card.appendChild(favoriteIndicator);
-    card.appendChild(sparkles);
+    card.appendChild(indicators);
 
     return card;
   }
 
   getCurrentCard() {
-    const stack = document.getElementById('cardsStack');
-    return stack ? stack.firstElementChild : null;
+    const container = document.getElementById('cardsContainer');
+    return container ? container.firstElementChild : null;
   }
 
   like() {
@@ -628,7 +641,18 @@ class BelarusHeroesApp {
   animateCard(direction) {
     const card = this.getCurrentCard();
     if (card) {
-      card.classList.add(direction);
+      // Add appropriate classes for visual feedback
+      if (direction === 'swipe-left') {
+        card.classList.add('liked');
+      } else if (direction === 'swipe-right') {
+        card.classList.add('disliked');
+      } else if (direction === 'swipe-down') {
+        card.classList.add('favorited');
+      }
+
+      // Add exit animation class
+      const exitClass = direction.replace('swipe-', 'exiting-');
+      card.classList.add(exitClass);
     }
   }
 
@@ -663,10 +687,10 @@ class BelarusHeroesApp {
 
   showEmptyState() {
     const empty = document.getElementById('emptyState');
-    const stack = document.getElementById('cardsStack');
+    const container = document.getElementById('cardsContainer');
 
     if (empty) empty.classList.remove('hidden');
-    if (stack) stack.classList.add('hidden');
+    if (container) container.classList.add('hidden');
 
     console.log('🏁 All heroes viewed!');
   }
@@ -683,34 +707,34 @@ class BelarusHeroesApp {
       image.src = hero.image;
       image.alt = hero.name;
       name.textContent = hero.name;
-      meta.innerHTML = `${hero.years}<br>${hero.field} • ${hero.category}`;
+      meta.innerHTML = `${hero.years}<br><span style="color: var(--color-gray-600);">${hero.field} • ${hero.category}</span>`;
 
       const extraFact = this.getExtraFact(hero.name);
       description.innerHTML = `
-        <p>${hero.fact}</p>
-        ${extraFact ? `<div style="margin-top: 16px; padding: 16px; background: rgba(255,255,255,0.1); border-radius: 12px;"><strong>📌 Дадатковы факт:</strong><br>${extraFact.fact}</div>` : ''}
+        <p style="margin: 0; line-height: 1.6; color: var(--color-gray-700);">${hero.fact}</p>
+        ${extraFact ? `<div style="margin-top: 1.5rem; padding: 1rem; background: var(--color-gray-50); border-radius: 0.5rem; border: 1px solid var(--color-gray-200);"><strong style="color: var(--color-gray-900);">📌 Дадатковы факт:</strong><br><span style="color: var(--color-gray-700);">${extraFact.fact}</span></div>` : ''}
       `;
 
-      modal.classList.remove('hidden');
+      modal.classList.add('open');
     }
   }
 
   hideDetailModal() {
     const modal = document.getElementById('detailModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) modal.classList.remove('open');
   }
 
   showMenu() {
     const modal = document.getElementById('menuModal');
     if (modal) {
       this.updateFavoritesCount();
-      modal.classList.remove('hidden');
+      modal.classList.add('open');
     }
   }
 
   hideMenu() {
     const modal = document.getElementById('menuModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) modal.classList.remove('open');
   }
 
   showFavorites() {
@@ -730,13 +754,13 @@ class BelarusHeroesApp {
         empty.classList.add('hidden');
       }
 
-      modal.classList.remove('hidden');
+      modal.classList.add('open');
     }
   }
 
   hideFavoritesModal() {
     const modal = document.getElementById('favoritesModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) modal.classList.remove('open');
   }
 
   renderFavorites() {
@@ -756,7 +780,7 @@ class BelarusHeroesApp {
         img.src = hero.image;
         img.alt = hero.name;
         img.onerror = () => {
-          img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
+          img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
         };
 
         const info = document.createElement('div');
@@ -768,7 +792,7 @@ class BelarusHeroesApp {
 
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-favorite';
-        removeBtn.textContent = '✕';
+        removeBtn.innerHTML = '✕';
         removeBtn.onclick = () => this.removeFavorite(hero.id);
 
         item.appendChild(img);
@@ -796,13 +820,13 @@ class BelarusHeroesApp {
   }
 
   showInstructions() {
-    const instructions = document.getElementById('instructions');
-    if (instructions) instructions.classList.remove('hidden');
+    const modal = document.getElementById('instructionsModal');
+    if (modal) modal.classList.add('open');
   }
 
   hideInstructions() {
-    const instructions = document.getElementById('instructions');
-    if (instructions) instructions.classList.add('hidden');
+    const modal = document.getElementById('instructionsModal');
+    if (modal) modal.classList.remove('open');
   }
 
   showAbout() {
@@ -834,9 +858,9 @@ class BelarusHeroesApp {
 
   hideEmptyState() {
     const empty = document.getElementById('emptyState');
-    const stack = document.getElementById('cardsStack');
+    const container = document.getElementById('cardsContainer');
     if (empty) empty.classList.add('hidden');
-    if (stack) stack.classList.remove('hidden');
+    if (container) container.classList.remove('hidden');
   }
 
   shuffleHeroes() {
@@ -919,15 +943,15 @@ class BelarusHeroesApp {
 
     if (modal && input && results) {
       input.value = '';
-      results.innerHTML = '<p style="text-align: center; color: var(--text-tertiary); padding: 20px;">Пачніце ўводзіць імя героя...</p>';
-      modal.classList.remove('hidden');
+      results.innerHTML = '<p style="text-align: center; color: var(--color-gray-500); padding: 20px;">Пачніце ўводзіць імя героя...</p>';
+      modal.classList.add('open');
       input.focus();
     }
   }
 
   hideSearch() {
     const modal = document.getElementById('searchModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) modal.classList.remove('open');
   }
 
   performSearch(query) {
@@ -935,7 +959,7 @@ class BelarusHeroesApp {
     if (!results) return;
 
     if (query.length < 2) {
-      results.innerHTML = '<p style="text-align: center; color: var(--text-tertiary); padding: 20px;">Пачніце ўводзіць імя героя...</p>';
+      results.innerHTML = '<p style="text-align: center; color: var(--color-gray-500); padding: 1.25rem;">Пачніце ўводзіць імя героя...</p>';
       return;
     }
 
@@ -945,7 +969,7 @@ class BelarusHeroesApp {
     );
 
     if (filtered.length === 0) {
-      results.innerHTML = '<p style="text-align: center; color: var(--text-tertiary); padding: 20px;">Героі не знойдзены</p>';
+      results.innerHTML = '<p style="text-align: center; color: var(--color-gray-500); padding: 1.25rem;">Героі не знойдзены</p>';
       return;
     }
 
@@ -956,26 +980,27 @@ class BelarusHeroesApp {
       item.style.cssText = `
         display: flex;
         align-items: center;
-        padding: 12px;
-        margin-bottom: 8px;
-        background: var(--bg-secondary);
-        border-radius: 12px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: var(--color-gray-50);
+        border: 1px solid var(--color-gray-200);
+        border-radius: 0.5rem;
         cursor: pointer;
-        transition: var(--transition-smooth);
+        transition: var(--transition-fast);
       `;
 
       const img = document.createElement('img');
       img.src = hero.image;
       img.alt = hero.name;
-      img.style.cssText = 'width: 40px; height: 40px; border-radius: 8px; margin-right: 12px; object-fit: cover;';
+      img.style.cssText = 'width: 2.5rem; height: 2.5rem; border-radius: 0.375rem; margin-right: 0.75rem; object-fit: cover; border: 1px solid var(--color-gray-200);';
       img.onerror = () => {
-        img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
+        img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
       };
 
       const info = document.createElement('div');
       info.innerHTML = `
-        <div style="font-weight: 600;">${hero.name}</div>
-        <div style="font-size: 12px; color: var(--text-tertiary);">${hero.years} • ${hero.field}</div>
+        <div style="font-weight: 600; color: var(--color-gray-900); margin-bottom: 0.125rem;">${hero.name}</div>
+        <div style="font-size: 0.75rem; color: var(--color-gray-600);">${hero.years} • ${hero.field}</div>
       `;
 
       item.appendChild(img);
@@ -1006,49 +1031,50 @@ class BelarusHeroesApp {
       });
 
       content.innerHTML = `
-        <div style="text-align: center; margin-bottom: 30px;">
-          <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
-          <h3>Ваша статыстыка</h3>
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">📊</div>
+          <h3 style="margin: 0;">Ваша статыстыка</h3>
         </div>
 
-        <div style="display: grid; gap: 16px;">
-          <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);">${viewedHeroes}</div>
-            <div style="color: var(--text-secondary);">Прагледжана герояў</div>
+        <div style="display: grid; gap: 1rem; margin-bottom: 2rem;">
+          <div style="background: var(--color-gray-50); padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--color-gray-200);">
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.25rem;">${viewedHeroes}</div>
+            <div style="color: var(--color-gray-600); font-size: 0.875rem;">Прагледжана герояў</div>
           </div>
 
-          <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: var(--accent-warning);">${favoriteCount}</div>
-            <div style="color: var(--text-secondary);">У закладках</div>
+          <div style="background: var(--color-gray-50); padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--color-gray-200);">
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-warning); margin-bottom: 0.25rem;">${favoriteCount}</div>
+            <div style="color: var(--color-gray-600); font-size: 0.875rem;">У закладках</div>
           </div>
 
-          <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; color: var(--accent-success);">${totalHeroes}</div>
-            <div style="color: var(--text-secondary);">Усяго герояў</div>
+          <div style="background: var(--color-gray-50); padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--color-gray-200);">
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-secondary); margin-bottom: 0.25rem;">${totalHeroes}</div>
+            <div style="color: var(--color-gray-600); font-size: 0.875rem;">Усяго герояў</div>
           </div>
         </div>
 
-        <div style="margin-top: 30px;">
-          <h4 style="margin-bottom: 16px;">Героі па катэгорыях:</h4>
+        <div>
+          <h4 style="margin-bottom: 1rem; color: var(--color-gray-900);">Героі па катэгорыях:</h4>
           ${Object.entries(categories).map(([category, count]) =>
-            `<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
-              <span>${category}</span>
-              <span style="font-weight: 600;">${count}</span>
+            `<div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-gray-200);">
+              <span style="color: var(--color-gray-700);">${category}</span>
+              <span style="font-weight: 600; color: var(--color-gray-900);">${count}</span>
             </div>`
           ).join('')}
         </div>
       `;
 
-      modal.classList.remove('hidden');
+      modal.classList.add('open');
     }
   }
 
   hideStats() {
     const modal = document.getElementById('statsModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) modal.classList.remove('open');
   }
 
   showRandomHero() {
+    this.hideMenu();
     const modal = document.getElementById('randomModal');
     const content = document.getElementById('randomHeroContent');
 
@@ -1056,25 +1082,25 @@ class BelarusHeroesApp {
       const randomHero = this.heroes[Math.floor(Math.random() * this.heroes.length)];
 
       content.innerHTML = `
-        <div style="text-align: center; margin-bottom: 20px;">
-          <div style="width: 120px; height: 120px; margin: 0 auto 16px; border-radius: 16px; overflow: hidden; background: var(--bg-secondary);">
+        <div style="text-align: center;">
+          <div style="width: 8rem; height: 8rem; margin: 0 auto 1rem; border-radius: 0.75rem; overflow: hidden; background: var(--color-gray-100); border: 1px solid var(--color-gray-200);">
             <img src="${randomHero.image}" alt="${randomHero.name}"
                  style="width: 100%; height: 100%; object-fit: cover;"
-                 onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="10" fill="%23666" text-anchor="middle" dy=".3em">${randomHero.name}</text></svg>'">
+                 onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${randomHero.name}</text></svg>'">
           </div>
-          <h3 style="margin-bottom: 8px;">${randomHero.name}</h3>
-          <div style="color: var(--text-secondary); margin-bottom: 16px;">${randomHero.years} • ${randomHero.field}</div>
-          <p style="line-height: 1.6; color: var(--text-secondary);">${randomHero.fact}</p>
+          <h3 style="margin-bottom: 0.5rem; color: var(--color-gray-900);">${randomHero.name}</h3>
+          <div style="color: var(--color-gray-600); margin-bottom: 1rem; font-size: 0.875rem;">${randomHero.years} • ${randomHero.field}</div>
+          <p style="line-height: 1.6; color: var(--color-gray-700); margin: 0;">${randomHero.fact}</p>
         </div>
       `;
 
-      modal.classList.remove('hidden');
+      modal.classList.add('open');
     }
   }
 
   hideRandom() {
     const modal = document.getElementById('randomModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) modal.classList.remove('open');
   }
 
   showSuccessFeedback(icon) {
