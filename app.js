@@ -38,11 +38,37 @@ class BelarusHeroesApp {
 
     // Show instructions for first-time users
     if (!localStorage.getItem('instructionsShown')) {
-      setTimeout(() => this.showInstructions(), 1000);
+      setTimeout(() => this.showInstructions(), 1500);
       localStorage.setItem('instructionsShown', 'true');
     }
 
     console.log('✅ App initialized with', this.heroes.length, 'heroes (shuffled randomly)');
+  }
+
+  initTelegramWebApp() {
+    // Check if running in Telegram Web App
+    if (window.Telegram && window.Telegram.WebApp) {
+      this.telegramWebApp = window.Telegram.WebApp;
+
+      // Enable closing confirmation
+      this.telegramWebApp.enableClosingConfirmation();
+
+      // Set app header color
+      this.telegramWebApp.setHeaderColor('#ffffff');
+
+      // Expand to full height if needed
+      this.telegramWebApp.expand();
+
+      // Listen for viewport changes
+      this.telegramWebApp.onEvent('viewportChanged', () => {
+        // Handle viewport changes if needed
+        console.log('📐 Viewport changed');
+      });
+
+      console.log('📱 Telegram Web App detected and initialized');
+    } else {
+      console.log('💻 Running in regular browser');
+    }
   }
 
   initTelegramWebApp() {
@@ -367,11 +393,17 @@ class BelarusHeroesApp {
     this.addEvent('#anotherRandomBtn', 'click', () => this.showRandomHero());
     this.addEvent('#startExploring', 'click', () => this.hideInstructions());
 
+    // Modal backdrop clicks
+    this.setupModalBackdropClicks();
+
     // Search functionality
     this.addEvent('#searchInput', 'input', (e) => this.performSearch(e.target.value));
 
     // Touch events
     this.setupTouchEvents();
+
+    // Keyboard navigation
+    this.setupKeyboardNavigation();
   }
 
   addEvent(selector, event, handler) {
@@ -382,18 +414,62 @@ class BelarusHeroesApp {
   }
 
   setupTouchEvents() {
-    const stack = document.getElementById('cardsStack');
-    if (!stack) return;
+    const container = document.getElementById('cardsContainer');
+    if (!container) return;
 
     // Mouse events
-    stack.addEventListener('mousedown', (e) => this.handleStart(e));
+    container.addEventListener('mousedown', (e) => this.handleStart(e));
     document.addEventListener('mousemove', (e) => this.handleMove(e));
     document.addEventListener('mouseup', (e) => this.handleEnd(e));
 
     // Touch events
-    stack.addEventListener('touchstart', (e) => this.handleStart(e), { passive: false });
+    container.addEventListener('touchstart', (e) => this.handleStart(e), { passive: false });
     document.addEventListener('touchmove', (e) => this.handleMove(e), { passive: false });
-    document.addEventListener('touchend', (e) => this.handleEnd(e));
+    document.addEventListener('touchend', (e) => this.handleEnd(e), { passive: false });
+  }
+
+  setupModalBackdropClicks() {
+    // Detail modal backdrop
+    const detailBackdrop = document.querySelector('#detailModal .modal-backdrop');
+    if (detailBackdrop) {
+      detailBackdrop.addEventListener('click', () => this.hideDetailModal());
+    }
+
+    // Menu modal backdrop
+    const menuBackdrop = document.querySelector('#menuModal .modal-backdrop');
+    if (menuBackdrop) {
+      menuBackdrop.addEventListener('click', () => this.hideMenu());
+    }
+
+    // Favorites modal backdrop
+    const favoritesBackdrop = document.querySelector('#favoritesModal .modal-backdrop');
+    if (favoritesBackdrop) {
+      favoritesBackdrop.addEventListener('click', () => this.hideFavoritesModal());
+    }
+
+    // Search modal backdrop
+    const searchBackdrop = document.querySelector('#searchModal .modal-backdrop');
+    if (searchBackdrop) {
+      searchBackdrop.addEventListener('click', () => this.hideSearch());
+    }
+
+    // Stats modal backdrop
+    const statsBackdrop = document.querySelector('#statsModal .modal-backdrop');
+    if (statsBackdrop) {
+      statsBackdrop.addEventListener('click', () => this.hideStats());
+    }
+
+    // Random modal backdrop
+    const randomBackdrop = document.querySelector('#randomModal .modal-backdrop');
+    if (randomBackdrop) {
+      randomBackdrop.addEventListener('click', () => this.hideRandom());
+    }
+
+    // Instructions modal backdrop
+    const instructionsBackdrop = document.querySelector('#instructionsModal .modal-backdrop');
+    if (instructionsBackdrop) {
+      instructionsBackdrop.addEventListener('click', () => this.hideInstructions());
+    }
   }
 
   handleStart(e) {
@@ -403,13 +479,22 @@ class BelarusHeroesApp {
     const point = e.type.includes('mouse') ? e : e.touches[0];
     this.startX = point.clientX;
     this.startY = point.clientY;
+    this.currentX = 0;
+    this.currentY = 0;
 
     const card = this.getCurrentCard();
     if (card) {
-      card.classList.add('swiping');
+      card.classList.add('dragging');
+      card.classList.remove('liked', 'disliked', 'favorited');
+      // Hide all indicators
+      const indicators = card.querySelectorAll('.swipe-indicator');
+      indicators.forEach(indicator => indicator.classList.remove('visible'));
     }
 
-    e.preventDefault();
+    // Prevent default only for touch events to avoid scroll issues
+    if (e.type.includes('touch')) {
+      e.preventDefault();
+    }
   }
 
   handleMove(e) {
@@ -422,10 +507,12 @@ class BelarusHeroesApp {
     const card = this.getCurrentCard();
     if (card) {
       const rotate = this.currentX * 0.1;
-      card.style.transform = `translate(${this.currentX}px, ${this.currentY}px) rotate(${rotate}deg)`;
+      const scale = Math.max(0.95, 1 - Math.abs(this.currentX) * 0.001);
+      card.style.transform = `translate(${this.currentX}px, ${this.currentY}px) rotate(${rotate}deg) scale(${scale})`;
       this.updateIndicators(card);
     }
 
+    // Prevent default for both mouse and touch to avoid text selection and scrolling
     e.preventDefault();
   }
 
@@ -436,22 +523,28 @@ class BelarusHeroesApp {
     const card = this.getCurrentCard();
 
     if (card) {
-      card.classList.remove('swiping');
+      card.classList.remove('dragging');
 
-      // Check swipe direction
-      if (Math.abs(this.currentY) > this.verticalSwipeThreshold) {
+      // Check swipe direction with improved thresholds
+      const absX = Math.abs(this.currentX);
+      const absY = Math.abs(this.currentY);
+
+      if (absY > this.verticalSwipeThreshold && absY > absX) {
+        // Vertical swipe
         if (this.currentY < 0) {
           this.showDetails();
         } else {
           this.favorite();
         }
-      } else if (Math.abs(this.currentX) > this.swipeThreshold) {
+      } else if (absX > this.swipeThreshold) {
+        // Horizontal swipe
         if (this.currentX > 0) {
           this.dislike();
         } else {
           this.like();
         }
       } else {
+        // Not enough movement, reset card
         this.resetCard();
       }
     }
@@ -489,6 +582,46 @@ class BelarusHeroesApp {
       const indicators = card.querySelectorAll('.swipe-indicator');
       indicators.forEach(indicator => indicator.classList.remove('visible'));
     }
+  }
+
+  setupKeyboardNavigation() {
+    document.addEventListener('keydown', (e) => {
+      // Only handle keyboard events when not in input fields
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          this.like();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          this.dislike();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          this.showDetails();
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          this.favorite();
+          break;
+        case ' ':
+        case 'Enter':
+          e.preventDefault();
+          this.showDetails();
+          break;
+        case 'Escape':
+          // Close any open modals
+          const openModals = document.querySelectorAll('.modal.open');
+          if (openModals.length > 0) {
+            openModals[openModals.length - 1].classList.remove('open');
+          }
+          break;
+      }
+    });
   }
 
   renderCards() {
@@ -653,6 +786,13 @@ class BelarusHeroesApp {
       // Add exit animation class
       const exitClass = direction.replace('swipe-', 'exiting-');
       card.classList.add(exitClass);
+
+      // Remove the card after animation completes
+      setTimeout(() => {
+        if (card.parentNode) {
+          card.parentNode.removeChild(card);
+        }
+      }, 500); // Match the CSS animation duration
     }
   }
 
@@ -1108,42 +1248,36 @@ class BelarusHeroesApp {
     feedback.className = 'success-feedback';
 
     const iconElement = document.createElement('div');
-    iconElement.className = 'success-icon';
+    iconElement.style.cssText = `
+      font-size: 3rem;
+      animation: pulse 0.6s ease-out;
+    `;
     iconElement.textContent = icon;
 
     feedback.appendChild(iconElement);
     document.body.appendChild(feedback);
 
     setTimeout(() => {
-      feedback.remove();
+      if (feedback.parentNode) {
+        feedback.parentNode.removeChild(feedback);
+      }
     }, 600);
   }
 
-  showToast(message) {
+  showToast(message, duration = 3000) {
     const toast = document.createElement('div');
-    toast.style.cssText = `
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(20px);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 16px;
-      font-weight: 500;
-      z-index: 10000;
-      text-align: center;
-      animation: toastIn 0.3s ease-out;
-    `;
-
+    toast.className = 'toast';
     toast.textContent = message;
     document.body.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.animation = 'toastOut 0.3s ease-in forwards';
-      setTimeout(() => toast.remove(), 300);
-    }, 2000);
+      toast.style.animation = 'slideUp 0.3s ease-in reverse';
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, duration);
   }
 }
 
