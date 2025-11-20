@@ -1,4 +1,4 @@
-// app.js - Complete rewrite for Belarusian Heroes App
+// Belarusian Heroes App - Clean Implementation
 class BelarusHeroesApp {
   constructor() {
     this.heroes = [];
@@ -10,375 +10,115 @@ class BelarusHeroesApp {
     this.startY = 0;
     this.currentX = 0;
     this.currentY = 0;
-    this.swipeThreshold = 50;
-    this.verticalSwipeThreshold = 80;
+    this.swipeThreshold = 80;
+    this.verticalSwipeThreshold = 100;
 
     this.init();
   }
 
   init() {
-    console.log('🚀 Initializing Belarus Heroes App...');
-
-    // Initialize Telegram Web App if available
-    this.initTelegramWebApp();
-
-    // Load data immediately
     this.loadData();
-
-    // Shuffle heroes for random order
     this.shuffleHeroes();
-
-    // Load favorites from localStorage
     this.loadFavorites();
-
-    // Setup UI
     this.setupEventListeners();
     this.renderCards();
     this.updateProgress();
-
-    // Show instructions for first-time users
-    if (!localStorage.getItem('instructionsShown')) {
-      setTimeout(() => this.showInstructions(), 1500);
-      localStorage.setItem('instructionsShown', 'true');
-    }
-
-    console.log('✅ App initialized with', this.heroes.length, 'heroes (shuffled randomly)');
-  }
-
-  initTelegramWebApp() {
-    // Check if running in Telegram Web App
-    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-      console.log('📱 Running in Telegram Web App');
-
-      this.telegramWebApp = Telegram.WebApp;
-
-      // Mark as Telegram Web App for CSS
-      document.body.classList.add('telegram-webapp');
-
-      // Set Telegram theme colors if available
-      this.applyTelegramTheme();
-
-      // Handle viewport changes
-      this.telegramWebApp.onEvent('viewportChanged', () => {
-        this.handleViewportChange();
-      });
-
-      // Expand to full height
-      this.telegramWebApp.expand();
-
-      // Enable closing confirmation
-      this.telegramWebApp.enableClosingConfirmation();
-
-      // Set app header color
-      this.telegramWebApp.setHeaderColor('#000000');
-
-      // Handle back button
-      this.telegramWebApp.onEvent('backButtonClicked', () => {
-        // Close any open modals first
-        const openModals = document.querySelectorAll('.modal.open');
-        if (openModals.length > 0) {
-          openModals.forEach(modal => modal.classList.remove('open'));
-          return;
-        }
-        // If no modals open, show menu
-        this.showMenu();
-      });
-
-      // Show back button
-      this.telegramWebApp.BackButton.show();
-
-      console.log('✅ Telegram Web App initialized');
-    } else {
-      console.log('🌐 Running in regular browser');
-    }
-  }
-
-
-  applyTelegramTheme() {
-    if (!this.telegramWebApp) return;
-
-    const theme = this.telegramWebApp.themeParams;
-    if (theme) {
-      // Apply Telegram theme colors to CSS variables
-      const root = document.documentElement;
-      if (theme.bg_color) root.style.setProperty('--bg-primary', theme.bg_color);
-      if (theme.secondary_bg_color) root.style.setProperty('--bg-secondary', theme.secondary_bg_color);
-      if (theme.text_color) root.style.setProperty('--text-primary', theme.text_color);
-      if (theme.hint_color) root.style.setProperty('--text-tertiary', theme.hint_color);
-      if (theme.link_color) root.style.setProperty('--accent-primary', theme.link_color);
-
-      console.log('🎨 Applied Telegram theme colors');
-    }
-  }
-
-  handleViewportChange() {
-    if (!this.telegramWebApp) return;
-
-    // Update viewport height for dynamic changes
-    const viewportHeight = this.telegramWebApp.viewportHeight;
-    if (viewportHeight) {
-      document.documentElement.style.setProperty('--telegram-viewport-height', `${viewportHeight}px`);
-      console.log('📐 Viewport changed to:', viewportHeight);
-    }
+    this.showInstructions();
   }
 
   loadData() {
-    console.log('📚 Loading hero data...');
-
-    // Use local JSON data directly
+    // Hero data
     this.heroes = [
-      {
-        "id": 1,
-        "name": "Франциск Скорина",
-        "years": "ок. 1490 — ок. 1551",
-        "field": "Просветитель, первопечатник",
-        "category": "Культура",
-        "fact": "Франциск Скорина напечатал первую книгу на белорусской земле в 1517 году — «Псалтыр».",
-        "image": "images/francisk.jpg"
-      },
-      {
-        "id": 2,
-        "name": "Кастусь Калиновский",
-        "years": "1838 — 1864",
-        "field": "Революционер, публицист",
-        "category": "История",
-        "fact": "Калиновский был одним из лидеров восстания 1863 года против Российской империи.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/1/16/Kastuś_Kalinouski.jpg"
-      },
-      {
-        "id": 3,
-        "name": "Янка Купала",
-        "years": "1882 — 1942",
-        "field": "Поэт, драматург",
-        "category": "Культура",
-        "fact": "Янка Купала — один из основателей современной белорусской литературы.",
-        "image": "images/kupala.jpg"
-      },
-      {
-        "id": 4,
-        "name": "Якуб Колас",
-        "years": "1882 — 1956",
-        "field": "Писатель, академик",
-        "category": "Культура",
-        "fact": "Автор эпопеи «На ростанях» и один из основателей Академии наук Беларуси.",
-        "image": "images/kolas_yakub.jpg"
-      },
-      {
-        "id": 5,
-        "name": "Максим Богданович",
-        "years": "1891 — 1917",
-        "field": "Поэт, критик",
-        "category": "Культура",
-        "fact": "Автор стихотворения «Пагоня», ставшего символом национального духа Беларуси.",
-        "image": "images/maxim_bogdanovich.JPG"
-      },
-      {
-        "id": 6,
-        "name": "Ефросинья Полоцкая",
-        "years": "ок. 1104 — ок. 1173",
-        "field": "Игуменья, просветительница",
-        "category": "Культура",
-        "fact": "Основала монастырь в Полоцке и способствовала развитию образования и культуры.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Euphrosyne_of_Polotsk.jpg/200px-Euphrosyne_of_Polotsk.jpg"
-      },
-      {
-        "id": 7,
-        "name": "Симеон Полоцкий",
-        "years": "1629 — 1680",
-        "field": "Поэт, драматург, педагог",
-        "category": "Культура",
-        "fact": "Один из первых белорусских и русских поэтов Нового времени, основатель школьного театра.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Simeon_Polotsky.jpg/200px-Simeon_Polotsky.jpg"
-      },
-      {
-        "id": 8,
-        "name": "Тадеуш Костюшко",
-        "years": "1746 — 1817",
-        "field": "Военачальник, политик",
-        "category": "История",
-        "fact": "Лидер восстания 1794 года в Речи Посполитой, национальный герой Польши, Беларуси и Литвы.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Tadeusz_Kościuszko.PNG/200px-Tadeusz_Kościuszko.PNG"
-      },
-      {
-        "id": 9,
-        "name": "Винцент Дунин-Марцинкевич",
-        "years": "1808 — 1884",
-        "field": "Поэт, драматург, этнограф",
-        "category": "Культура",
-        "fact": "Один из основателей белорусской литературы, автор первой белорусской пьесы.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Vincent_Dunin-Marcinkievič.jpg/200px-Vincent_Dunin-Marcinkievič.jpg"
-      },
-      {
-        "id": 10,
-        "name": "Адам Мицкевич",
-        "years": "1798 — 1855",
-        "field": "Поэт, философ",
-        "category": "Культура",
-        "fact": "Великий польский и белорусский поэт, автор «Пана Тадеуша», родился в Беларуси.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Adam_Mickiewicz.PNG/200px-Adam_Mickiewicz.PNG"
-      },
-      {
-        "id": 11,
-        "name": "Констанция Буйло",
-        "years": "1898 — 1986",
-        "field": "Партизанка, Герой Советского Союза",
-        "category": "Война",
-        "fact": "Командир женского партизанского отряда во время Великой Отечественной войны.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Konstantyja_Bujło.jpg/200px-Konstantyja_Bujło.jpg"
-      },
-      {
-        "id": 12,
-        "name": "Павел Сухой",
-        "years": "1895 — 1975",
-        "field": "Авиаконструктор",
-        "category": "Наука",
-        "fact": "Создал знаменитые самолёты Су-2, Су-7, Су-9, основатель КБ Сухого.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Pavel_Sukhoi.jpg/200px-Pavel_Sukhoi.jpg"
-      },
-      {
-        "id": 13,
-        "name": "Владимир Короткевич",
-        "years": "1930 — 1984",
-        "field": "Писатель-фантаст",
-        "category": "Культура",
-        "fact": "Один из основателей белорусской научной фантастики, автор «Чёрного замка Ольшанского».",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Vladimir_Korotkevich.jpg/200px-Vladimir_Korotkevich.jpg"
-      },
-      {
-        "id": 14,
-        "name": "Рыгор Барадулин",
-        "years": "1935 — 2014",
-        "field": "Поэт, переводчик",
-        "category": "Культура",
-        "fact": "Народный поэт Беларуси, лауреат Государственной премии, переводил Шекспира и Пушкина.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Ryhor_Baradulin.jpg/200px-Ryhor_Baradulin.jpg"
-      },
-      {
-        "id": 15,
-        "name": "Василий Быков",
-        "years": "1924 — 2003",
-        "field": "Писатель, фронтовик",
-        "category": "Культура",
-        "fact": "Автор произведений о войне, лауреат Государственной премии СССР.",
-        "image": "images/bykov.jpg"
-      },
-      {
-        "id": 16,
-        "name": "Светлана Алексиевич",
-        "years": "род. 1948",
-        "field": "Писательница, журналистка",
-        "category": "Культура",
-        "fact": "Лауреат Нобелевской премии по литературе 2015 года за документальную прозу.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Svetlana_Alexievich_2013.jpg/200px-Svetlana_Alexievich_2013.jpg"
-      },
-      {
-        "id": 17,
-        "name": "Виктор Гончаренко",
-        "years": "род. 1977",
-        "field": "Футбольный тренер",
-        "category": "Спорт",
-        "fact": "Тренер сборной Беларуси по футболу, работал с ведущими европейскими клубами.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Viktor_Goncharenko_2018.jpg/200px-Viktor_Goncharenko_2018.jpg"
-      },
-      {
-        "id": 18,
-        "name": "Мария Игнатенко",
-        "years": "1929 — 1943",
-        "field": "Партизанка, пионер-герой",
-        "category": "Война",
-        "fact": "Юная партизанка, казнённая фашистами, символ мужества белорусских детей.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Maria_Ignatenko.jpg/200px-Maria_Ignatenko.jpg"
-      },
-      {
-        "id": 19,
-        "name": "Иван Мележ",
-        "years": "1921 — 1976",
-        "field": "Писатель",
-        "category": "Культура",
-        "fact": "Автор трилогии «Полесская хроника», классик белорусской литературы.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Ivan_Melezh.jpg/200px-Ivan_Melezh.jpg"
-      },
-      {
-        "id": 20,
-        "name": "Александр Лукашенко",
-        "years": "род. 1954",
-        "field": "Президент Республики Беларусь",
-        "category": "Политика",
-        "fact": "Первый и единственный Президент Республики Беларусь с 1994 года.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Alexander_Lukashenko_2020.jpg/200px-Alexander_Lukashenko_2020.jpg"
-      }
+      { id: 1, name: "Франциск Скорина", years: "ок. 1490 — ок. 1551", field: "Просветитель, первопечатник", category: "Культура", fact: "Франциск Скорина напечатал первую книгу на белорусской земле в 1517 году — «Псалтыр».", image: "images/francisk.jpg" },
+      { id: 2, name: "Кастусь Калиновский", years: "1838 — 1864", field: "Революционер, публицист", category: "История", fact: "Калиновский был одним из лидеров восстания 1863 года против Российской империи.", image: "https://upload.wikimedia.org/wikipedia/commons/1/16/Kastuś_Kalinouski.jpg" },
+      { id: 3, name: "Янка Купала", years: "1882 — 1942", field: "Поэт, драматург", category: "Культура", fact: "Янка Купала — один из основателей современной белорусской литературы.", image: "images/kupala.jpg" },
+      { id: 4, name: "Якуб Колас", years: "1882 — 1956", field: "Писатель, академик", category: "Культура", fact: "Автор эпопеи «На ростанях» и один из основателей Академии наук Беларуси.", image: "images/kolas_yakub.jpg" },
+      { id: 5, name: "Максим Богданович", years: "1891 — 1917", field: "Поэт, критик", category: "Культура", fact: "Автор стихотворения «Пагоня», ставшего символом национального духа Беларуси.", image: "images/maxim_bogdanovich.JPG" },
+      { id: 6, name: "Ефросинья Полоцкая", years: "ок. 1104 — ок. 1173", field: "Игуменья, просветительница", category: "Культура", fact: "Основала монастырь в Полоцке и способствовала развитию образования и культуры.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Euphrosyne_of_Polotsk.jpg/200px-Euphrosyne_of_Polotsk.jpg" },
+      { id: 7, name: "Симеон Полоцкий", years: "1629 — 1680", field: "Поэт, драматург, педагог", category: "Культура", fact: "Один из первых белорусских и русских поэтов Нового времени, основатель школьного театра.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Simeon_Polotsky.jpg/200px-Simeon_Polotsky.jpg" },
+      { id: 8, name: "Тадеуш Костюшко", years: "1746 — 1817", field: "Военачальник, политик", category: "История", fact: "Лидер восстания 1794 года в Речи Посполитой, национальный герой Польши, Беларуси и Литвы.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Tadeusz_Kościuszko.PNG/200px-Tadeusz_Kościuszko.PNG" },
+      { id: 9, name: "Винцент Дунин-Марцинкевич", years: "1808 — 1884", field: "Поэт, драматург, этнограф", category: "Культура", fact: "Один из основателей белорусской литературы, автор первой белорусской пьесы.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Vincent_Dunin-Marcinkievič.jpg/200px-Vincent_Dunin-Marcinkievič.jpg" },
+      { id: 10, name: "Адам Мицкевич", years: "1798 — 1855", field: "Поэт, философ", category: "Культура", fact: "Великий польский и белорусский поэт, автор «Пана Тадеуша», родился в Беларуси.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Adam_Mickiewicz.PNG/200px-Adam_Mickiewicz.PNG" },
+      { id: 11, name: "Констанция Буйло", years: "1898 — 1986", field: "Партизанка, Герой Советского Союза", category: "Война", fact: "Командир женского партизанского отряда во время Великой Отечественной войны.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Konstantyja_Bujło.jpg/200px-Konstantyja_Bujło.jpg" },
+      { id: 12, name: "Павел Сухой", years: "1895 — 1975", field: "Авиаконструктор", category: "Наука", fact: "Создал знаменитые самолёты Су-2, Су-7, Су-9, основатель КБ Сухого.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Pavel_Sukhoi.jpg/200px-Pavel_Sukhoi.jpg" },
+      { id: 13, name: "Владимир Короткевич", years: "1930 — 1984", field: "Писатель-фантаст", category: "Культура", fact: "Один из основателей белорусской научной фантастики, автор «Чёрного замка Ольшанского».", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Vladimir_Korotkevich.jpg/200px-Vladimir_Korotkevich.jpg" },
+      { id: 14, name: "Рыгор Барадулин", years: "1935 — 2014", field: "Поэт, переводчик", category: "Культура", fact: "Народный поэт Беларуси, лауреат Государственной премии, переводил Шекспира и Пушкина.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Ryhor_Baradulin.jpg/200px-Ryhor_Baradulin.jpg" },
+      { id: 15, name: "Василий Быков", years: "1924 — 2003", field: "Писатель, фронтовик", category: "Культура", fact: "Автор произведений о войне, лауреат Государственной премии СССР.", image: "images/bykov.jpg" },
+      { id: 16, name: "Светлана Алексиевич", years: "род. 1948", field: "Писательница, журналистка", category: "Культура", fact: "Лауреат Нобелевской премии по литературе 2015 года за документальную прозу.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Svetlana_Alexievich_2013.jpg/200px-Svetlana_Alexievich_2013.jpg" },
+      { id: 17, name: "Виктор Гончаренко", years: "род. 1977", field: "Футбольный тренер", category: "Спорт", fact: "Тренер сборной Беларуси по футболу, работал с ведущими европейскими клубами.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Viktor_Goncharenko_2018.jpg/200px-Viktor_Goncharenko_2018.jpg" },
+      { id: 18, name: "Мария Игнатенко", years: "1929 — 1943", field: "Партизанка, пионер-герой", category: "Война", fact: "Юная партизанка, казнённая фашистами, символ мужества белорусских детей.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Maria_Ignatenko.jpg/200px-Maria_Ignatenko.jpg" },
+      { id: 19, name: "Иван Мележ", years: "1921 — 1976", field: "Писатель", category: "Культура", fact: "Автор трилогии «Полесская хроника», классик белорусской литературы.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Ivan_Melezh.jpg/200px-Ivan_Melezh.jpg" },
+      { id: 20, name: "Александр Лукашенко", years: "род. 1954", field: "Президент Республики Беларусь", category: "Политика", fact: "Первый и единственный Президент Республики Беларусь с 1994 года.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Alexander_Lukashenko_2020.jpg/200px-Alexander_Lukashenko_2020.jpg" }
     ];
 
+    // Facts data
     this.facts = [
-      {"id": 1, "name": "Франциск Скорина", "fact": "Первый белорусский книгопечатник издал «Псалтыр» в Праге в 1517 году."},
-      {"id": 2, "name": "Кастусь Калиновский", "fact": "Его письма «Мужыцкая праўда» стали символом борьбы за свободу."},
-      {"id": 3, "name": "Янка Купала", "fact": "Настоящее имя — Иван Луцевич."},
-      {"id": 4, "name": "Якуб Колас", "fact": "Псевдоним означает «Колос» — символ родной земли."},
-      {"id": 5, "name": "Максим Богданович", "fact": "Умер в возрасте 25 лет, но успел изменить белорусскую литературу навсегда."},
-      {"id": 6, "name": "Ефросинья Полоцкая", "fact": "Основала Спасо-Преображенский монастырь и Крестовоздвиженскую церковь в Полоцке."},
-      {"id": 7, "name": "Симеон Полоцкий", "fact": "Написал первую русскую пьесу «Комедия притчи о блудном сыне»."},
-      {"id": 8, "name": "Тадеуш Костюшко", "fact": "Участвовал в Войне за независимость США, получил звание бригадного генерала."},
-      {"id": 9, "name": "Винцент Дунин-Марцинкевич", "fact": "Собрал более 2000 белорусских народных песен и опубликовал их."},
-      {"id": 10, "name": "Адам Мицкевич", "fact": "Его поэма «Пан Тадеуш» считается национальным эпосом Польши."},
-      {"id": 11, "name": "Констанция Буйло", "fact": "Её отряд уничтожил более 300 немецких солдат и офицеров."},
-      {"id": 12, "name": "Павел Сухой", "fact": "Создал первый в СССР реактивный истребитель Су-9."},
-      {"id": 13, "name": "Владимир Короткевич", "fact": "Написал более 20 книг, включая исторические романы и фантастику."},
-      {"id": 14, "name": "Рыгор Барадулин", "fact": "Перевёл на белорусский язык произведения Шекспира, Гёте и Пушкина."},
-      {"id": 15, "name": "Василий Быков", "fact": "Его произведения переведены на 40 языков мира."},
-      {"id": 16, "name": "Светлана Алексиевич", "fact": "Её книги «У войны не женское лицо» и «Последние свидетели» стали мировыми бестселлерами."},
-      {"id": 17, "name": "Виктор Гончаренко", "fact": "Привёл «Краснодар» к победе в Кубке России в 2019 году."},
-      {"id": 18, "name": "Мария Игнатенко", "fact": "Стала символом белорусского сопротивления, её именем названы улицы и школы."},
-      {"id": 19, "name": "Иван Мележ", "fact": "Трилогия «Полесская хроника» переведена на многие языки."},
-      {"id": 20, "name": "Александр Лукашенко", "fact": "Под его руководством Беларусь стала членом ООН и других международных организаций."}
+      { id: 1, name: "Франциск Скорина", fact: "Первый белорусский книгопечатник издал «Псалтыр» в Праге в 1517 году." },
+      { id: 2, name: "Кастусь Калиновский", fact: "Его письма «Мужыцкая праўда» стали символом борьбы за свободу." },
+      { id: 3, name: "Янка Купала", fact: "Настоящее имя — Иван Луцевич." },
+      { id: 4, name: "Якуб Колас", fact: "Псевдоним означает «Колос» — символ родной земли." },
+      { id: 5, name: "Максим Богданович", fact: "Умер в возрасте 25 лет, но успел изменить белорусскую литературу навсегда." },
+      { id: 6, name: "Ефросинья Полоцкая", fact: "Основала Спасо-Преображенский монастырь и Крестовоздвиженскую церковь в Полоцке." },
+      { id: 7, name: "Симеон Полоцкий", fact: "Написал первую русскую пьесу «Комедия притчи о блудном сыне»." },
+      { id: 8, name: "Тадеуш Костюшко", fact: "Участвовал в Войне за независимость США, получил звание бригадного генерала." },
+      { id: 9, name: "Винцент Дунин-Марцинкевич", fact: "Собрал более 2000 белорусских народных песен и опубликовал их." },
+      { id: 10, name: "Адам Мицкевич", fact: "Его поэма «Пан Тадеуш» считается национальным эпосом Польши." },
+      { id: 11, name: "Констанция Буйло", fact: "Её отряд уничтожил более 300 немецких солдат и офицеров." },
+      { id: 12, name: "Павел Сухой", fact: "Создал первый в СССР реактивный истребитель Су-9." },
+      { id: 13, name: "Владимир Короткевич", fact: "Написал более 20 книг, включая исторические романы и фантастику." },
+      { id: 14, name: "Рыгор Барадулин", fact: "Перевёл на белорусский язык произведения Шекспира, Гёте и Пушкина." },
+      { id: 15, name: "Василий Быков", fact: "Его произведения переведены на 40 языков мира." },
+      { id: 16, name: "Светлана Алексиевич", fact: "Её книги «У войны не женское лицо» и «Последние свидетели» стали мировыми бестселлерами." },
+      { id: 17, name: "Виктор Гончаренко", fact: "Привёл «Краснодар» к победе в Кубке России в 2019 году." },
+      { id: 18, name: "Мария Игнатенко", fact: "Стала символом белорусского сопротивления, её именем названы улицы и школы." },
+      { id: 19, name: "Иван Мележ", fact: "Трилогия «Полесская хроника» переведена на многие языки." },
+      { id: 20, name: "Александр Лукашенко", fact: "Под его руководством Беларусь стала членом ООН и других международных организаций." }
     ];
   }
 
   setupEventListeners() {
-    console.log('🎧 Setting up event listeners...');
-
-    // Menu and modal buttons
-    this.addEvent('#menuBtn', 'click', () => this.showMenu());
-    this.addEvent('#closeMenuBtn', 'click', () => this.hideMenu());
-    this.addEvent('#closeModal', 'click', () => this.hideDetailModal());
-    this.addEvent('#closeDetailBtn', 'click', () => this.hideDetailModal());
-    this.addEvent('#closeFavoritesBtn', 'click', () => this.hideFavoritesModal());
-    this.addEvent('#closeInstructions', 'click', () => this.hideInstructions());
+    // Menu button
+    this.addEvent('#menuBtn', 'click', () => this.showModal('menuModal'));
 
     // Action buttons
     this.addEvent('#dislikeBtn', 'click', () => this.dislike());
     this.addEvent('#likeBtn', 'click', () => this.like());
     this.addEvent('#favoriteBtn', 'click', () => this.favorite());
 
-    // Menu actions
+    // Modal close buttons
+    this.addEvent('#closeModal', 'click', () => this.hideModal('detailModal'));
+    this.addEvent('#closeMenuBtn', 'click', () => this.hideModal('menuModal'));
+    this.addEvent('#closeFavoritesBtn', 'click', () => this.hideModal('favoritesModal'));
+    this.addEvent('#closeSearchBtn', 'click', () => this.hideModal('searchModal'));
+    this.addEvent('#closeStatsBtn', 'click', () => this.hideModal('statsModal'));
+    this.addEvent('#closeRandomBtn', 'click', () => this.hideModal('randomModal'));
+    this.addEvent('#closeInstructions', 'click', () => this.hideModal('instructionsModal'));
+
+    // Modal actions
+    this.addEvent('#shareDetailBtn', 'click', () => this.share());
+    this.addEvent('#closeDetailBtn', 'click', () => this.hideModal('detailModal'));
+    this.addEvent('#anotherRandomBtn', 'click', () => this.showRandomHero());
+    this.addEvent('#startExploring', 'click', () => this.hideModal('instructionsModal'));
+
+    // Menu items
     this.addEvent('#favoritesBtn', 'click', () => this.showFavorites());
     this.addEvent('#searchBtn', 'click', () => this.showSearch());
     this.addEvent('#statsBtn', 'click', () => this.showStats());
     this.addEvent('#randomBtn', 'click', () => this.showRandomHero());
     this.addEvent('#resetAppBtn', 'click', () => this.reset());
     this.addEvent('#aboutAppBtn', 'click', () => this.showAbout());
+
+    // Reset button
     this.addEvent('#resetBtn', 'click', () => this.reset());
 
-    // Share button
-    this.addEvent('#shareDetailBtn', 'click', () => this.shareCurrent());
-
-    // Modal buttons
-    this.addEvent('#closeSearchBtn', 'click', () => this.hideSearch());
-    this.addEvent('#closeStatsBtn', 'click', () => this.hideStats());
-    this.addEvent('#closeRandomBtn', 'click', () => this.hideRandom());
-    this.addEvent('#anotherRandomBtn', 'click', () => this.showRandomHero());
-    this.addEvent('#startExploring', 'click', () => this.hideInstructions());
-
-    // Modal backdrop clicks
-    this.setupModalBackdropClicks();
-
-    // Search functionality
+    // Search
     this.addEvent('#searchInput', 'input', (e) => this.performSearch(e.target.value));
 
     // Touch events
     this.setupTouchEvents();
 
-    // Keyboard navigation
-    this.setupKeyboardNavigation();
+    // Modal overlay
+    this.addEvent('#modalOverlay', 'click', () => this.hideAllModals());
   }
 
   addEvent(selector, event, handler) {
@@ -389,62 +129,16 @@ class BelarusHeroesApp {
   }
 
   setupTouchEvents() {
-    const container = document.getElementById('cardsContainer');
-    if (!container) return;
+    const stack = document.getElementById('cardsStack');
+    if (!stack) return;
 
-    // Mouse events
-    container.addEventListener('mousedown', (e) => this.handleStart(e));
+    stack.addEventListener('mousedown', (e) => this.handleStart(e));
     document.addEventListener('mousemove', (e) => this.handleMove(e));
     document.addEventListener('mouseup', (e) => this.handleEnd(e));
 
-    // Touch events
-    container.addEventListener('touchstart', (e) => this.handleStart(e), { passive: false });
+    stack.addEventListener('touchstart', (e) => this.handleStart(e), { passive: false });
     document.addEventListener('touchmove', (e) => this.handleMove(e), { passive: false });
-    document.addEventListener('touchend', (e) => this.handleEnd(e), { passive: false });
-  }
-
-  setupModalBackdropClicks() {
-    // Detail modal backdrop
-    const detailBackdrop = document.querySelector('#detailModal .modal-backdrop');
-    if (detailBackdrop) {
-      detailBackdrop.addEventListener('click', () => this.hideDetailModal());
-    }
-
-    // Menu modal backdrop
-    const menuBackdrop = document.querySelector('#menuModal .modal-backdrop');
-    if (menuBackdrop) {
-      menuBackdrop.addEventListener('click', () => this.hideMenu());
-    }
-
-    // Favorites modal backdrop
-    const favoritesBackdrop = document.querySelector('#favoritesModal .modal-backdrop');
-    if (favoritesBackdrop) {
-      favoritesBackdrop.addEventListener('click', () => this.hideFavoritesModal());
-    }
-
-    // Search modal backdrop
-    const searchBackdrop = document.querySelector('#searchModal .modal-backdrop');
-    if (searchBackdrop) {
-      searchBackdrop.addEventListener('click', () => this.hideSearch());
-    }
-
-    // Stats modal backdrop
-    const statsBackdrop = document.querySelector('#statsModal .modal-backdrop');
-    if (statsBackdrop) {
-      statsBackdrop.addEventListener('click', () => this.hideStats());
-    }
-
-    // Random modal backdrop
-    const randomBackdrop = document.querySelector('#randomModal .modal-backdrop');
-    if (randomBackdrop) {
-      randomBackdrop.addEventListener('click', () => this.hideRandom());
-    }
-
-    // Instructions modal backdrop
-    const instructionsBackdrop = document.querySelector('#instructionsModal .modal-backdrop');
-    if (instructionsBackdrop) {
-      instructionsBackdrop.addEventListener('click', () => this.hideInstructions());
-    }
+    document.addEventListener('touchend', (e) => this.handleEnd(e));
   }
 
   handleStart(e) {
@@ -454,22 +148,14 @@ class BelarusHeroesApp {
     const point = e.type.includes('mouse') ? e : e.touches[0];
     this.startX = point.clientX;
     this.startY = point.clientY;
-    this.currentX = 0;
-    this.currentY = 0;
 
     const card = this.getCurrentCard();
     if (card) {
       card.classList.add('dragging');
-      card.classList.remove('liked', 'disliked', 'favorited');
-      // Hide all indicators
-      const indicators = card.querySelectorAll('.swipe-indicator');
-      indicators.forEach(indicator => indicator.classList.remove('visible'));
+      this.showSwipeIndicators(card);
     }
 
-    // Prevent default only for touch events to avoid scroll issues
-    if (e.type.includes('touch')) {
-      e.preventDefault();
-    }
+    e.preventDefault();
   }
 
   handleMove(e) {
@@ -484,10 +170,9 @@ class BelarusHeroesApp {
       const rotate = this.currentX * 0.1;
       const scale = Math.max(0.95, 1 - Math.abs(this.currentX) * 0.001);
       card.style.transform = `translate(${this.currentX}px, ${this.currentY}px) rotate(${rotate}deg) scale(${scale})`;
-      this.updateIndicators(card);
+      this.updateSwipeIndicators(card);
     }
 
-    // Prevent default for both mouse and touch to avoid text selection and scrolling
     e.preventDefault();
   }
 
@@ -499,27 +184,22 @@ class BelarusHeroesApp {
 
     if (card) {
       card.classList.remove('dragging');
+      this.hideSwipeIndicators(card);
 
-      // Check swipe direction with improved thresholds
-      const absX = Math.abs(this.currentX);
-      const absY = Math.abs(this.currentY);
-
-      if (absY > this.verticalSwipeThreshold && absY > absX) {
-        // Vertical swipe
+      // Determine swipe direction
+      if (Math.abs(this.currentY) > this.verticalSwipeThreshold) {
         if (this.currentY < 0) {
           this.showDetails();
         } else {
           this.favorite();
         }
-      } else if (absX > this.swipeThreshold) {
-        // Horizontal swipe
+      } else if (Math.abs(this.currentX) > this.swipeThreshold) {
         if (this.currentX > 0) {
           this.dislike();
         } else {
           this.like();
         }
       } else {
-        // Not enough movement, reset card
         this.resetCard();
       }
     }
@@ -528,8 +208,12 @@ class BelarusHeroesApp {
     this.currentY = 0;
   }
 
-  updateIndicators(card) {
-    // Remove all indicator visibility
+  showSwipeIndicators(card) {
+    const indicators = card.querySelectorAll('.swipe-indicator');
+    indicators.forEach(indicator => indicator.classList.remove('visible'));
+  }
+
+  updateSwipeIndicators(card) {
     const indicators = card.querySelectorAll('.swipe-indicator');
     indicators.forEach(indicator => indicator.classList.remove('visible'));
 
@@ -548,65 +232,23 @@ class BelarusHeroesApp {
     }
   }
 
+  hideSwipeIndicators(card) {
+    const indicators = card.querySelectorAll('.swipe-indicator');
+    indicators.forEach(indicator => indicator.classList.remove('visible'));
+  }
+
   resetCard() {
     const card = this.getCurrentCard();
     if (card) {
       card.style.transform = '';
-      card.classList.remove('dragging', 'liked', 'disliked', 'favorited');
-      // Hide all indicators
-      const indicators = card.querySelectorAll('.swipe-indicator');
-      indicators.forEach(indicator => indicator.classList.remove('visible'));
     }
-  }
-
-  setupKeyboardNavigation() {
-    document.addEventListener('keydown', (e) => {
-      // Only handle keyboard events when not in input fields
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        return;
-      }
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          this.like();
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          this.dislike();
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          this.showDetails();
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          this.favorite();
-          break;
-        case ' ':
-        case 'Enter':
-          e.preventDefault();
-          this.showDetails();
-          break;
-        case 'Escape':
-          // Close any open modals
-          const openModals = document.querySelectorAll('.modal.open');
-          if (openModals.length > 0) {
-            openModals[openModals.length - 1].classList.remove('open');
-          }
-          break;
-      }
-    });
   }
 
   renderCards() {
-    const container = document.getElementById('cardsContainer');
-    if (!container) {
-      console.error('Cards container not found!');
-      return;
-    }
+    const stack = document.getElementById('cardsStack');
+    if (!stack) return;
 
-    container.innerHTML = '';
+    stack.innerHTML = '';
 
     const cardsToShow = Math.min(3, this.heroes.length - this.currentIndex);
 
@@ -614,24 +256,21 @@ class BelarusHeroesApp {
       const hero = this.heroes[this.currentIndex + i];
       const card = this.createCard(hero, i);
 
-      // Add entry animation for the top card
       if (i === 0) {
         card.classList.add('entering');
       }
 
-      container.appendChild(card);
+      stack.appendChild(card);
     }
-
-    console.log(`Rendered ${cardsToShow} cards`);
   }
 
   createCard(hero, index) {
     const card = document.createElement('div');
     card.className = 'hero-card';
     card.style.zIndex = 10 - index;
-    card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 8}px)`;
+    card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 10}px)`;
 
-    // Create image container
+    // Image container
     const imageContainer = document.createElement('div');
     imageContainer.className = 'hero-image-container';
 
@@ -641,12 +280,12 @@ class BelarusHeroesApp {
     img.alt = hero.name;
     img.loading = 'lazy';
     img.onerror = () => {
-      img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
+      img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
     };
 
     imageContainer.appendChild(img);
 
-    // Create content
+    // Content
     const content = document.createElement('div');
     content.className = 'card-content';
 
@@ -666,25 +305,25 @@ class BelarusHeroesApp {
     content.appendChild(meta);
     content.appendChild(description);
 
-    // Create swipe indicators container
+    // Swipe indicators
     const indicators = document.createElement('div');
     indicators.className = 'swipe-indicators';
 
     const likeIndicator = document.createElement('div');
     likeIndicator.className = 'swipe-indicator like';
-    likeIndicator.textContent = 'Падабаецца';
+    likeIndicator.textContent = '👍 Падабаецца';
 
     const dislikeIndicator = document.createElement('div');
     dislikeIndicator.className = 'swipe-indicator dislike';
-    dislikeIndicator.textContent = 'Прапусціць';
+    dislikeIndicator.textContent = '👎 Прапусціць';
 
     const detailIndicator = document.createElement('div');
     detailIndicator.className = 'swipe-indicator detail';
-    detailIndicator.textContent = 'Падрабязнасці';
+    detailIndicator.textContent = '📖 Падрабязнасці';
 
     const favoriteIndicator = document.createElement('div');
     favoriteIndicator.className = 'swipe-indicator favorite';
-    favoriteIndicator.textContent = 'У закладкі';
+    favoriteIndicator.textContent = '⭐ У закладкі';
 
     indicators.appendChild(likeIndicator);
     indicators.appendChild(dislikeIndicator);
@@ -699,21 +338,19 @@ class BelarusHeroesApp {
   }
 
   getCurrentCard() {
-    const container = document.getElementById('cardsContainer');
-    return container ? container.firstElementChild : null;
+    const stack = document.getElementById('cardsStack');
+    return stack ? stack.firstElementChild : null;
   }
 
   like() {
-    console.log('❤️ Like');
-    this.showSuccessFeedback('❤️');
-    this.animateCard('swipe-left');
+    this.animateCard('exiting-left');
+    this.showFeedback('❤️');
     setTimeout(() => this.nextCard(), 300);
   }
 
   dislike() {
-    console.log('👎 Dislike');
-    this.showSuccessFeedback('👎');
-    this.animateCard('swipe-right');
+    this.animateCard('exiting-right');
+    this.showFeedback('👎');
     setTimeout(() => this.nextCard(), 300);
   }
 
@@ -725,11 +362,9 @@ class BelarusHeroesApp {
     this.saveFavorites();
     this.updateFavoritesCount();
 
-    console.log('⭐ Added to favorites:', hero.name);
-    this.showSuccessFeedback('⭐');
+    this.animateCard('exiting-down');
+    this.showFeedback('⭐');
     this.showToast(`✅ ${hero.name} даданы ў закладкі`);
-
-    this.animateCard('swipe-down');
     setTimeout(() => this.nextCard(), 300);
   }
 
@@ -741,7 +376,7 @@ class BelarusHeroesApp {
 
     const card = this.getCurrentCard();
     if (card) {
-      card.classList.add('swipe-up');
+      card.classList.add('exiting-up');
       setTimeout(() => this.resetCard(), 300);
     }
   }
@@ -749,25 +384,7 @@ class BelarusHeroesApp {
   animateCard(direction) {
     const card = this.getCurrentCard();
     if (card) {
-      // Add appropriate classes for visual feedback
-      if (direction === 'swipe-left') {
-        card.classList.add('liked');
-      } else if (direction === 'swipe-right') {
-        card.classList.add('disliked');
-      } else if (direction === 'swipe-down') {
-        card.classList.add('favorited');
-      }
-
-      // Add exit animation class
-      const exitClass = direction.replace('swipe-', 'exiting-');
-      card.classList.add(exitClass);
-
-      // Remove the card after animation completes
-      setTimeout(() => {
-        if (card.parentNode) {
-          card.parentNode.removeChild(card);
-        }
-      }, 500); // Match the CSS animation duration
+      card.classList.add(direction);
     }
   }
 
@@ -794,162 +411,279 @@ class BelarusHeroesApp {
   }
 
   updateFavoritesCount() {
-    const countElement = document.getElementById('favoritesCount');
-    if (countElement) {
-      countElement.textContent = this.favorites.size;
+    const badge = document.querySelector('#favoritesBtn .badge');
+    if (badge) {
+      badge.textContent = this.favorites.size;
     }
   }
 
   showEmptyState() {
-    const empty = document.getElementById('emptyState');
-    const container = document.getElementById('cardsContainer');
-
-    if (empty) empty.classList.remove('hidden');
-    if (container) container.classList.add('hidden');
-
-    console.log('🏁 All heroes viewed!');
+    document.getElementById('emptyState').classList.remove('hidden');
+    document.getElementById('cardsStack').classList.add('hidden');
   }
 
-  // Modal functions
+  hideEmptyState() {
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('cardsStack').classList.remove('hidden');
+  }
+
+  shuffleHeroes() {
+    for (let i = this.heroes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.heroes[i], this.heroes[j]] = [this.heroes[j], this.heroes[i]];
+    }
+  }
+
+  showModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+    document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+
+  hideModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+    document.getElementById('modalOverlay').classList.add('hidden');
+  }
+
+  hideAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
+    document.getElementById('modalOverlay').classList.add('hidden');
+  }
+
   showDetailModal(hero) {
     const modal = document.getElementById('detailModal');
-    const image = document.getElementById('detailImage');
-    const name = document.getElementById('detailName');
-    const meta = document.getElementById('detailMeta');
-    const description = document.getElementById('detailDescription');
+    const image = modal.querySelector('.hero-image img');
+    const name = modal.querySelector('.hero-content h2');
+    const meta = modal.querySelector('.hero-meta');
+    const description = modal.querySelector('.hero-description');
 
-    if (modal && image && name && meta && description) {
+    if (image && name && meta && description) {
       image.src = hero.image;
       image.alt = hero.name;
       name.textContent = hero.name;
-      meta.innerHTML = `${hero.years}<br><span style="color: var(--color-gray-600);">${hero.field} • ${hero.category}</span>`;
+      meta.textContent = `${hero.years} • ${hero.field}`;
 
       const extraFact = this.getExtraFact(hero.name);
-      description.innerHTML = `
-        <p style="margin: 0; line-height: 1.6; color: var(--color-gray-700);">${hero.fact}</p>
-        ${extraFact ? `<div style="margin-top: 1.5rem; padding: 1rem; background: var(--color-gray-50); border-radius: 0.5rem; border: 1px solid var(--color-gray-200);"><strong style="color: var(--color-gray-900);">📌 Дадатковы факт:</strong><br><span style="color: var(--color-gray-700);">${extraFact.fact}</span></div>` : ''}
-      `;
-
-      modal.classList.add('open');
+      description.innerHTML = `<p>${hero.fact}</p>${extraFact ? `<div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.05); border-radius: 8px;"><strong>📌 Дадатковы факт:</strong><br>${extraFact.fact}</div>` : ''}`;
     }
-  }
 
-  hideDetailModal() {
-    const modal = document.getElementById('detailModal');
-    if (modal) modal.classList.remove('open');
-  }
-
-  showMenu() {
-    const modal = document.getElementById('menuModal');
-    if (modal) {
-      this.updateFavoritesCount();
-      modal.classList.add('open');
-    }
-  }
-
-  hideMenu() {
-    const modal = document.getElementById('menuModal');
-    if (modal) modal.classList.remove('open');
+    this.showModal('detailModal');
   }
 
   showFavorites() {
-    this.hideMenu();
+    this.hideModal('menuModal');
+
     const modal = document.getElementById('favoritesModal');
-    const list = document.getElementById('favoritesList');
-    const empty = document.getElementById('emptyFavorites');
-
-    if (modal && list && empty) {
-      this.renderFavorites();
-
-      if (this.favorites.size === 0) {
-        list.classList.add('hidden');
-        empty.classList.remove('hidden');
-      } else {
-        list.classList.remove('hidden');
-        empty.classList.add('hidden');
-      }
-
-      modal.classList.add('open');
-    }
-  }
-
-  hideFavoritesModal() {
-    const modal = document.getElementById('favoritesModal');
-    if (modal) modal.classList.remove('open');
-  }
-
-  renderFavorites() {
-    const list = document.getElementById('favoritesList');
-    if (!list) return;
+    const list = modal.querySelector('.favorites-list');
+    const empty = modal.querySelector('.empty-favorites');
 
     list.innerHTML = '';
 
-    this.favorites.forEach(heroId => {
-      const hero = this.heroes.find(h => h.id === heroId);
-      if (hero) {
-        const item = document.createElement('div');
-        item.className = 'favorite-item';
+    if (this.favorites.size === 0) {
+      list.classList.add('hidden');
+      empty.classList.remove('hidden');
+    } else {
+      list.classList.remove('hidden');
+      empty.classList.add('hidden');
 
-        const img = document.createElement('img');
-        img.className = 'favorite-image';
-        img.src = hero.image;
-        img.alt = hero.name;
-        img.onerror = () => {
-          img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
-        };
+      this.favorites.forEach(heroId => {
+        const hero = this.heroes.find(h => h.id === heroId);
+        if (hero) {
+          const item = document.createElement('div');
+          item.className = 'favorite-item';
 
-        const info = document.createElement('div');
-        info.className = 'favorite-info';
-        info.innerHTML = `
-          <div class="favorite-name">${hero.name}</div>
-          <div class="favorite-meta">${hero.years} • ${hero.field}</div>
-        `;
+          const img = document.createElement('img');
+          img.className = 'favorite-image';
+          img.src = hero.image;
+          img.alt = hero.name;
+          img.onerror = () => {
+            img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
+          };
 
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-favorite';
-        removeBtn.innerHTML = '✕';
-        removeBtn.onclick = () => this.removeFavorite(hero.id);
+          const info = document.createElement('div');
+          info.className = 'favorite-info';
+          info.innerHTML = `
+            <div class="favorite-name">${hero.name}</div>
+            <div class="favorite-meta">${hero.years} • ${hero.field}</div>
+          `;
 
-        item.appendChild(img);
-        item.appendChild(info);
-        item.appendChild(removeBtn);
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'remove-favorite';
+          removeBtn.textContent = '✕';
+          removeBtn.onclick = () => this.removeFavorite(hero.id);
 
-        item.addEventListener('click', (e) => {
-          if (!e.target.classList.contains('remove-favorite')) {
-            this.showDetailModal(hero);
-            this.hideFavoritesModal();
-          }
-        });
+          item.appendChild(img);
+          item.appendChild(info);
+          item.appendChild(removeBtn);
 
-        list.appendChild(item);
-      }
-    });
+          item.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('remove-favorite')) {
+              this.showDetailModal(hero);
+              this.hideModal('favoritesModal');
+            }
+          });
+
+          list.appendChild(item);
+        }
+      });
+    }
+
+    this.showModal('favoritesModal');
   }
 
   removeFavorite(heroId) {
     this.favorites.delete(heroId);
     this.saveFavorites();
     this.updateFavoritesCount();
-    this.renderFavorites();
+    this.showFavorites();
     this.showToast('🗑️ Выдалена з закладак');
   }
 
-  showInstructions() {
-    const modal = document.getElementById('instructionsModal');
-    if (modal) modal.classList.add('open');
+  showSearch() {
+    this.hideModal('menuModal');
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+    this.showModal('searchModal');
+    document.getElementById('searchInput').focus();
   }
 
-  hideInstructions() {
-    const modal = document.getElementById('instructionsModal');
-    if (modal) modal.classList.remove('open');
+  performSearch(query) {
+    const results = document.getElementById('searchResults');
+    if (!results) return;
+
+    if (query.length < 2) {
+      results.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: 20px;">Пачніце ўводзіць імя героя...</p>';
+      return;
+    }
+
+    const filtered = this.heroes.filter(hero =>
+      hero.name.toLowerCase().includes(query.toLowerCase()) ||
+      hero.field.toLowerCase().includes(query.toLowerCase())
+    );
+
+    if (filtered.length === 0) {
+      results.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: 20px;">Героі не знойдзены</p>';
+      return;
+    }
+
+    results.innerHTML = '';
+    filtered.forEach(hero => {
+      const item = document.createElement('div');
+      item.style.cssText = `
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: var(--gray-50);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      `;
+
+      const img = document.createElement('img');
+      img.src = hero.image;
+      img.alt = hero.name;
+      img.style.cssText = 'width: 40px; height: 40px; border-radius: 8px; margin-right: 12px; object-fit: cover;';
+      img.onerror = () => {
+        img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
+      };
+
+      const info = document.createElement('div');
+      info.innerHTML = `
+        <div style="font-weight: 600; color: var(--gray-900); margin-bottom: 4px;">${hero.name}</div>
+        <div style="font-size: 14px; color: var(--gray-600);">${hero.years} • ${hero.field}</div>
+      `;
+
+      item.appendChild(img);
+      item.appendChild(info);
+
+      item.addEventListener('click', () => {
+        this.showDetailModal(hero);
+        this.hideModal('searchModal');
+      });
+
+      results.appendChild(item);
+    });
+  }
+
+  showStats() {
+    this.hideModal('menuModal');
+
+    const content = document.querySelector('#statsModal .modal-body');
+    const totalHeroes = this.heroes.length;
+    const viewedHeroes = this.currentIndex;
+    const favoriteCount = this.favorites.size;
+    const categories = {};
+
+    this.heroes.forEach(hero => {
+      categories[hero.category] = (categories[hero.category] || 0) + 1;
+    });
+
+    content.innerHTML = `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+        <h2>Ваша статыстыка</h2>
+      </div>
+
+      <div style="display: grid; gap: 16px; margin-bottom: 32px;">
+        <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; text-align: center; border: 1px solid var(--gray-200);">
+          <div style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">${viewedHeroes}</div>
+          <div style="color: var(--gray-600);">Прагледжана герояў</div>
+        </div>
+
+        <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; text-align: center; border: 1px solid var(--gray-200);">
+          <div style="font-size: 24px; font-weight: 700; color: var(--warning); margin-bottom: 8px;">${favoriteCount}</div>
+          <div style="color: var(--gray-600);">У закладках</div>
+        </div>
+
+        <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; text-align: center; border: 1px solid var(--gray-200);">
+          <div style="font-size: 24px; font-weight: 700; color: var(--secondary); margin-bottom: 8px;">${totalHeroes}</div>
+          <div style="color: var(--gray-600);">Усяго герояў</div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom: 16px; color: var(--gray-900);">Героі па катэгорыях:</h3>
+        ${Object.entries(categories).map(([category, count]) =>
+          `<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-200);">
+            <span style="color: var(--gray-700);">${category}</span>
+            <span style="font-weight: 600; color: var(--gray-900);">${count}</span>
+          </div>`
+        ).join('')}
+      </div>
+    `;
+
+    this.showModal('statsModal');
+  }
+
+  showRandomHero() {
+    this.hideModal('menuModal');
+
+    const randomHero = this.heroes[Math.floor(Math.random() * this.heroes.length)];
+    const content = document.querySelector('#randomModal .modal-body');
+
+    content.innerHTML = `
+      <div style="text-align: center;">
+        <div style="width: 120px; height: 120px; margin: 0 auto 16px; border-radius: 16px; overflow: hidden; background: var(--gray-100);">
+          <img src="${randomHero.image}" alt="${randomHero.name}"
+                style="width: 100%; height: 100%; object-fit: cover;"
+                onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${randomHero.name}</text></svg>'">
+        </div>
+        <h2 style="margin-bottom: 8px;">${randomHero.name}</h2>
+        <div style="color: var(--gray-600); margin-bottom: 16px;">${randomHero.years} • ${randomHero.field}</div>
+        <p style="line-height: 1.6; color: var(--gray-700); margin: 0;">${randomHero.fact}</p>
+      </div>
+    `;
+
+    this.showModal('randomModal');
   }
 
   showAbout() {
-    this.hideMenu();
+    this.hideModal('menuModal');
+
     const aboutHero = {
       id: 'about',
       name: 'Аб праекце',
-      image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007aff"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">🇧🇾</text></svg>',
+      image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23c8102e"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">🇧🇾</text></svg>',
       years: '2024',
       field: 'Гісторыя і культура',
       category: 'Адукацыя',
@@ -959,32 +693,21 @@ class BelarusHeroesApp {
     this.showDetailModal(aboutHero);
   }
 
+  showInstructions() {
+    if (localStorage.getItem('instructionsShown')) return;
+
+    this.showModal('instructionsModal');
+    localStorage.setItem('instructionsShown', 'true');
+  }
+
   reset() {
     this.currentIndex = 0;
     this.shuffleHeroes();
-    this.hideMenu();
-    this.hideFavoritesModal();
-    this.hideDetailModal();
+    this.hideAllModals();
     this.hideEmptyState();
     this.renderCards();
     this.updateProgress();
     this.showToast('🔀 Героі перамешаны! Пачалі нанова!');
-  }
-
-  hideEmptyState() {
-    const empty = document.getElementById('emptyState');
-    const container = document.getElementById('cardsContainer');
-    if (empty) empty.classList.add('hidden');
-    if (container) container.classList.remove('hidden');
-  }
-
-  shuffleHeroes() {
-    // Fisher-Yates shuffle algorithm
-    for (let i = this.heroes.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [this.heroes[i], this.heroes[j]] = [this.heroes[j], this.heroes[i]];
-    }
-    console.log('🔀 Heroes shuffled randomly for new experience');
   }
 
   getExtraFact(heroName) {
@@ -993,26 +716,12 @@ class BelarusHeroesApp {
     return heroFacts.length > 0 ? heroFacts[Math.floor(Math.random() * heroFacts.length)] : null;
   }
 
-  shareCurrent() {
-    const modal = document.getElementById('detailModal');
-    const heroId = modal?.dataset.currentHero;
-    const hero = this.heroes.find(h => h.id == heroId);
-
+  share() {
+    const hero = this.heroes[this.currentIndex];
     if (!hero) return;
 
     const text = `🇧🇾 ${hero.name}\n${hero.years}\n${hero.fact}\n\n#ГероіБеларусі`;
 
-    // Use Telegram Web App sharing if available
-    if (this.telegramWebApp) {
-      try {
-        this.telegramWebApp.openLink(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`);
-        return;
-      } catch (e) {
-        console.warn('Telegram sharing failed, falling back to clipboard');
-      }
-    }
-
-    // Fallback to Web Share API or clipboard
     if (navigator.share) {
       navigator.share({ title: 'Герой Беларусі', text }).catch(() => {
         this.copyToClipboard(text);
@@ -1029,207 +738,10 @@ class BelarusHeroesApp {
     );
   }
 
-  loadFavorites() {
-    try {
-      const saved = localStorage.getItem('belarusHeroesFavorites');
-      if (saved) {
-        this.favorites = new Set(JSON.parse(saved));
-        console.log(`⭐ Loaded ${this.favorites.size} favorites`);
-      }
-    } catch (e) {
-      console.warn('Failed to load favorites:', e);
-    }
-  }
-
-  saveFavorites() {
-    try {
-      localStorage.setItem('belarusHeroesFavorites', JSON.stringify([...this.favorites]));
-    } catch (e) {
-      console.warn('Failed to save favorites:', e);
-    }
-  }
-
-  // New Features
-  showSearch() {
-    this.hideMenu();
-    const modal = document.getElementById('searchModal');
-    const input = document.getElementById('searchInput');
-    const results = document.getElementById('searchResults');
-
-    if (modal && input && results) {
-      input.value = '';
-      results.innerHTML = '<p style="text-align: center; color: var(--color-gray-500); padding: 20px;">Пачніце ўводзіць імя героя...</p>';
-      modal.classList.add('open');
-      input.focus();
-    }
-  }
-
-  hideSearch() {
-    const modal = document.getElementById('searchModal');
-    if (modal) modal.classList.remove('open');
-  }
-
-  performSearch(query) {
-    const results = document.getElementById('searchResults');
-    if (!results) return;
-
-    if (query.length < 2) {
-      results.innerHTML = '<p style="text-align: center; color: var(--color-gray-500); padding: 1.25rem;">Пачніце ўводзіць імя героя...</p>';
-      return;
-    }
-
-    const filtered = this.heroes.filter(hero =>
-      hero.name.toLowerCase().includes(query.toLowerCase()) ||
-      hero.field.toLowerCase().includes(query.toLowerCase())
-    );
-
-    if (filtered.length === 0) {
-      results.innerHTML = '<p style="text-align: center; color: var(--color-gray-500); padding: 1.25rem;">Героі не знойдзены</p>';
-      return;
-    }
-
-    results.innerHTML = '';
-    filtered.forEach(hero => {
-      const item = document.createElement('div');
-      item.className = 'search-result-item';
-      item.style.cssText = `
-        display: flex;
-        align-items: center;
-        padding: 0.75rem;
-        margin-bottom: 0.5rem;
-        background: var(--color-gray-50);
-        border: 1px solid var(--color-gray-200);
-        border-radius: 0.5rem;
-        cursor: pointer;
-        transition: var(--transition-fast);
-      `;
-
-      const img = document.createElement('img');
-      img.src = hero.image;
-      img.alt = hero.name;
-      img.style.cssText = 'width: 2.5rem; height: 2.5rem; border-radius: 0.375rem; margin-right: 0.75rem; object-fit: cover; border: 1px solid var(--color-gray-200);';
-      img.onerror = () => {
-        img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
-      };
-
-      const info = document.createElement('div');
-      info.innerHTML = `
-        <div style="font-weight: 600; color: var(--color-gray-900); margin-bottom: 0.125rem;">${hero.name}</div>
-        <div style="font-size: 0.75rem; color: var(--color-gray-600);">${hero.years} • ${hero.field}</div>
-      `;
-
-      item.appendChild(img);
-      item.appendChild(info);
-
-      item.addEventListener('click', () => {
-        this.showDetailModal(hero);
-        this.hideSearch();
-      });
-
-      results.appendChild(item);
-    });
-  }
-
-  showStats() {
-    this.hideMenu();
-    const modal = document.getElementById('statsModal');
-    const content = document.getElementById('statsContent');
-
-    if (modal && content) {
-      const totalHeroes = this.heroes.length;
-      const viewedHeroes = this.currentIndex;
-      const favoriteCount = this.favorites.size;
-      const categories = {};
-
-      this.heroes.forEach(hero => {
-        categories[hero.category] = (categories[hero.category] || 0) + 1;
-      });
-
-      content.innerHTML = `
-        <div style="text-align: center; margin-bottom: 2rem;">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem;">📊</div>
-          <h3 style="margin: 0;">Ваша статыстыка</h3>
-        </div>
-
-        <div style="display: grid; gap: 1rem; margin-bottom: 2rem;">
-          <div style="background: var(--color-gray-50); padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--color-gray-200);">
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.25rem;">${viewedHeroes}</div>
-            <div style="color: var(--color-gray-600); font-size: 0.875rem;">Прагледжана герояў</div>
-          </div>
-
-          <div style="background: var(--color-gray-50); padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--color-gray-200);">
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-warning); margin-bottom: 0.25rem;">${favoriteCount}</div>
-            <div style="color: var(--color-gray-600); font-size: 0.875rem;">У закладках</div>
-          </div>
-
-          <div style="background: var(--color-gray-50); padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--color-gray-200);">
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-secondary); margin-bottom: 0.25rem;">${totalHeroes}</div>
-            <div style="color: var(--color-gray-600); font-size: 0.875rem;">Усяго герояў</div>
-          </div>
-        </div>
-
-        <div>
-          <h4 style="margin-bottom: 1rem; color: var(--color-gray-900);">Героі па катэгорыях:</h4>
-          ${Object.entries(categories).map(([category, count]) =>
-            `<div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-gray-200);">
-              <span style="color: var(--color-gray-700);">${category}</span>
-              <span style="font-weight: 600; color: var(--color-gray-900);">${count}</span>
-            </div>`
-          ).join('')}
-        </div>
-      `;
-
-      modal.classList.add('open');
-    }
-  }
-
-  hideStats() {
-    const modal = document.getElementById('statsModal');
-    if (modal) modal.classList.remove('open');
-  }
-
-  showRandomHero() {
-    this.hideMenu();
-    const modal = document.getElementById('randomModal');
-    const content = document.getElementById('randomHeroContent');
-
-    if (modal && content) {
-      const randomHero = this.heroes[Math.floor(Math.random() * this.heroes.length)];
-
-      content.innerHTML = `
-        <div style="text-align: center;">
-          <div style="width: 8rem; height: 8rem; margin: 0 auto 1rem; border-radius: 0.75rem; overflow: hidden; background: var(--color-gray-100); border: 1px solid var(--color-gray-200);">
-            <img src="${randomHero.image}" alt="${randomHero.name}"
-                 style="width: 100%; height: 100%; object-fit: cover;"
-                 onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${randomHero.name}</text></svg>'">
-          </div>
-          <h3 style="margin-bottom: 0.5rem; color: var(--color-gray-900);">${randomHero.name}</h3>
-          <div style="color: var(--color-gray-600); margin-bottom: 1rem; font-size: 0.875rem;">${randomHero.years} • ${randomHero.field}</div>
-          <p style="line-height: 1.6; color: var(--color-gray-700); margin: 0;">${randomHero.fact}</p>
-        </div>
-      `;
-
-      modal.classList.add('open');
-    }
-  }
-
-  hideRandom() {
-    const modal = document.getElementById('randomModal');
-    if (modal) modal.classList.remove('open');
-  }
-
-  showSuccessFeedback(icon) {
+  showFeedback(icon) {
     const feedback = document.createElement('div');
     feedback.className = 'success-feedback';
-
-    const iconElement = document.createElement('div');
-    iconElement.style.cssText = `
-      font-size: 3rem;
-      animation: pulse 0.6s ease-out;
-    `;
-    iconElement.textContent = icon;
-
-    feedback.appendChild(iconElement);
+    feedback.textContent = icon;
     document.body.appendChild(feedback);
 
     setTimeout(() => {
@@ -1254,14 +766,28 @@ class BelarusHeroesApp {
       }, 300);
     }, duration);
   }
+
+  loadFavorites() {
+    try {
+      const saved = localStorage.getItem('belarusHeroesFavorites');
+      if (saved) {
+        this.favorites = new Set(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.warn('Failed to load favorites:', e);
+    }
+  }
+
+  saveFavorites() {
+    try {
+      localStorage.setItem('belarusHeroesFavorites', JSON.stringify([...this.favorites]));
+    } catch (e) {
+      console.warn('Failed to save favorites:', e);
+    }
+  }
 }
 
-
 // Initialize app
-let app;
 document.addEventListener('DOMContentLoaded', () => {
-  app = new BelarusHeroesApp();
+  window.app = new BelarusHeroesApp();
 });
-
-// Make app globally available
-window.app = app;
