@@ -19,6 +19,9 @@ class BelarusHeroesApp {
   init() {
     console.log('🚀 Initializing Belarus Heroes App...');
 
+    // Initialize Telegram Web App if available
+    this.initTelegramWebApp();
+
     // Load data immediately
     this.loadData();
 
@@ -40,6 +43,82 @@ class BelarusHeroesApp {
     }
 
     console.log('✅ App initialized with', this.heroes.length, 'heroes (shuffled randomly)');
+  }
+
+  initTelegramWebApp() {
+    // Check if running in Telegram Web App
+    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+      console.log('📱 Running in Telegram Web App');
+
+      this.telegramWebApp = Telegram.WebApp;
+
+      // Mark as Telegram Web App for CSS
+      document.body.classList.add('telegram-webapp');
+
+      // Set Telegram theme colors if available
+      this.applyTelegramTheme();
+
+      // Handle viewport changes
+      this.telegramWebApp.onEvent('viewportChanged', () => {
+        this.handleViewportChange();
+      });
+
+      // Expand to full height
+      this.telegramWebApp.expand();
+
+      // Enable closing confirmation
+      this.telegramWebApp.enableClosingConfirmation();
+
+      // Set app header color
+      this.telegramWebApp.setHeaderColor('#000000');
+
+      // Handle back button
+      this.telegramWebApp.onEvent('backButtonClicked', () => {
+        // Close any open modals first
+        const openModals = document.querySelectorAll('.modal:not(.hidden)');
+        if (openModals.length > 0) {
+          openModals.forEach(modal => modal.classList.add('hidden'));
+          return;
+        }
+        // If no modals open, show menu
+        this.showMenu();
+      });
+
+      // Show back button
+      this.telegramWebApp.BackButton.show();
+
+      console.log('✅ Telegram Web App initialized');
+    } else {
+      console.log('🌐 Running in regular browser');
+    }
+  }
+
+  applyTelegramTheme() {
+    if (!this.telegramWebApp) return;
+
+    const theme = this.telegramWebApp.themeParams;
+    if (theme) {
+      // Apply Telegram theme colors to CSS variables
+      const root = document.documentElement;
+      if (theme.bg_color) root.style.setProperty('--bg-primary', theme.bg_color);
+      if (theme.secondary_bg_color) root.style.setProperty('--bg-secondary', theme.secondary_bg_color);
+      if (theme.text_color) root.style.setProperty('--text-primary', theme.text_color);
+      if (theme.hint_color) root.style.setProperty('--text-tertiary', theme.hint_color);
+      if (theme.link_color) root.style.setProperty('--accent-primary', theme.link_color);
+
+      console.log('🎨 Applied Telegram theme colors');
+    }
+  }
+
+  handleViewportChange() {
+    if (!this.telegramWebApp) return;
+
+    // Update viewport height for dynamic changes
+    const viewportHeight = this.telegramWebApp.viewportHeight;
+    if (viewportHeight) {
+      document.documentElement.style.setProperty('--telegram-viewport-height', `${viewportHeight}px`);
+      console.log('📐 Viewport changed to:', viewportHeight);
+    }
   }
 
   loadData() {
@@ -784,6 +863,17 @@ class BelarusHeroesApp {
 
     const text = `🇧🇾 ${hero.name}\n${hero.years}\n${hero.fact}\n\n#ГероіБеларусі`;
 
+    // Use Telegram Web App sharing if available
+    if (this.telegramWebApp) {
+      try {
+        this.telegramWebApp.openLink(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`);
+        return;
+      } catch (e) {
+        console.warn('Telegram sharing failed, falling back to clipboard');
+      }
+    }
+
+    // Fallback to Web Share API or clipboard
     if (navigator.share) {
       navigator.share({ title: 'Герой Беларусі', text }).catch(() => {
         this.copyToClipboard(text);

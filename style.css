@@ -1,26 +1,80 @@
 /* === TINDER-STYLE SWIPE INTERFACE - FIXED === */
 :root {
-  --bg-primary: #000000;
-  --bg-secondary: rgba(255, 255, 255, 0.08);
-  --bg-tertiary: rgba(255, 255, 255, 0.12);
-  --glass-bg: rgba(255, 255, 255, 0.15);
-  --glass-border: rgba(255, 255, 255, 0.20);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  --accent-primary: #007AFF;
-  --accent-secondary: #5856D6;
-  --accent-success: #34C759;
-  --accent-danger: #FF3B30;
-  --accent-warning: #FF9500;
-  --accent-gradient: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-  --text-primary: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-tertiary: rgba(255, 255, 255, 0.6);
+  /* === MINIMALIST DESIGN SYSTEM === */
+  /* Clean, elegant, and focused */
   
-  --card-radius: 24px;
-  --glass-blur: 20px;
-  --transition-smooth: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --transition-swipe: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Fluid sizing based on viewport */
+  --min-vw: 320px;
+  --max-vw: 1920px;
+  
+  /* Elegant spacing scale */
+  --space-xs: clamp(6px, 1.5vw, 10px);
+  --space-sm: clamp(12px, 3vw, 18px);
+  --space-md: clamp(18px, 4.5vw, 28px);
+  --space-lg: clamp(24px, 6vw, 36px);
+  --space-xl: clamp(32px, 8vw, 48px);
+  --space-2xl: clamp(40px, 10vw, 60px);
+  --space-3xl: clamp(48px, 12vw, 72px);
+  
+  /* Clean typography */
+  --text-xs: clamp(11px, 2.8vw, 13px);
+  --text-sm: clamp(13px, 3.3vw, 15px);
+  --text-base: clamp(15px, 3.8vw, 17px);
+  --text-lg: clamp(17px, 4.3vw, 19px);
+  --text-xl: clamp(19px, 4.8vw, 22px);
+  --text-2xl: clamp(22px, 5.5vw, 26px);
+  --text-3xl: clamp(26px, 6.5vw, 30px);
+  
+  /* Minimal component sizes */
+  --header-height: clamp(60px, 14vh, 84px);
+  --card-width: clamp(300px, 88vw, 420px);
+  --card-height: clamp(380px, 68vh, 540px);
+  --button-size: clamp(48px, 11vw, 68px);
+  --modal-width: clamp(340px, 92vw, 500px);
+  --modal-height: clamp(420px, 82vh, 620px);
+  
+  /* Subtle border radius */
+  --radius-sm: clamp(6px, 1.5vw, 10px);
+  --radius-md: clamp(10px, 2.5vw, 14px);
+  --radius-lg: clamp(14px, 3.5vw, 18px);
+  --radius-xl: clamp(18px, 4.5vw, 24px);
+  
+  /* Minimalist color palette */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8F9FA;
+  --bg-tertiary: #E9ECEF;
+  --surface: #FFFFFF;
+  --surface-hover: #F8F9FA;
+  --border-light: #E9ECEF;
+  --border-medium: #DEE2E6;
+  --text-primary: #212529;
+  --text-secondary: #6C757D;
+  --text-tertiary: #ADB5BD;
+  --accent-primary: #6C5CE7;
+  --accent-secondary: #A29BFE;
+  --accent-success: #00B894;
+  --accent-danger: #FF7675;
+  --accent-warning: #FDCB6E;
+  
+  /* Elegant transitions */
+  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-swipe: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Subtle effects */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.18);
+  --blur-subtle: 8px;
+
+  /* Telegram Mini-App Safe Areas */
+  --telegram-top-safe-area: env(safe-area-inset-top, 0px);
+  --telegram-bottom-safe-area: env(safe-area-inset-bottom, 0px);
+  --telegram-left-safe-area: env(safe-area-inset-left, 0px);
+  --telegram-right-safe-area: env(safe-area-inset-right, 0px);
+  --telegram-top-bar-height: 56px;
 }
 
 * {
@@ -33,15 +87,21 @@
 }
 
 html, body {
-  height: 100%;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
   margin: 0;
   padding: 0;
+  /* Telegram Mini-App specific */
+  padding-top: max(var(--telegram-top-safe-area), var(--telegram-top-bar-height));
+  padding-bottom: var(--telegram-bottom-safe-area);
+  padding-left: var(--telegram-left-safe-area);
+  padding-right: var(--telegram-right-safe-area);
 }
 
 body {
-  background: var(--bg-primary);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -49,47 +109,34 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: clamp(16px, 5vh, 32px) clamp(20px, 8vw, 40px);
+  min-height: calc(100vh - var(--telegram-top-bar-height) - var(--telegram-top-safe-area) - var(--telegram-bottom-safe-area));
+  min-height: calc(100dvh - var(--telegram-top-bar-height) - var(--telegram-top-safe-area) - var(--telegram-bottom-safe-area));
+  padding: var(--space-lg) var(--space-xl);
   box-sizing: border-box;
+  /* Ensure content doesn't go under Telegram's UI */
+  max-height: calc(100vh - var(--telegram-top-bar-height) - var(--telegram-top-safe-area) - var(--telegram-bottom-safe-area));
+  max-height: calc(100dvh - var(--telegram-top-bar-height) - var(--telegram-top-safe-area) - var(--telegram-bottom-safe-area));
+  /* Clean typography */
+  font-size: var(--text-base);
+  line-height: 1.6;
+  font-weight: 400;
 }
 
-/* Liquid Background */
-.liquid-background {
+/* Minimalist Background */
+.minimalist-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 149, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(52, 199, 89, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 60% 10%, rgba(0, 122, 255, 0.06) 0%, transparent 40%);
-  animation: liquidFlow 25s ease-in-out infinite, liquidPulse 8s ease-in-out infinite;
+    radial-gradient(circle at 30% 20%, rgba(108, 92, 231, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(0, 184, 148, 0.02) 0%, transparent 50%);
   z-index: -1;
+  animation: subtlePulse 20s ease-in-out infinite;
 }
 
-@keyframes liquidFlow {
-  0%, 100% {
-    transform: scale(1) rotate(0deg);
-    filter: hue-rotate(0deg);
-  }
-  25% {
-    transform: scale(1.05) rotate(90deg);
-    filter: hue-rotate(15deg);
-  }
-  50% {
-    transform: scale(1.1) rotate(180deg);
-    filter: hue-rotate(30deg);
-  }
-  75% {
-    transform: scale(1.05) rotate(270deg);
-    filter: hue-rotate(15deg);
-  }
-}
-
-@keyframes liquidPulse {
+@keyframes subtlePulse {
   0%, 100% { opacity: 0.8; }
   50% { opacity: 1; }
 }
@@ -128,70 +175,69 @@ body {
   left: 100%;
 }
 
-/* App Container */
+/* App Container - Minimalist Design */
 .app-container {
   width: 100%;
   min-height: 100vh;
-  max-width: 520px;
+  max-width: clamp(340px, 95vw, 620px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: clamp(24px, 6vh, 40px) clamp(24px, 6vw, 32px);
+  padding: var(--space-2xl) var(--space-xl);
   box-sizing: border-box;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  border: 1px solid var(--glass-border);
-  border-radius: 32px;
-  box-shadow:
-    var(--glass-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  /* Clean and minimal */
+  border: 1px solid var(--border-light);
+  container-type: inline-size;
 }
 
-/* Header */
+/* Header - Minimalist Design */
 .header {
-  margin: clamp(20px, 5vh, 32px) 0 clamp(24px, 4vh, 36px);
-  border-radius: 28px;
+  margin: var(--space-xl) 0 var(--space-2xl);
   padding: 0;
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    var(--glass-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  container-type: inline-size;
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(16px, 4vw, 20px) clamp(20px, 5vw, 24px);
+  padding: var(--space-lg) 0;
   width: 100%;
   box-sizing: border-box;
+  gap: var(--space-md);
 }
 
 .logo {
-  width: clamp(32px, 8vw, 44px);
-  height: clamp(32px, 8vw, 44px);
-  border-radius: 12px;
-  background: var(--accent-gradient);
+  width: var(--button-size);
+  height: var(--button-size);
+  border-radius: var(--radius-md);
+  background: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(14px, 4vw, 18px);
+  font-size: var(--text-lg);
   flex-shrink: 0;
+  aspect-ratio: 1;
+  color: white;
+  transition: var(--transition-smooth);
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
 }
 
 .title {
   flex: 1;
   text-align: center;
-  margin: 0 clamp(8px, 2vw, 12px);
+  margin: 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -200,81 +246,87 @@ body {
 }
 
 .title h1 {
-  font-weight: 800;
-  font-size: clamp(16px, 4.5vw, 20px);
-  letter-spacing: -0.5px;
+  font-weight: 700;
+  font-size: var(--text-xl);
+  letter-spacing: -0.3px;
   margin: 0;
   line-height: 1.2;
+  color: var(--text-primary);
 }
 
 .title p {
-  font-size: clamp(11px, 3vw, 13px);
-  color: var(--text-tertiary);
-  margin: 2px 0 0 0;
-  line-height: 1.3;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: var(--space-xs) 0 0 0;
+  line-height: 1.4;
+  font-weight: 400;
 }
 
 .icon-btn {
-  background: var(--bg-secondary);
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  background: transparent;
+  border: 1px solid var(--border-medium);
+  width: var(--button-size);
+  height: var(--button-size);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: var(--transition-smooth);
-  color: var(--text-primary);
-  font-size: 18px;
+  color: var(--text-secondary);
+  font-size: var(--text-lg);
+  aspect-ratio: 1;
 }
 
 .icon-btn:hover {
-  background: var(--bg-tertiary);
+  background: var(--surface-hover);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
   transform: scale(1.05);
 }
 
-/* Swipe Container */
+/* Swipe Container - Universal Adaptation */
 .swipe-container {
   flex: 1;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: clamp(32px, 8vh, 48px) 0 clamp(140px, 24vh, 180px);
+  margin: var(--space-3xl) 0 clamp(140px, 25vh, 200px);
   min-height: 0;
-  padding: 0 clamp(16px, 4vw, 24px);
+  padding: 0 var(--space-lg);
+  container-type: inline-size;
 }
 
-/* Cards Stack */
+/* Cards Stack - Universal Adaptation */
 .cards-stack {
   position: relative;
   width: 100%;
-  height: clamp(400px, 75vh, 540px);
-  max-width: min(380px, 95vw);
+  height: var(--card-height);
+  max-width: var(--card-width);
   perspective: 1000px;
   margin: 0 auto;
-  padding: 0 clamp(12px, 3vw, 16px);
+  padding: 0 var(--space-md);
+  aspect-ratio: 3/4;
+  container-type: inline-size;
 }
 
-/* Card Styles */
+/* Card Styles - Minimalist Design */
 .hero-card {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--card-radius);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: grab;
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease;
+  transition: var(--transition-smooth);
   transform-style: preserve-3d;
-  box-shadow:
-    var(--glass-shadow),
-    0 8px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-md);
   will-change: transform, opacity;
+  aspect-ratio: 3/4;
+  container-type: inline-size;
 }
 
 .hero-card:active {
@@ -373,40 +425,46 @@ body {
 
 .card-image {
   width: 100%;
-  height: clamp(220px, 45vh, 320px);
+  height: 60cqh; /* Container query height */
   object-fit: cover;
-  background: var(--bg-secondary);
-  border-radius: var(--card-radius) var(--card-radius) 0 0;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  aspect-ratio: 3/2;
 }
 
 .card-content {
-  padding: clamp(16px, 4vw, 24px);
+  padding: var(--space-lg);
   position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-name {
-  font-weight: 800;
-  font-size: clamp(20px, 5vw, 26px);
-  margin-bottom: clamp(6px, 1.5vw, 10px);
-  line-height: 1.2;
+  font-weight: 600;
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+  color: var(--text-primary);
 }
 
 .card-meta {
   color: var(--text-secondary);
-  font-size: clamp(12px, 3vw, 15px);
-  margin-bottom: clamp(8px, 2vw, 12px);
-  font-weight: 500;
-  line-height: 1.3;
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-md);
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .card-fact {
   color: var(--text-secondary);
-  font-size: clamp(13px, 3.5vw, 16px);
-  line-height: 1.4;
+  font-size: var(--text-base);
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
 }
 
 /* Swipe Indicators */
@@ -457,55 +515,56 @@ body {
   opacity: 1;
 }
 
-/* Action Buttons */
+/* Action Buttons - Minimalist Design */
 .actions-container {
   position: fixed;
-  bottom: clamp(32px, 6vh, 48px);
+  bottom: var(--space-2xl);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: clamp(20px, 5vw, 28px);
+  gap: var(--space-xl);
   align-items: center;
   z-index: 100;
-  padding: clamp(16px, 4vh, 20px) clamp(24px, 6vw, 32px);
+  padding: var(--space-lg);
   width: 100%;
-  max-width: 520px;
+  max-width: clamp(340px, 95vw, 620px);
   justify-content: center;
   box-sizing: border-box;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  border: 1px solid var(--glass-border);
-  border-radius: 32px;
-  box-shadow:
-    var(--glass-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  margin: 0 clamp(16px, 4vw, 24px);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  margin: 0 var(--space-lg);
+  container-type: inline-size;
 }
 
 .action-btn {
-  width: clamp(52px, 12vw, 68px);
-  height: clamp(52px, 12vw, 68px);
+  width: var(--button-size);
+  height: var(--button-size);
   border-radius: 50%;
-  border: none;
+  border: 1px solid var(--border-medium);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: var(--transition-bounce);
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  transition: var(--transition-smooth);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
+  aspect-ratio: 1;
+  container-type: inline-size;
+  color: var(--text-secondary);
 }
 
 .action-btn:hover {
-  transform: scale(1.1);
-  box-shadow:
-    0 8px 25px rgba(0, 122, 255, 0.3),
-    0 4px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-primary);
+}
+
+.action-btn:active {
+  transform: translateY(0) scale(0.98);
+  transition: var(--transition-fast);
 }
 
 .action-btn:active {
@@ -525,50 +584,50 @@ body {
 }
 
 .dislike-btn:hover {
-  background: var(--accent-danger);
-  transform: scale(1.1) rotate(-90deg);
-}
-
-.dislike-btn:hover .btn-icon {
-  transform: rotate(90deg);
+  background: rgba(255, 118, 117, 0.1);
+  color: var(--accent-danger);
+  border-color: var(--accent-danger);
 }
 
 .like-btn:hover {
-  background: var(--accent-success);
-  transform: scale(1.1) rotate(90deg);
-}
-
-.like-btn:hover .btn-icon {
-  transform: rotate(-90deg);
+  background: rgba(0, 184, 148, 0.1);
+  color: var(--accent-success);
+  border-color: var(--accent-success);
 }
 
 .favorite-btn:hover {
-  background: var(--accent-warning);
-  transform: scale(1.1);
+  background: rgba(253, 203, 110, 0.1);
+  color: var(--accent-warning);
+  border-color: var(--accent-warning);
 }
 
 .favorite-btn:hover .btn-icon {
-  transform: scale(1.2);
+  transform: scale(1.1);
+  animation: heartPulse 0.6s ease-in-out;
 }
 
-/* Progress */
+@keyframes heartPulse {
+  0%, 100% { transform: scale(1.1); }
+  50% { transform: scale(1.3); }
+}
+
+/* Progress - Universal Adaptation */
 .progress-container {
   position: fixed;
-  bottom: clamp(140px, 22vh, 170px);
+  bottom: clamp(160px, 26vh, 190px);
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(200px, 45vw, 240px);
+  width: clamp(200px, 50vw, 280px);
   text-align: center;
   z-index: 90;
-  padding: clamp(12px, 3vh, 16px) clamp(16px, 4vw, 20px);
+  padding: var(--space-md) var(--space-lg);
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  box-shadow:
-    var(--glass-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  container-type: inline-size;
 }
 
 .progress-bar {
@@ -594,27 +653,24 @@ body {
   font-weight: 600;
 }
 
-/* Empty State */
+/* Empty State - Minimalist Design */
 .empty-state {
   text-align: center;
-  padding: clamp(48px, 12vh, 88px) clamp(24px, 7vw, 44px);
-  border-radius: 32px;
-  max-width: min(360px, 95vw);
+  padding: var(--space-3xl) var(--space-2xl);
+  border-radius: var(--radius-2xl);
+  max-width: min(400px, 95vw);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: clamp(320px, 55vh, 440px);
+  min-height: var(--modal-height);
   width: 100%;
   box-sizing: border-box;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    var(--glass-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-lg);
+  container-type: inline-size;
 }
 
 .empty-icon {
@@ -669,7 +725,7 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-/* Modal Styles */
+/* Modal Styles - Minimalist Design */
 .modal {
   position: fixed;
   top: 0;
@@ -679,7 +735,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(24px, 6vw, 32px);
+  padding: var(--space-2xl);
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
@@ -698,36 +754,32 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(var(--blur-subtle));
+  -webkit-backdrop-filter: blur(var(--blur-subtle));
 }
 
 .modal-container {
   position: relative;
   width: 100%;
-  max-width: min(500px, 96vw);
-  max-height: min(92vh, 640px);
+  max-width: var(--modal-width);
+  max-height: var(--modal-height);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
-  padding: 0 clamp(12px, 3vw, 16px);
+  padding: 0 var(--space-md);
 }
 
 .modal-card {
-  border-radius: 32px;
+  border-radius: var(--radius-2xl);
   padding: 0;
   overflow: hidden;
-  transform: scale(0.9);
+  transform: scale(0.95);
   transition: var(--transition-bounce);
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    var(--glass-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xl);
+  container-type: inline-size;
 }
 
 .modal:not(.hidden) .modal-card {
@@ -1115,24 +1167,87 @@ body {
   }
 }
 
-/* Enhanced card entry animation */
+/* Beautiful Micro-Animations */
 @keyframes cardEnter {
   0% {
     opacity: 0;
-    transform: scale(0.8) translateY(50px) rotateY(15deg);
+    transform: scale(0.9) translateY(30px);
   }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.05) translateY(-10px) rotateY(-5deg);
+  60% {
+    opacity: 0.8;
+    transform: scale(1.02) translateY(-5px);
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0) rotateY(0deg);
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
   }
 }
 
 .hero-card.entering {
-  animation: cardEnter 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation: cardEnter 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.hero-card:nth-child(2) {
+  animation: fadeInUp 0.4s ease-out 0.1s both;
+}
+
+.hero-card:nth-child(3) {
+  animation: slideInRight 0.4s ease-out 0.2s both;
+}
+
+/* Subtle hover animations */
+.hero-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-smooth);
+}
+
+/* Button micro-interactions */
+.action-btn {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+.action-btn:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.action-btn:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.action-btn:nth-child(3) {
+  animation-delay: 1s;
 }
 
 /* Hidden State */
@@ -1140,8 +1255,13 @@ body {
   display: none !important;
 }
 
-/* Responsive Design - Mobile First */
-@media (max-width: 480px) {
+/* === UNIVERSAL RESPONSIVE DESIGN SYSTEM === */
+/* Comprehensive breakpoints for all devices and screen sizes */
+/* Mobile: 320px - 767px (phones, small tablets) */
+/* Tablet: 768px - 1199px (tablets, small laptops) */
+/* Desktop: 1200px+ (desktops, large screens) */
+
+@media (max-width: 767px) {
   body {
     padding: clamp(12px, 4vh, 20px) clamp(16px, 6vw, 24px);
   }
@@ -1244,7 +1364,7 @@ body {
   }
 }
 
-@media (min-width: 481px) and (max-width: 768px) {
+@media (min-width: 768px) and (max-width: 1199px) {
   body {
     padding: clamp(20px, 6vh, 28px) clamp(24px, 8vw, 32px);
   }
@@ -1299,7 +1419,7 @@ body {
   }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 1200px) and (max-width: 1919px) {
   body {
     padding: clamp(24px, 7vh, 32px) clamp(28px, 9vw, 36px);
   }
@@ -1354,7 +1474,7 @@ body {
   }
 }
 
-@media (min-width: 1025px) {
+@media (min-width: 1920px) {
   body {
     padding: clamp(28px, 8vh, 36px) clamp(32px, 10vw, 40px);
   }
@@ -1483,18 +1603,63 @@ body {
   }
 }
 
-/* Telegram Theme Adaptation */
+/* Telegram Web App API Integration */
+.telegram-webapp {
+  /* Styles applied when running in Telegram */
+  --telegram-viewport-height: 100vh;
+  --telegram-viewport-height: 100dvh;
+
+  /* Optimize for Telegram's rendering */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Telegram-specific touch optimizations */
+.telegram-webapp .hero-card {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.telegram-webapp .action-btn {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Telegram Theme Adaptation - Minimalist */
+.telegram-webapp {
+  /* Telegram already provides a clean interface */
+  --bg-primary: #ffffff;
+  --surface: #ffffff;
+}
+
+/* Light mode preferences */
 @media (prefers-color-scheme: light) {
   :root {
     --bg-primary: #FFFFFF;
-    --bg-secondary: rgba(0, 0, 0, 0.05);
-    --bg-tertiary: rgba(0, 0, 0, 0.08);
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.1);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    --text-primary: #000000;
-    --text-secondary: rgba(0, 0, 0, 0.7);
-    --text-tertiary: rgba(0, 0, 0, 0.5);
+    --bg-secondary: #F8F9FA;
+    --bg-tertiary: #E9ECEF;
+    --surface: #FFFFFF;
+    --surface-hover: #F8F9FA;
+    --border-light: #E9ECEF;
+    --border-medium: #DEE2E6;
+    --text-primary: #212529;
+    --text-secondary: #6C757D;
+    --text-tertiary: #ADB5BD;
+  }
+}
+
+/* Telegram Mini-App specific viewport handling */
+@supports (height: 100dvh) {
+  html, body {
+    height: 100dvh;
+  }
+
+  body {
+    min-height: calc(100dvh - var(--telegram-top-bar-height) - var(--telegram-top-safe-area) - var(--telegram-bottom-safe-area));
+    max-height: calc(100dvh - var(--telegram-top-bar-height) - var(--telegram-top-safe-area) - var(--telegram-bottom-safe-area));
   }
 }
 
@@ -1767,6 +1932,186 @@ body {
   .modal-container {
     padding: 0 clamp(24px, 6vw, 28px);
     max-height: min(96vh, 700px);
+  }
+}
+
+/* Ultra-small screens (very old phones) */
+@media (max-width: 319px) {
+  :root {
+    --space-xs: 2px;
+    --space-sm: 4px;
+    --space-md: 6px;
+    --space-lg: 8px;
+    --text-xs: 9px;
+    --text-sm: 10px;
+    --text-base: 11px;
+  }
+
+  .app-container {
+    padding: var(--space-md);
+  }
+
+  .logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .action-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Ultra-wide screens (4K+ displays) */
+@media (min-width: 2560px) {
+  .app-container {
+    max-width: 800px;
+  }
+
+  .cards-stack {
+    max-width: 500px;
+  }
+
+  .modal-container {
+    max-width: 600px;
+  }
+}
+
+/* Portrait orientation optimizations */
+@media (orientation: portrait) and (max-height: 600px) {
+  .header {
+    margin: var(--space-lg) 0 var(--space-xl);
+  }
+
+  .swipe-container {
+    margin: var(--space-2xl) 0 clamp(120px, 20vh, 140px);
+  }
+
+  .actions-container {
+    bottom: var(--space-lg);
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+  .header {
+    margin: var(--space-sm) 0 var(--space-md);
+  }
+
+  .swipe-container {
+    margin: var(--space-lg) 0 clamp(80px, 15vh, 100px);
+  }
+
+  .actions-container {
+    bottom: var(--space-sm);
+  }
+
+  .cards-stack {
+    height: clamp(200px, 50vh, 280px);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(0, 0, 0, 0.8);
+    --text-primary: #000000;
+    --text-secondary: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Container Queries for Component Adaptability */
+@container (max-width: 350px) {
+  .hero-card {
+    border-radius: var(--radius-lg);
+  }
+
+  .card-content {
+    padding: var(--space-md);
+  }
+
+  .card-name {
+    font-size: var(--text-xl);
+  }
+}
+
+@container (min-width: 400px) {
+  .hero-card {
+    border-radius: var(--radius-xl);
+  }
+
+  .card-content {
+    padding: var(--space-lg);
+  }
+
+  .card-name {
+    font-size: var(--text-2xl);
+  }
+}
+
+@container (max-width: 500px) {
+  .actions-container {
+    padding: var(--space-md) var(--space-lg);
+    gap: var(--space-lg);
+  }
+
+  .action-btn {
+    width: calc(var(--button-size) * 0.9);
+    height: calc(var(--button-size) * 0.9);
+  }
+}
+
+@container (min-width: 600px) {
+  .actions-container {
+    padding: var(--space-lg) var(--space-xl);
+    gap: var(--space-xl);
+  }
+
+  .action-btn {
+    width: calc(var(--button-size) * 1.1);
+    height: calc(var(--button-size) * 1.1);
+  }
+}
+
+/* Aspect ratio optimizations */
+@media (max-aspect-ratio: 9/16) {
+  /* Very tall screens (phones in portrait) */
+  .cards-stack {
+    height: clamp(350px, 60vh, 450px);
+  }
+
+  .swipe-container {
+    margin: var(--space-2xl) 0 clamp(160px, 28vh, 200px);
+  }
+}
+
+@media (min-aspect-ratio: 16/9) {
+  /* Very wide screens (ultrawide monitors) */
+  .app-container {
+    max-width: 900px;
+  }
+
+  .cards-stack {
+    max-width: 450px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: all 0.1s ease;
+    --transition-smooth: all 0.1s ease;
+    --transition-bounce: all 0.1s ease;
+    --transition-swipe: all 0.1s ease;
+  }
+
+  .hero-card.entering {
+    animation: none;
+  }
+
+  .liquid-background {
+    animation: none;
   }
 }
 
