@@ -47,32 +47,6 @@ class BelarusHeroesApp {
 
   initTelegramWebApp() {
     // Check if running in Telegram Web App
-    if (window.Telegram && window.Telegram.WebApp) {
-      this.telegramWebApp = window.Telegram.WebApp;
-
-      // Enable closing confirmation
-      this.telegramWebApp.enableClosingConfirmation();
-
-      // Set app header color
-      this.telegramWebApp.setHeaderColor('#ffffff');
-
-      // Expand to full height if needed
-      this.telegramWebApp.expand();
-
-      // Listen for viewport changes
-      this.telegramWebApp.onEvent('viewportChanged', () => {
-        // Handle viewport changes if needed
-        console.log('📐 Viewport changed');
-      });
-
-      console.log('📱 Telegram Web App detected and initialized');
-    } else {
-      console.log('💻 Running in regular browser');
-    }
-  }
-
-  initTelegramWebApp() {
-    // Check if running in Telegram Web App
     if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
       console.log('📱 Running in Telegram Web App');
 
@@ -101,9 +75,9 @@ class BelarusHeroesApp {
       // Handle back button
       this.telegramWebApp.onEvent('backButtonClicked', () => {
         // Close any open modals first
-        const openModals = document.querySelectorAll('.modal:not(.hidden)');
+        const openModals = document.querySelectorAll('.modal.open');
         if (openModals.length > 0) {
-          openModals.forEach(modal => modal.classList.add('hidden'));
+          openModals.forEach(modal => modal.classList.remove('open'));
           return;
         }
         // If no modals open, show menu
@@ -118,6 +92,7 @@ class BelarusHeroesApp {
       console.log('🌐 Running in regular browser');
     }
   }
+
 
   applyTelegramTheme() {
     if (!this.telegramWebApp) return;
@@ -1281,19 +1256,6 @@ class BelarusHeroesApp {
   }
 }
 
-// Add toast animations
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes toastIn {
-    from { opacity: 0; transform: translate(-50%, -40%); }
-    to { opacity: 1; transform: translate(-50%, -50%); }
-  }
-  @keyframes toastOut {
-    from { opacity: 1; transform: translate(-50%, -50%); }
-    to { opacity: 0; transform: translate(-50%, -60%); }
-  }
-`;
-document.head.appendChild(style);
 
 // Initialize app
 let app;
