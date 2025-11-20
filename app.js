@@ -241,6 +241,8 @@ class BelarusHeroesApp {
     const card = this.getCurrentCard();
     if (card) {
       card.style.transform = '';
+      card.classList.remove('exiting-left', 'exiting-right', 'exiting-up', 'exiting-down', 'dragging');
+      this.hideSwipeIndicators(card);
     }
   }
 
@@ -248,6 +250,18 @@ class BelarusHeroesApp {
     const stack = document.getElementById('cardsStack');
     if (!stack) return;
 
+    // Clean up any existing cards with animation classes
+    const existingCards = stack.querySelectorAll('.hero-card');
+    existingCards.forEach(card => {
+      if (card.classList.contains('exiting-left') ||
+          card.classList.contains('exiting-right') ||
+          card.classList.contains('exiting-up') ||
+          card.classList.contains('exiting-down')) {
+        card.remove();
+      }
+    });
+
+    // Clear the stack
     stack.innerHTML = '';
 
     const cardsToShow = Math.min(3, this.heroes.length - this.currentIndex);
@@ -345,13 +359,13 @@ class BelarusHeroesApp {
   like() {
     this.animateCard('exiting-left');
     this.showFeedback('❤️');
-    setTimeout(() => this.nextCard(), 300);
+    setTimeout(() => this.nextCard(), 600);
   }
 
   dislike() {
     this.animateCard('exiting-right');
     this.showFeedback('👎');
-    setTimeout(() => this.nextCard(), 300);
+    setTimeout(() => this.nextCard(), 600);
   }
 
   favorite() {
@@ -365,7 +379,7 @@ class BelarusHeroesApp {
     this.animateCard('exiting-down');
     this.showFeedback('⭐');
     this.showToast(`✅ ${hero.name} даданы ў закладкі`);
-    setTimeout(() => this.nextCard(), 300);
+    setTimeout(() => this.nextCard(), 600);
   }
 
   showDetails() {
@@ -377,7 +391,7 @@ class BelarusHeroesApp {
     const card = this.getCurrentCard();
     if (card) {
       card.classList.add('exiting-up');
-      setTimeout(() => this.resetCard(), 300);
+      setTimeout(() => this.resetCard(), 600);
     }
   }
 
@@ -395,7 +409,8 @@ class BelarusHeroesApp {
     if (this.currentIndex >= this.heroes.length) {
       this.showEmptyState();
     } else {
-      this.renderCards();
+      // Small delay to ensure animation cleanup
+      setTimeout(() => this.renderCards(), 50);
     }
   }
 
