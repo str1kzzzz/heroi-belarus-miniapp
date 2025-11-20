@@ -281,12 +281,16 @@ class BelarusHeroesApp {
   }
 
   like() {
+    if (this.currentIndex >= this.heroes.length) return;
+
     this.animateCard('exiting-left');
     this.showFeedback('❤️');
     setTimeout(() => this.nextCard(), 600);
   }
 
   dislike() {
+    if (this.currentIndex >= this.heroes.length) return;
+
     this.animateCard('exiting-right');
     this.showFeedback('👎');
     setTimeout(() => this.nextCard(), 600);
@@ -342,9 +346,11 @@ class BelarusHeroesApp {
     const text = document.getElementById('progressText');
 
     if (fill && text) {
-      const progress = (this.currentIndex / this.heroes.length) * 100;
-      fill.style.width = `${progress}%`;
-      text.textContent = `${this.currentIndex}/${this.heroes.length}`;
+      // Cap progress at 100% and currentIndex at heroes.length
+      const cappedIndex = Math.min(this.currentIndex, this.heroes.length);
+      const progress = (cappedIndex / this.heroes.length) * 100;
+      fill.style.width = `${Math.min(progress, 100)}%`;
+      text.textContent = `${cappedIndex}/${this.heroes.length}`;
     }
   }
 
@@ -358,11 +364,31 @@ class BelarusHeroesApp {
   showEmptyState() {
     document.getElementById('emptyState').classList.remove('hidden');
     document.getElementById('cardsStack').classList.add('hidden');
+    this.disableActionButtons();
   }
 
   hideEmptyState() {
     document.getElementById('emptyState').classList.add('hidden');
     document.getElementById('cardsStack').classList.remove('hidden');
+    this.enableActionButtons();
+  }
+
+  disableActionButtons() {
+    const buttons = document.querySelectorAll('.action-btn');
+    buttons.forEach(button => {
+      button.disabled = true;
+      button.style.opacity = '0.5';
+      button.style.pointerEvents = 'none';
+    });
+  }
+
+  enableActionButtons() {
+    const buttons = document.querySelectorAll('.action-btn');
+    buttons.forEach(button => {
+      button.disabled = false;
+      button.style.opacity = '';
+      button.style.pointerEvents = '';
+    });
   }
 
   shuffleHeroes() {
