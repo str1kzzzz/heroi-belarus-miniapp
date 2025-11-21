@@ -1,79 +1,107 @@
 // Belarusian Heroes App - Clean Implementation
 class BelarusHeroesApp {
   constructor() {
-    this.heroes = [];
-    this.facts = [];
-    this.favorites = new Set();
-    this.currentIndex = 0;
-    this.isSwiping = false;
-    this.startX = 0;
-    this.startY = 0;
-    this.currentX = 0;
-    this.currentY = 0;
-    this.swipeThreshold = 80;
-    this.verticalSwipeThreshold = 100;
+    // Initialize properties efficiently
+    Object.assign(this, {
+      heroes: [],
+      facts: [],
+      favorites: new Set(),
+      currentIndex: 0,
+      isSwiping: false,
+      startX: 0,
+      startY: 0,
+      currentX: 0,
+      currentY: 0,
+      swipeThreshold: 80,
+      verticalSwipeThreshold: 100,
+      searchTimeout: null,
+      performanceMarks: new Map()
+    });
 
-    this.init();
+    // Start performance monitoring
+    this.startPerformanceMonitoring();
   }
 
-  init() {
-    this.loadData();
-    this.shuffleHeroes();
-    this.loadFavorites();
-    this.setupEventListeners();
-    this.renderCards();
-    this.updateProgress();
-    this.showInstructions();
+  startPerformanceMonitoring() {
+    if ('performance' in window && 'mark' in performance) {
+      performance.mark('app-init-start');
+    }
   }
 
-  loadData() {
-    // Hero data
-    this.heroes = [
-      { id: 1, name: "Франциск Скорина", years: "ок. 1490 — ок. 1551", field: "Просветитель, первопечатник", category: "Культура", fact: "Франциск Скорина напечатал первую книгу на белорусской земле в 1517 году — «Псалтыр».", image: "images/francisk.jpg" },
-      { id: 2, name: "Кастусь Калиновский", years: "1838 — 1864", field: "Революционер, публицист", category: "История", fact: "Калиновский был одним из лидеров восстания 1863 года против Российской империи.", image: "https://upload.wikimedia.org/wikipedia/commons/1/16/Kastuś_Kalinouski.jpg" },
-      { id: 3, name: "Янка Купала", years: "1882 — 1942", field: "Поэт, драматург", category: "Культура", fact: "Янка Купала — один из основателей современной белорусской литературы.", image: "images/kupala.jpg" },
-      { id: 4, name: "Якуб Колас", years: "1882 — 1956", field: "Писатель, академик", category: "Культура", fact: "Автор эпопеи «На ростанях» и один из основателей Академии наук Беларуси.", image: "images/kolas_yakub.jpg" },
-      { id: 5, name: "Максим Богданович", years: "1891 — 1917", field: "Поэт, критик", category: "Культура", fact: "Автор стихотворения «Пагоня», ставшего символом национального духа Беларуси.", image: "images/maxim_bogdanovich.JPG" },
-      { id: 6, name: "Ефросинья Полоцкая", years: "ок. 1104 — ок. 1173", field: "Игуменья, просветительница", category: "Культура", fact: "Основала монастырь в Полоцке и способствовала развитию образования и культуры.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Euphrosyne_of_Polotsk.jpg/200px-Euphrosyne_of_Polotsk.jpg" },
-      { id: 7, name: "Симеон Полоцкий", years: "1629 — 1680", field: "Поэт, драматург, педагог", category: "Культура", fact: "Один из первых белорусских и русских поэтов Нового времени, основатель школьного театра.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Simeon_Polotsky.jpg/200px-Simeon_Polotsky.jpg" },
-      { id: 8, name: "Тадеуш Костюшко", years: "1746 — 1817", field: "Военачальник, политик", category: "История", fact: "Лидер восстания 1794 года в Речи Посполитой, национальный герой Польши, Беларуси и Литвы.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Tadeusz_Kościuszko.PNG/200px-Tadeusz_Kościuszko.PNG" },
-      { id: 9, name: "Винцент Дунин-Марцинкевич", years: "1808 — 1884", field: "Поэт, драматург, этнограф", category: "Культура", fact: "Один из основателей белорусской литературы, автор первой белорусской пьесы.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Vincent_Dunin-Marcinkievič.jpg/200px-Vincent_Dunin-Marcinkievič.jpg" },
-      { id: 10, name: "Адам Мицкевич", years: "1798 — 1855", field: "Поэт, философ", category: "Культура", fact: "Великий польский и белорусский поэт, автор «Пана Тадеуша», родился в Беларуси.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Adam_Mickiewicz.PNG/200px-Adam_Mickiewicz.PNG" },
-      { id: 11, name: "Констанция Буйло", years: "1898 — 1986", field: "Партизанка, Герой Советского Союза", category: "Война", fact: "Командир женского партизанского отряда во время Великой Отечественной войны.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Konstantyja_Bujło.jpg/200px-Konstantyja_Bujło.jpg" },
-      { id: 12, name: "Павел Сухой", years: "1895 — 1975", field: "Авиаконструктор", category: "Наука", fact: "Создал знаменитые самолёты Су-2, Су-7, Су-9, основатель КБ Сухого.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Pavel_Sukhoi.jpg/200px-Pavel_Sukhoi.jpg" },
-      { id: 13, name: "Владимир Короткевич", years: "1930 — 1984", field: "Писатель-фантаст", category: "Культура", fact: "Один из основателей белорусской научной фантастики, автор «Чёрного замка Ольшанского».", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Vladimir_Korotkevich.jpg/200px-Vladimir_Korotkevich.jpg" },
-      { id: 14, name: "Рыгор Барадулин", years: "1935 — 2014", field: "Поэт, переводчик", category: "Культура", fact: "Народный поэт Беларуси, лауреат Государственной премии, переводил Шекспира и Пушкина.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Ryhor_Baradulin.jpg/200px-Ryhor_Baradulin.jpg" },
-      { id: 15, name: "Василий Быков", years: "1924 — 2003", field: "Писатель, фронтовик", category: "Культура", fact: "Автор произведений о войне, лауреат Государственной премии СССР.", image: "images/bykov.jpg" },
-      { id: 16, name: "Светлана Алексиевич", years: "род. 1948", field: "Писательница, журналистка", category: "Культура", fact: "Лауреат Нобелевской премии по литературе 2015 года за документальную прозу.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Svetlana_Alexievich_2013.jpg/200px-Svetlana_Alexievich_2013.jpg" },
-      { id: 17, name: "Виктор Гончаренко", years: "род. 1977", field: "Футбольный тренер", category: "Спорт", fact: "Тренер сборной Беларуси по футболу, работал с ведущими европейскими клубами.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Viktor_Goncharenko_2018.jpg/200px-Viktor_Goncharenko_2018.jpg" },
-      { id: 18, name: "Мария Игнатенко", years: "1929 — 1943", field: "Партизанка, пионер-герой", category: "Война", fact: "Юная партизанка, казнённая фашистами, символ мужества белорусских детей.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Maria_Ignatenko.jpg/200px-Maria_Ignatenko.jpg" },
-      { id: 19, name: "Иван Мележ", years: "1921 — 1976", field: "Писатель", category: "Культура", fact: "Автор трилогии «Полесская хроника», классик белорусской литературы.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Ivan_Melezh.jpg/200px-Ivan_Melezh.jpg" },
-      { id: 20, name: "Александр Лукашенко", years: "род. 1954", field: "Президент Республики Беларусь", category: "Политика", fact: "Первый и единственный Президент Республики Беларусь с 1994 года.", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Alexander_Lukashenko_2020.jpg/200px-Alexander_Lukashenko_2020.jpg" }
-    ];
+  endPerformanceMonitoring() {
+    if ('performance' in window && 'mark' in performance && 'measure' in performance) {
+      try {
+        performance.mark('app-init-end');
+        performance.measure('app-initialization', 'app-init-start', 'app-init-end');
+        const measure = performance.getEntriesByName('app-initialization')[0];
+        console.log(`App initialized in ${measure.duration.toFixed(2)}ms`);
+      } catch (e) {
+        console.warn('Performance monitoring failed:', e);
+      }
+    }
+  }
 
-    // Facts data
-    this.facts = [
-      { id: 1, name: "Франциск Скорина", fact: "Первый белорусский книгопечатник издал «Псалтыр» в Праге в 1517 году." },
-      { id: 2, name: "Кастусь Калиновский", fact: "Его письма «Мужыцкая праўда» стали символом борьбы за свободу." },
-      { id: 3, name: "Янка Купала", fact: "Настоящее имя — Иван Луцевич." },
-      { id: 4, name: "Якуб Колас", fact: "Псевдоним означает «Колос» — символ родной земли." },
-      { id: 5, name: "Максим Богданович", fact: "Умер в возрасте 25 лет, но успел изменить белорусскую литературу навсегда." },
-      { id: 6, name: "Ефросинья Полоцкая", fact: "Основала Спасо-Преображенский монастырь и Крестовоздвиженскую церковь в Полоцке." },
-      { id: 7, name: "Симеон Полоцкий", fact: "Написал первую русскую пьесу «Комедия притчи о блудном сыне»." },
-      { id: 8, name: "Тадеуш Костюшко", fact: "Участвовал в Войне за независимость США, получил звание бригадного генерала." },
-      { id: 9, name: "Винцент Дунин-Марцинкевич", fact: "Собрал более 2000 белорусских народных песен и опубликовал их." },
-      { id: 10, name: "Адам Мицкевич", fact: "Его поэма «Пан Тадеуш» считается национальным эпосом Польши." },
-      { id: 11, name: "Констанция Буйло", fact: "Её отряд уничтожил более 300 немецких солдат и офицеров." },
-      { id: 12, name: "Павел Сухой", fact: "Создал первый в СССР реактивный истребитель Су-9." },
-      { id: 13, name: "Владимир Короткевич", fact: "Написал более 20 книг, включая исторические романы и фантастику." },
-      { id: 14, name: "Рыгор Барадулин", fact: "Перевёл на белорусский язык произведения Шекспира, Гёте и Пушкина." },
-      { id: 15, name: "Василий Быков", fact: "Его произведения переведены на 40 языков мира." },
-      { id: 16, name: "Светлана Алексиевич", fact: "Её книги «У войны не женское лицо» и «Последние свидетели» стали мировыми бестселлерами." },
-      { id: 17, name: "Виктор Гончаренко", fact: "Привёл «Краснодар» к победе в Кубке России в 2019 году." },
-      { id: 18, name: "Мария Игнатенко", fact: "Стала символом белорусского сопротивления, её именем названы улицы и школы." },
-      { id: 19, name: "Иван Мележ", fact: "Трилогия «Полесская хроника» переведена на многие языки." },
-      { id: 20, name: "Александр Лукашенко", fact: "Под его руководством Беларусь стала членом ООН и других международных организаций." }
-    ];
+  async init() {
+    try {
+      // Show loading state
+      this.showLoadingState();
+
+      // Load data asynchronously
+      await this.loadData();
+
+      // Initialize app after data is loaded
+      this.shuffleHeroes();
+      this.loadFavorites();
+      this.setupEventListeners();
+      this.renderCards();
+      this.updateProgress();
+      this.showInstructions();
+
+      // Hide loading state
+      this.hideLoadingState();
+
+      // End performance monitoring
+      this.endPerformanceMonitoring();
+
+    } catch (error) {
+      console.error('Error initializing app:', error);
+      this.showToast('❌ Памылка ініцыялізацыі прыкладання', 5000);
+      this.endPerformanceMonitoring();
+    }
+  }
+
+  async loadData() {
+    try {
+      // Load heroes data
+      const heroesResponse = await fetch('heroes.json');
+      if (!heroesResponse.ok) {
+        throw new Error(`Failed to load heroes: ${heroesResponse.status}`);
+      }
+      this.heroes = await heroesResponse.json();
+
+      // Load facts data
+      const factsResponse = await fetch('facts.json');
+      if (!factsResponse.ok) {
+        throw new Error(`Failed to load facts: ${factsResponse.status}`);
+      }
+      this.facts = await factsResponse.json();
+
+      console.log(`Loaded ${this.heroes.length} heroes and ${this.facts.length} facts`);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      this.showToast('❌ Памылка загрузкі даных', 5000);
+      // Fallback to minimal data
+      this.heroes = [{
+        id: 1,
+        name: "Памылка загрузкі",
+        years: "",
+        field: "Спробуйце перазагрузіць старонку",
+        category: "Памылка",
+        fact: "Не ўдалося загрузіць даныя герояў",
+        image: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f0f0f0'/><text x='50' y='50' font-family='Arial' font-size='8' fill='%23666' text-anchor='middle' dy='.3em'>Error</text></svg>"
+      }];
+      this.facts = [];
+    }
   }
 
   setupEventListeners() {
@@ -132,13 +160,17 @@ class BelarusHeroesApp {
     const stack = document.getElementById('cardsStack');
     if (!stack) return;
 
+    // Use passive listeners where possible for better performance
     stack.addEventListener('mousedown', (e) => this.handleStart(e));
-    document.addEventListener('mousemove', (e) => this.handleMove(e));
+    document.addEventListener('mousemove', (e) => this.handleMove(e), { passive: true });
     document.addEventListener('mouseup', (e) => this.handleEnd(e));
 
     stack.addEventListener('touchstart', (e) => this.handleStart(e), { passive: false });
     document.addEventListener('touchmove', (e) => this.handleMove(e), { passive: false });
-    document.addEventListener('touchend', (e) => this.handleEnd(e));
+    document.addEventListener('touchend', (e) => this.handleEnd(e), { passive: true });
+
+    // Prevent context menu on long press
+    stack.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
   handleStart(e) {
@@ -215,55 +247,116 @@ class BelarusHeroesApp {
   }
 
   renderCards() {
+    const startTime = performance.now();
     const stack = document.getElementById('cardsStack');
     if (!stack) return;
 
-    // Clear the stack completely
-    stack.innerHTML = '';
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
 
     // Only render the current card
     if (this.currentIndex < this.heroes.length) {
       const hero = this.heroes[this.currentIndex];
       const card = this.createCard(hero);
       card.classList.add('entering');
-      stack.appendChild(card);
+      fragment.appendChild(card);
+    }
+
+    // Clear and append in one operation
+    stack.innerHTML = '';
+    stack.appendChild(fragment);
+
+    const renderTime = performance.now() - startTime;
+    if (renderTime > 16) { // Log if rendering takes more than one frame
+      console.warn(`Card render took ${renderTime.toFixed(2)}ms`);
     }
   }
 
   createCard(hero) {
     const card = document.createElement('div');
     card.className = 'hero-card';
+    card.setAttribute('role', 'article');
+    card.setAttribute('aria-label', `Карточка героя ${hero.name}`);
 
-    // Image container
+    // Image container with loading state
     const imageContainer = document.createElement('div');
     imageContainer.className = 'hero-image-container';
 
+    // Loading placeholder
+    const placeholder = document.createElement('div');
+    placeholder.className = 'image-placeholder';
+    placeholder.innerHTML = `
+      <div class="placeholder-content">
+        <div class="placeholder-icon">📷</div>
+        <div class="placeholder-text">Загрузка...</div>
+      </div>
+    `;
+    imageContainer.appendChild(placeholder);
+
+    // Optimized image loading
     const img = document.createElement('img');
     img.className = 'hero-image';
-    img.src = hero.image;
-    img.alt = hero.name;
+    img.alt = `Фотография ${hero.name}`;
     img.loading = 'lazy';
-    img.onerror = () => {
-      img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
+    img.decoding = 'async';
+
+    // Preload critical images
+    if (this.currentIndex === 0) {
+      img.loading = 'eager';
+    }
+
+    // Enhanced error handling with multiple fallbacks
+    const loadImage = (src, fallbackIndex = 0) => {
+      const fallbacks = [
+        src,
+        `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name.split(' ').map(n => n[0]).join('')}</text></svg>`,
+        `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23e0e0e0"/><circle cx="50" cy="35" r="15" fill="%23ccc"/><rect x="35" y="55" width="30" height="25" fill="%23ccc"/></svg>`
+      ];
+
+      img.src = fallbacks[fallbackIndex];
+
+      img.onload = () => {
+        placeholder.style.display = 'none';
+        img.style.opacity = '1';
+      };
+
+      img.onerror = () => {
+        if (fallbackIndex < fallbacks.length - 1) {
+          loadImage(fallbacks[fallbackIndex + 1], fallbackIndex + 1);
+        } else {
+          placeholder.innerHTML = `
+            <div class="placeholder-content">
+              <div class="placeholder-icon">❌</div>
+              <div class="placeholder-text">Не загрузилась</div>
+            </div>
+          `;
+        }
+      };
     };
 
+    loadImage(hero.image);
+    img.style.opacity = '0';
+    img.style.transition = 'opacity 0.3s ease';
     imageContainer.appendChild(img);
 
-    // Content
+    // Content with better structure
     const content = document.createElement('div');
     content.className = 'card-content';
 
     const name = document.createElement('h3');
     name.className = 'card-name';
     name.textContent = hero.name;
+    name.setAttribute('aria-label', `Имя героя: ${hero.name}`);
 
     const meta = document.createElement('div');
     meta.className = 'card-meta';
-    meta.textContent = `${hero.years} • ${hero.field}`;
+    meta.innerHTML = `<time>${hero.years}</time> • <span>${hero.field}</span>`;
+    meta.setAttribute('aria-label', `Годы жизни и профессия: ${hero.years}, ${hero.field}`);
 
     const description = document.createElement('p');
     description.className = 'card-description';
     description.textContent = hero.fact;
+    description.setAttribute('aria-label', `Описание: ${hero.fact}`);
 
     content.appendChild(name);
     content.appendChild(meta);
@@ -359,6 +452,18 @@ class BelarusHeroesApp {
     if (badge) {
       badge.textContent = this.favorites.size;
     }
+  }
+
+  showLoadingState() {
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('cardsStack').classList.add('hidden');
+    this.disableActionButtons();
+  }
+
+  hideLoadingState() {
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('cardsStack').classList.remove('hidden');
+    this.enableActionButtons();
   }
 
   showEmptyState() {
@@ -511,6 +616,18 @@ class BelarusHeroesApp {
   }
 
   performSearch(query) {
+    // Debounce search for better performance
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    this.searchTimeout = setTimeout(() => {
+      this._executeSearch(query);
+    }, 150);
+  }
+
+  _executeSearch(query) {
+    const startTime = performance.now();
     const results = document.getElementById('searchResults');
     if (!results) return;
 
@@ -519,9 +636,12 @@ class BelarusHeroesApp {
       return;
     }
 
+    // Use more efficient search with early returns
+    const queryLower = query.toLowerCase();
     const filtered = this.heroes.filter(hero =>
-      hero.name.toLowerCase().includes(query.toLowerCase()) ||
-      hero.field.toLowerCase().includes(query.toLowerCase())
+      hero.name.toLowerCase().includes(queryLower) ||
+      hero.field.toLowerCase().includes(queryLower) ||
+      hero.category.toLowerCase().includes(queryLower)
     );
 
     if (filtered.length === 0) {
@@ -529,32 +649,30 @@ class BelarusHeroesApp {
       return;
     }
 
-    results.innerHTML = '';
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
+
     filtered.forEach(hero => {
       const item = document.createElement('div');
-      item.style.cssText = `
-        display: flex;
-        align-items: center;
-        padding: 12px;
-        margin-bottom: 8px;
-        background: var(--gray-50);
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      `;
+      item.className = 'search-result-item';
+      item.setAttribute('role', 'button');
+      item.setAttribute('tabindex', '0');
+      item.setAttribute('aria-label', `Выбрать героя ${hero.name}`);
 
       const img = document.createElement('img');
       img.src = hero.image;
       img.alt = hero.name;
-      img.style.cssText = 'width: 40px; height: 40px; border-radius: 8px; margin-right: 12px; object-fit: cover;';
+      img.className = 'search-result-image';
+      img.loading = 'lazy';
       img.onerror = () => {
-        img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name}</text></svg>`;
+        img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name.split(' ').map(n => n[0]).join('')}</text></svg>`;
       };
 
       const info = document.createElement('div');
+      info.className = 'search-result-info';
       info.innerHTML = `
-        <div style="font-weight: 600; color: var(--gray-900); margin-bottom: 4px;">${hero.name}</div>
-        <div style="font-size: 14px; color: var(--gray-600);">${hero.years} • ${hero.field}</div>
+        <div class="search-result-name">${this._highlightText(hero.name, query)}</div>
+        <div class="search-result-meta">${hero.years} • ${hero.field}</div>
       `;
 
       item.appendChild(img);
@@ -565,8 +683,30 @@ class BelarusHeroesApp {
         this.hideModal('searchModal');
       });
 
-      results.appendChild(item);
+      // Keyboard support
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          item.click();
+        }
+      });
+
+      fragment.appendChild(item);
     });
+
+    results.innerHTML = '';
+    results.appendChild(fragment);
+
+    const searchTime = performance.now() - startTime;
+    if (searchTime > 50) { // Log slow searches
+      console.warn(`Search took ${searchTime.toFixed(2)}ms for query: "${query}"`);
+    }
+  }
+
+  _highlightText(text, query) {
+    if (!query) return text;
+    const regex = new RegExp(`(${query})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
   }
 
   showStats() {
@@ -752,6 +892,11 @@ class BelarusHeroesApp {
 }
 
 // Initialize app
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new BelarusHeroesApp();
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    window.app = new BelarusHeroesApp();
+    await window.app.init();
+  } catch (error) {
+    console.error('Failed to initialize app:', error);
+  }
 });
