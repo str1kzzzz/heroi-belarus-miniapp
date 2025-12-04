@@ -36,8 +36,8 @@
       <div class="header-content">
         <div class="logo">🇧🇾</div>
         <div class="title-section">
-          <h1>Героі Беларусі</h1>
-          <p>Свайпайце карткі</p>
+          <h1>Падарожжа героямі</h1>
+          <p>Інтэрактыўнае падарожжа па гісторыі</p>
         </div>
         <button class="menu-btn" id="menuBtn" aria-label="Меню">
           <span>⋮</span>
@@ -47,14 +47,17 @@
 
     <!-- Main Content -->
     <main class="main">
-      <div class="cards-stack" id="cardsStack"></div>
-
-      <!-- Empty State -->
-      <div class="empty-state hidden" id="emptyState">
-        <div class="empty-icon">🎉</div>
-        <h2>Усе героі прагледжаны!</h2>
-        <p>Праверце закладкі або пачніце нанова</p>
-        <button class="btn-primary" id="resetBtn">Пачаць нанова</button>
+      <div class="story-container" id="storyContainer">
+        <div class="story-scene" id="storyScene">
+          <div class="scene-header">
+            <h2 class="scene-title" id="sceneTitle"></h2>
+          </div>
+          <div class="scene-image">
+            <img id="sceneImage" src="" alt="" loading="lazy">
+          </div>
+          <div class="scene-text" id="sceneText"></div>
+          <div class="scene-choices" id="sceneChoices"></div>
+        </div>
       </div>
 
       <!-- Loading State -->
@@ -64,17 +67,12 @@
       </div>
     </main>
 
-    <!-- Action Buttons -->
-    <div class="actions">
-      <button class="action-btn dislike-btn" id="dislikeBtn" aria-label="Не падабаецца">
-        <span class="btn-icon">✕</span>
-      </button>
-      <button class="action-btn like-btn" id="likeBtn" aria-label="Падабаецца">
-        <span class="btn-icon">♥</span>
-      </button>
-      <button class="action-btn favorite-btn" id="favoriteBtn" aria-label="У закладкі">
-        <span class="btn-icon">⭐</span>
-      </button>
+    <!-- Progress -->
+    <div class="progress">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-text" id="progressText">Сцэна 1</span>
     </div>
 
     <!-- Progress -->
@@ -88,27 +86,6 @@
     <!-- Modals -->
     <div class="modal-overlay hidden" id="modalOverlay"></div>
 
-    <!-- Detail Modal -->
-    <div class="modal hidden" id="detailModal">
-      <div class="modal-header">
-        <button class="modal-close" id="closeModal">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="hero-image">
-          <img id="detailImage" src="" alt="" loading="lazy">
-        </div>
-        <div class="hero-content">
-          <h2 id="detailName"></h2>
-          <div class="hero-meta" id="detailMeta"></div>
-          <div class="hero-description" id="detailDescription"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="shareDetailBtn">📤 Падзяліцца</button>
-        <button class="btn-primary" id="closeDetailBtn">Вярнуцца</button>
-      </div>
-    </div>
-
     <!-- Menu Modal -->
     <div class="modal hidden" id="menuModal">
       <div class="modal-header">
@@ -117,24 +94,15 @@
       </div>
       <div class="modal-body">
         <div class="menu-list">
-          <button class="menu-item" id="favoritesBtn">
-            <span class="menu-icon">⭐</span>
-            <span>Закладкі</span>
-            <span class="badge" id="favoritesCount">0</span>
-          </button>
-          <button class="menu-item" id="searchBtn">
-            <span class="menu-icon">🔍</span>
-            <span>Пошук</span>
-          </button>
-          <button class="menu-item" id="statsBtn">
+          <button class="menu-item" id="progressBtn">
             <span class="menu-icon">📊</span>
-            <span>Статыстыка</span>
+            <span>Прагрэс</span>
           </button>
-          <button class="menu-item" id="randomBtn">
-            <span class="menu-icon">🎲</span>
-            <span>Выпадковы герой</span>
+          <button class="menu-item" id="heroesListBtn">
+            <span class="menu-icon">👥</span>
+            <span>Усе героі</span>
           </button>
-          <button class="menu-item" id="resetAppBtn">
+          <button class="menu-item" id="resetJourneyBtn">
             <span class="menu-icon">🔄</span>
             <span>Пачаць нанова</span>
           </button>
@@ -146,58 +114,25 @@
       </div>
     </div>
 
-    <!-- Favorites Modal -->
-    <div class="modal hidden" id="favoritesModal">
+    <!-- Progress Modal -->
+    <div class="modal hidden" id="progressModal">
       <div class="modal-header">
-        <h2>Закладкі</h2>
-        <button class="modal-close" id="closeFavoritesBtn">✕</button>
+        <h2>Ваш прагрэс</h2>
+        <button class="modal-close" id="closeProgressBtn">✕</button>
       </div>
       <div class="modal-body">
-        <div class="favorites-list" id="favoritesList"></div>
-        <div class="empty-favorites hidden" id="emptyFavorites">
-          <div class="empty-icon">⭐</div>
-          <p>Няма закладак</p>
-          <small>Дадавайце герояў у закладкі</small>
-        </div>
+        <div id="progressContent"></div>
       </div>
     </div>
 
-    <!-- Search Modal -->
-    <div class="modal hidden" id="searchModal">
+    <!-- Heroes List Modal -->
+    <div class="modal hidden" id="heroesListModal">
       <div class="modal-header">
-        <h2>Пошук</h2>
-        <button class="modal-close" id="closeSearchBtn">✕</button>
+        <h2>Усе героі</h2>
+        <button class="modal-close" id="closeHeroesListBtn">✕</button>
       </div>
       <div class="modal-body">
-        <div class="search-input">
-          <input type="text" id="searchInput" placeholder="Увядзіце імя героя...">
-        </div>
-        <div class="search-results" id="searchResults"></div>
-      </div>
-    </div>
-
-    <!-- Stats Modal -->
-    <div class="modal hidden" id="statsModal">
-      <div class="modal-header">
-        <h2>Статыстыка</h2>
-        <button class="modal-close" id="closeStatsBtn">✕</button>
-      </div>
-      <div class="modal-body">
-        <div id="statsContent"></div>
-      </div>
-    </div>
-
-    <!-- Random Modal -->
-    <div class="modal hidden" id="randomModal">
-      <div class="modal-header">
-        <h2>🎲 Выпадковы герой</h2>
-        <button class="modal-close" id="closeRandomBtn">✕</button>
-      </div>
-      <div class="modal-body">
-        <div id="randomHeroContent"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-primary" id="anotherRandomBtn">🎲 Яшчэ адзін</button>
+        <div class="heroes-grid" id="heroesGrid"></div>
       </div>
     </div>
 
@@ -210,25 +145,21 @@
       <div class="modal-body">
         <div class="instructions">
           <div class="instruction">
-            <span class="instruction-icon">👆</span>
-            <span><strong>Свайп уверх</strong> - падрабязнасці</span>
+            <span class="instruction-icon">📖</span>
+            <span>Чытайце гісторыю і рабіце выбары</span>
           </div>
           <div class="instruction">
-            <span class="instruction-icon">👈</span>
-            <span><strong>Свайп улева</strong> - падабаецца</span>
+            <span class="instruction-icon">🎯</span>
+            <span>Кожны выбар уплывае на ваша падарожжа</span>
           </div>
           <div class="instruction">
-            <span class="instruction-icon">👉</span>
-            <span><strong>Свайп управа</strong> - прапусціць</span>
-          </div>
-          <div class="instruction">
-            <span class="instruction-icon">❤️</span>
-            <span><strong>Свайп уніз</strong> - у закладкі</span>
+            <span class="instruction-icon">⭐</span>
+            <span>Адкрывайце новых герояў Беларусі</span>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-primary" id="startExploring">Пачаць!</button>
+        <button class="btn-primary" id="startJourney">Пачаць падарожжа!</button>
       </div>
     </div>
   </div>
