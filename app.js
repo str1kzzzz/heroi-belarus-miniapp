@@ -167,8 +167,31 @@ class BelarusHeroesJourney {
     // Update image
     const imageElement = document.querySelector('.scene-image img');
     if (imageElement) {
-      imageElement.src = scene.image || '';
+      let imageSrc = scene.image || '';
+
+      // If scene has hero_id, use the hero's image
+      if (scene.hero_id) {
+        const hero = this.heroes.find(h => h.id === scene.hero_id);
+        if (hero) {
+          imageSrc = hero.image;
+        }
+      }
+
+      // Handle different image types
+      if (imageSrc.startsWith('images/') || imageSrc.startsWith('http')) {
+        // Already correct
+      } else if (!imageSrc || imageSrc.startsWith('data:')) {
+        // Keep as is (data URLs or empty)
+      }
+
+      imageElement.src = imageSrc;
       imageElement.alt = scene.title || '';
+
+      // Add error handling
+      imageElement.onerror = () => {
+        // Fallback to a default SVG
+        imageElement.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="12" fill="%23666" text-anchor="middle" dy=".3em">🖼️</text></svg>';
+      };
     }
 
     // Update text
@@ -285,8 +308,10 @@ class BelarusHeroesJourney {
 
       const isDiscovered = this.discoveredHeroes.has(hero.id);
 
+      const imgSrc = hero.image.startsWith('http') ? hero.image : hero.image;
+
       item.innerHTML = `
-        <img src="${hero.image}" alt="${hero.name}" class="hero-grid-image" onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name.split(' ').map(n => n[0]).join('')}</text></svg>'">
+        <img src="${imgSrc}" alt="${hero.name}" class="hero-grid-image" onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name.split(' ').map(n => n[0]).join('')}</text></svg>'">
         <div class="hero-grid-name">${isDiscovered ? hero.name : '❓'}</div>
       `;
 
