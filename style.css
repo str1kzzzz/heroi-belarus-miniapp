@@ -180,9 +180,9 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  padding: var(--space-2);
-  min-height: calc(100vh - var(--header-height) - 6rem);
-  min-height: calc(100dvh - var(--header-height) - 6rem);
+  padding: var(--space-2) var(--space-2) calc(var(--space-4) + 2rem) var(--space-2);
+  min-height: calc(100vh - var(--header-height) - 4rem);
+  min-height: calc(100dvh - var(--header-height) - 4rem);
 }
 
 /* Story Container */
@@ -897,7 +897,9 @@ body {
   }
 
   .main {
-    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-2);
+    padding: var(--space-2) var(--space-2) calc(var(--space-2) + 1.5rem) var(--space-2);
+    min-height: calc(100vh - var(--header-height) - 3rem);
+    min-height: calc(100dvh - var(--header-height) - 3rem);
   }
 
   .story-container {
@@ -905,7 +907,7 @@ body {
   }
 
   .story-scene {
-    min-height: 60vh;
+    min-height: 50vh;
   }
 
   .scene-title {
