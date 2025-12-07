@@ -586,6 +586,12 @@ class BelarusHeroesApp {
             <span class="hero-field">${hero.field}</span>
             <span class="hero-category">${hero.category}</span>
           </div>
+          ${hero.bio ? `
+            <div class="hero-bio">
+              <h4>Біяграфія:</h4>
+              <p>${hero.bio}</p>
+            </div>
+          ` : ''}
           <div class="hero-fact">
             <h4>Цікавы факт:</h4>
             <p>${hero.fact}</p>
