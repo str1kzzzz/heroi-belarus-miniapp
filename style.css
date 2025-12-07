@@ -648,6 +648,7 @@ body {
 }
 
 .modal {
+  display: none;
   background: var(--white);
   border-radius: var(--border-radius-xl);
   box-shadow: var(--shadow-xl);

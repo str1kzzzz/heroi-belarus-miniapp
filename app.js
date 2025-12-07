@@ -81,8 +81,8 @@ class BelarusHeroesApp {
 
       // Initialize app after data is loaded
       this.loadUserData();
-      this.setupEventListeners();
       this.renderApp();
+      this.setupEventListeners();
       this.showView(this.currentView);
 
       // Hide loading state
@@ -175,23 +175,38 @@ class BelarusHeroesApp {
 
     // Hero actions
     document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('hero-card')) {
-        const heroId = parseInt(e.target.dataset.heroId);
+      const heroCard = e.target.closest('.hero-card');
+      if (heroCard) {
+        const heroId = parseInt(heroCard.dataset.heroId);
         this.showHeroDetail(heroId);
+        return;
       }
+
       if (e.target.classList.contains('study-hero-btn')) {
         const heroId = parseInt(e.target.dataset.heroId);
         this.studyHero(heroId);
+        return;
       }
+
       if (e.target.classList.contains('add-opinion-btn')) {
         const heroId = parseInt(e.target.dataset.heroId);
         this.showAddOpinionModal(heroId);
+        return;
+      }
+
+      if (e.target.classList.contains('learn-more-btn')) {
+        const heroId = parseInt(e.target.dataset.heroId);
+        this.showHeroDetail(heroId);
+        return;
       }
     });
 
     // Opinion form
     this.addEvent('#submitOpinion', 'click', () => this.submitOpinion());
     this.addEvent('#cancelOpinion', 'click', () => this.hideModal('opinionModal'));
+
+    // Modal close buttons
+    this.addEvent('#closeHeroModal', 'click', () => this.hideModal('heroModal'));
 
     // Modal overlay
     this.addEvent('#modalOverlay', 'click', () => this.hideAllModals());
@@ -440,7 +455,7 @@ class BelarusHeroesApp {
         <div class="fact-card">
           <div class="fact-hero">${fact.name}</div>
           <div class="fact-text">${fact.fact}</div>
-          ${hero ? `<button class="btn-secondary" onclick="window.app.showHeroDetail(${hero.id})">Пазнаць больш</button>` : ''}
+          ${hero ? `<button class="btn-secondary learn-more-btn" data-hero-id="${hero.id}">Пазнаць больш</button>` : ''}
         </div>
       `;
     }
@@ -528,9 +543,6 @@ class BelarusHeroesApp {
     `;
 
     this.showModal('heroModal');
-
-    // Add event listener for close button
-    this.addEvent('#closeHeroModal', 'click', () => this.hideModal('heroModal'));
   }
 
   studyHero(heroId) {
