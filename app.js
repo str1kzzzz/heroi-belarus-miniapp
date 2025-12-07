@@ -66,6 +66,73 @@ class BelarusHeroesApp {
     return true;
   }
 
+  checkFirstVisit() {
+    const userKey = `belarusHeroes_${this.user.id}`;
+    const hasVisited = localStorage.getItem(`${userKey}_visited`);
+    return !hasVisited;
+  }
+
+  showWelcomeModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay active';
+    modal.innerHTML = `
+      <div class="modal welcome-modal active">
+        <div class="welcome-content">
+          <div class="welcome-header">
+            <div class="welcome-logo">🇧🇾</div>
+            <h1>Вітаем у Героях Беларусі!</h1>
+            <p>Інтэрактыўная платформа для вывучэння гісторыі Беларусі</p>
+          </div>
+
+          <div class="welcome-user-info">
+            <div class="user-avatar">
+              ${this.user.photoUrl ? `<img src="${this.user.photoUrl}" alt="Avatar">` : '👤'}
+            </div>
+            <div class="user-details">
+              <h3>${this.user.firstName} ${this.user.lastName || ''}</h3>
+              <p>@${this.user.username || 'telegram_user'}</p>
+            </div>
+          </div>
+
+          <div class="welcome-features">
+            <div class="feature">
+              <span class="feature-icon">📚</span>
+              <span>Вывучай герояў па сферах</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">🔍</span>
+              <span>Шукай і адкрывай новых герояў</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">💡</span>
+              <span>Чытай цікавыя факты</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">💬</span>
+              <span>Дадавай свае меркаванні</span>
+            </div>
+          </div>
+
+          <button id="startAppBtn" class="btn-primary welcome-btn">
+            Пачаць падарожжа! 🚀
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Add event listener for start button
+    document.getElementById('startAppBtn').addEventListener('click', () => {
+      const userKey = `belarusHeroes_${this.user.id}`;
+      localStorage.setItem(`${userKey}_visited`, 'true');
+      document.body.removeChild(modal);
+      this.renderApp();
+      this.setupEventListeners();
+      this.showView(this.currentView);
+    });
+  }
+
   async init() {
     try {
       // Show loading state
@@ -79,14 +146,20 @@ class BelarusHeroesApp {
       // Load data asynchronously
       await this.loadData();
 
-      // Initialize app after data is loaded
+      // Load user data
       this.loadUserData();
-      this.renderApp();
-      this.setupEventListeners();
-      this.showView(this.currentView);
 
       // Hide loading state
       this.hideLoadingState();
+
+      // Check if first visit
+      if (this.checkFirstVisit()) {
+        this.showWelcomeModal();
+      } else {
+        this.renderApp();
+        this.setupEventListeners();
+        this.showView(this.currentView);
+      }
 
       // End performance monitoring
       this.endPerformanceMonitoring();
