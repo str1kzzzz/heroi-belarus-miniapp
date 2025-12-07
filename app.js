@@ -206,31 +206,56 @@ class BelarusHeroesApp {
         this.studiedHeroes = new Set(data.studiedHeroes || []);
         this.heroOpinions = data.heroOpinions || {};
         this.currentView = data.currentView || 'study';
+
+        // Load theme preference
+        const savedTheme = data.theme || 'light';
+        this.setTheme(savedTheme);
       } else {
         // New user - add some default heroes
         this.studiedHeroes.add(1); // Франциск Скорина
         this.studiedHeroes.add(3); // Янка Купала
+
+        // Set default theme
+        this.setTheme('light');
       }
     } catch (e) {
       console.warn('Failed to load user data:', e);
       // Fallback
       this.studiedHeroes.add(1);
       this.studiedHeroes.add(3);
+      this.setTheme('light');
     }
   }
 
   saveUserData() {
     try {
       const userKey = `belarusHeroes_${this.user.id}`;
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
       const data = {
         studiedHeroes: Array.from(this.studiedHeroes),
         heroOpinions: this.heroOpinions,
-        currentView: this.currentView
+        currentView: this.currentView,
+        theme: currentTheme
       };
       localStorage.setItem(userKey, JSON.stringify(data));
     } catch (e) {
       console.warn('Failed to save user data:', e);
     }
+  }
+
+  setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const themeIcon = document.querySelector('.theme-icon');
+    if (themeIcon) {
+      themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+  }
+
+  toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    this.setTheme(newTheme);
+    this.saveUserData();
   }
 
   setupEventListeners() {
@@ -239,6 +264,9 @@ class BelarusHeroesApp {
     this.addEvent('#searchTab', 'click', () => this.showView('search'));
     this.addEvent('#randomTab', 'click', () => this.showView('random'));
     this.addEvent('#profileTab', 'click', () => this.showView('profile'));
+
+    // Theme toggle
+    this.addEvent('#themeToggle', 'click', () => this.toggleTheme());
 
     // Search functionality
     this.addEvent('#searchInput', 'input', (e) => this.handleSearch(e.target.value));
@@ -303,8 +331,13 @@ class BelarusHeroesApp {
             <h1>Героі Беларусі</h1>
             <p>Вывучай і пазнавай</p>
           </div>
-          <div class="user-info">
-            <span class="user-name">${this.user.firstName}</span>
+          <div class="header-actions">
+            <button id="themeToggle" class="theme-toggle" aria-label="Пераключыць тэму">
+              <span class="theme-icon">🌙</span>
+            </button>
+            <div class="user-info">
+              <span class="user-name">${this.user.firstName}</span>
+            </div>
           </div>
         </div>
       </header>
