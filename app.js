@@ -1,16 +1,16 @@
-// Belarusian Heroes Journey - Interactive Story App
-class BelarusHeroesJourney {
+// Belarusian Heroes Learning Platform
+class BelarusHeroesApp {
   constructor() {
     // Initialize properties
     Object.assign(this, {
       heroes: [],
       facts: [],
-      story: {},
-      currentScene: 'intro',
-      visitedScenes: new Set(),
-      discoveredHeroes: new Set(),
-      progress: 0,
-      totalScenes: 0
+      user: null,
+      currentView: 'study',
+      studiedHeroes: new Set(),
+      heroOpinions: {},
+      searchResults: [],
+      currentHero: null
     });
 
     // Start performance monitoring
@@ -36,20 +36,54 @@ class BelarusHeroesJourney {
     }
   }
 
+  authenticateUser() {
+    // Check if running in Telegram Web App
+    if (window.Telegram && window.Telegram.WebApp) {
+      const webApp = window.Telegram.WebApp;
+      const initData = webApp.initDataUnsafe;
+
+      if (initData && initData.user) {
+        this.user = {
+          id: initData.user.id,
+          firstName: initData.user.first_name,
+          lastName: initData.user.last_name,
+          username: initData.user.username,
+          photoUrl: initData.user.photo_url
+        };
+        console.log('User authenticated:', this.user);
+        return true;
+      }
+    }
+
+    // Fallback for development
+    console.warn('Not running in Telegram Web App, using demo user');
+    this.user = {
+      id: 'demo',
+      firstName: 'Demo',
+      lastName: 'User',
+      username: 'demo_user'
+    };
+    return true;
+  }
+
   async init() {
     try {
       // Show loading state
       this.showLoadingState();
 
+      // Authenticate user first
+      if (!this.authenticateUser()) {
+        throw new Error('Authentication failed');
+      }
+
       // Load data asynchronously
       await this.loadData();
 
       // Initialize app after data is loaded
-      this.loadProgress();
+      this.loadUserData();
       this.setupEventListeners();
-      this.showScene(this.currentScene);
-      this.updateProgress();
-      this.showInstructions();
+      this.renderApp();
+      this.showView(this.currentView);
 
       // Hide loading state
       this.hideLoadingState();
@@ -80,45 +114,84 @@ class BelarusHeroesJourney {
       }
       this.facts = await factsResponse.json();
 
-      // Load story data
-      const storyResponse = await fetch('story.json');
-      if (!storyResponse.ok) {
-        throw new Error(`Failed to load story: ${storyResponse.status}`);
-      }
-      this.story = await storyResponse.json();
-
-      // Calculate total scenes
-      this.totalScenes = Object.keys(this.story.scenes).length;
-
-      console.log(`Loaded ${this.heroes.length} heroes, ${this.facts.length} facts, and ${this.totalScenes} scenes`);
+      console.log(`Loaded ${this.heroes.length} heroes and ${this.facts.length} facts`);
     } catch (error) {
       console.error('Error loading data:', error);
       this.showToast('❌ Памылка загрузкі даных', 5000);
       // Fallback data
       this.heroes = [];
       this.facts = [];
-      this.story = { scenes: {} };
+    }
+  }
+
+  loadUserData() {
+    try {
+      const userKey = `belarusHeroes_${this.user.id}`;
+      const saved = localStorage.getItem(userKey);
+      if (saved) {
+        const data = JSON.parse(saved);
+        this.studiedHeroes = new Set(data.studiedHeroes || []);
+        this.heroOpinions = data.heroOpinions || {};
+        this.currentView = data.currentView || 'study';
+      } else {
+        // New user - add some default heroes
+        this.studiedHeroes.add(1); // Франциск Скорина
+        this.studiedHeroes.add(3); // Янка Купала
+      }
+    } catch (e) {
+      console.warn('Failed to load user data:', e);
+      // Fallback
+      this.studiedHeroes.add(1);
+      this.studiedHeroes.add(3);
+    }
+  }
+
+  saveUserData() {
+    try {
+      const userKey = `belarusHeroes_${this.user.id}`;
+      const data = {
+        studiedHeroes: Array.from(this.studiedHeroes),
+        heroOpinions: this.heroOpinions,
+        currentView: this.currentView
+      };
+      localStorage.setItem(userKey, JSON.stringify(data));
+    } catch (e) {
+      console.warn('Failed to save user data:', e);
     }
   }
 
   setupEventListeners() {
-    // Menu button
-    this.addEvent('#menuBtn', 'click', () => this.showModal('menuModal'));
+    // Navigation tabs
+    this.addEvent('#studyTab', 'click', () => this.showView('study'));
+    this.addEvent('#searchTab', 'click', () => this.showView('search'));
+    this.addEvent('#randomTab', 'click', () => this.showView('random'));
+    this.addEvent('#profileTab', 'click', () => this.showView('profile'));
 
-    // Modal close buttons
-    this.addEvent('#closeMenuBtn', 'click', () => this.hideModal('menuModal'));
-    this.addEvent('#closeProgressBtn', 'click', () => this.hideModal('progressModal'));
-    this.addEvent('#closeHeroesListBtn', 'click', () => this.hideModal('heroesListModal'));
-    this.addEvent('#closeInstructions', 'click', () => this.hideModal('instructionsModal'));
+    // Search functionality
+    this.addEvent('#searchInput', 'input', (e) => this.handleSearch(e.target.value));
 
-    // Menu items
-    this.addEvent('#progressBtn', 'click', () => this.showProgress());
-    this.addEvent('#heroesListBtn', 'click', () => this.showHeroesList());
-    this.addEvent('#resetJourneyBtn', 'click', () => this.resetJourney());
-    this.addEvent('#aboutAppBtn', 'click', () => this.showAbout());
+    // Random fact button
+    this.addEvent('#getRandomFact', 'click', () => this.showRandomFact());
 
-    // Instructions
-    this.addEvent('#startJourney', 'click', () => this.hideModal('instructionsModal'));
+    // Hero actions
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('hero-card')) {
+        const heroId = parseInt(e.target.dataset.heroId);
+        this.showHeroDetail(heroId);
+      }
+      if (e.target.classList.contains('study-hero-btn')) {
+        const heroId = parseInt(e.target.dataset.heroId);
+        this.studyHero(heroId);
+      }
+      if (e.target.classList.contains('add-opinion-btn')) {
+        const heroId = parseInt(e.target.dataset.heroId);
+        this.showAddOpinionModal(heroId);
+      }
+    });
+
+    // Opinion form
+    this.addEvent('#submitOpinion', 'click', () => this.submitOpinion());
+    this.addEvent('#cancelOpinion', 'click', () => this.hideModal('opinionModal'));
 
     // Modal overlay
     this.addEvent('#modalOverlay', 'click', () => this.hideAllModals());
@@ -131,325 +204,401 @@ class BelarusHeroesJourney {
     }
   }
 
-  showScene(sceneId) {
-    const scene = this.story.scenes[sceneId];
-    if (!scene) {
-      console.error(`Scene ${sceneId} not found`);
-      return;
-    }
+  renderApp() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <div class="logo">🇧🇾</div>
+          <div class="title-section">
+            <h1>Героі Беларусі</h1>
+            <p>Вывучай і пазнавай</p>
+          </div>
+          <div class="user-info">
+            <span class="user-name">${this.user.firstName}</span>
+          </div>
+        </div>
+      </header>
 
-    // Mark scene as visited
-    this.visitedScenes.add(sceneId);
+      <!-- Navigation -->
+      <nav class="nav-tabs">
+        <button id="studyTab" class="nav-tab active" data-view="study">
+          <span class="nav-icon">📚</span>
+          <span>Вывучэнне</span>
+        </button>
+        <button id="searchTab" class="nav-tab" data-view="search">
+          <span class="nav-icon">🔍</span>
+          <span>Пошук</span>
+        </button>
+        <button id="randomTab" class="nav-tab" data-view="random">
+          <span class="nav-icon">💡</span>
+          <span>Факты</span>
+        </button>
+        <button id="profileTab" class="nav-tab" data-view="profile">
+          <span class="nav-icon">👤</span>
+          <span>Профіль</span>
+        </button>
+      </nav>
 
-    // Update current scene
-    this.currentScene = sceneId;
+      <!-- Main Content -->
+      <main class="main-content">
+        <div id="studyView" class="view active">
+          <div class="view-header">
+            <h2>Вывучай герояў па сферах</h2>
+          </div>
+          <div id="fieldsContainer" class="fields-container"></div>
+        </div>
 
-    // Update progress
-    this.updateProgress();
+        <div id="searchView" class="view">
+          <div class="view-header">
+            <h2>Пошук герояў</h2>
+            <div class="search-container">
+              <input type="text" id="searchInput" placeholder="Увядзіце імя героя або сферу...">
+            </div>
+          </div>
+          <div id="searchResults" class="search-results"></div>
+        </div>
 
-    // Render scene
-    this.renderScene(scene);
+        <div id="randomView" class="view">
+          <div class="view-header">
+            <h2>Цікавыя факты</h2>
+          </div>
+          <div class="random-fact-container">
+            <button id="getRandomFact" class="btn-primary">Атрымаць выпадковы факт</button>
+            <div id="randomFactDisplay" class="fact-display"></div>
+          </div>
+        </div>
 
-    // Save progress
-    this.saveProgress();
-  }
+        <div id="profileView" class="view">
+          <div class="view-header">
+            <h2>Ваш профіль</h2>
+          </div>
+          <div class="profile-content">
+            <div class="profile-stats">
+              <div class="stat-card">
+                <div class="stat-number">${this.studiedHeroes.size}</div>
+                <div class="stat-label">Вывучана герояў</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number">${Object.keys(this.heroOpinions).length}</div>
+                <div class="stat-label">Дададзена меркаванняў</div>
+              </div>
+            </div>
+            <div id="studiedHeroesList" class="studied-heroes-list"></div>
+          </div>
+        </div>
+      </main>
 
-  renderScene(scene) {
-    const sceneElement = document.getElementById('storyScene');
-    if (!sceneElement) return;
+      <!-- Modals -->
+      <div class="modal-overlay" id="modalOverlay"></div>
 
-    // Update title
-    const titleElement = document.getElementById('sceneTitle');
-    if (titleElement) {
-      titleElement.textContent = scene.title || '';
-    }
-
-    // Update image
-    const imageElement = document.querySelector('.scene-image img');
-    if (imageElement) {
-      let imageSrc = scene.image || '';
-
-      // If scene has hero_id, use the hero's image
-      if (scene.hero_id) {
-        const hero = this.heroes.find(h => h.id === scene.hero_id);
-        if (hero) {
-          imageSrc = hero.image;
-        }
-      }
-
-      // Handle different image types
-      if (imageSrc.startsWith('images/') || imageSrc.startsWith('http')) {
-        // Already correct
-      } else if (!imageSrc || imageSrc.startsWith('data:')) {
-        // Keep as is (data URLs or empty)
-      }
-
-      imageElement.src = imageSrc;
-      imageElement.alt = scene.title || '';
-
-      // Add error handling
-      imageElement.onerror = () => {
-        // Fallback to a default SVG
-        imageElement.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="12" fill="%23666" text-anchor="middle" dy=".3em">🖼️</text></svg>';
-      };
-    }
-
-    // Update text
-    const textElement = document.getElementById('sceneText');
-    if (textElement) {
-      textElement.textContent = scene.text || '';
-    }
-
-    // Update choices
-    const choicesElement = document.getElementById('sceneChoices');
-    if (choicesElement) {
-      choicesElement.innerHTML = '';
-
-      if (scene.choices && scene.choices.length > 0) {
-        scene.choices.forEach(choice => {
-          const choiceBtn = document.createElement('button');
-          choiceBtn.className = 'choice-btn';
-          choiceBtn.textContent = choice.text;
-          choiceBtn.addEventListener('click', () => this.makeChoice(choice));
-          choicesElement.appendChild(choiceBtn);
-        });
-      }
-    }
-
-    // If scene has hero_id, mark hero as discovered
-    if (scene.hero_id) {
-      this.discoveredHeroes.add(scene.hero_id);
-    }
-  }
-
-  makeChoice(choice) {
-    if (choice.next) {
-      this.showScene(choice.next);
-    } else if (choice.category) {
-      // Handle category choice - go to appropriate path
-      const categoryScenes = Object.values(this.story.scenes).filter(s =>
-        s.category === choice.category && s.choices && s.choices.length > 0
-      );
-      if (categoryScenes.length > 0) {
-        this.showScene(categoryScenes[0].id || categoryScenes[0].title.toLowerCase().replace(/\s+/g, '_'));
-      }
-    }
-  }
-
-  updateProgress() {
-    const fill = document.getElementById('progressFill');
-    const text = document.getElementById('progressText');
-
-    if (fill && text) {
-      const progress = (this.visitedScenes.size / this.totalScenes) * 100;
-      fill.style.width = `${Math.min(progress, 100)}%`;
-      text.textContent = `Сцэна ${this.visitedScenes.size}`;
-    }
-  }
-
-  showProgress() {
-    this.hideModal('menuModal');
-
-    const content = document.querySelector('#progressModal .modal-body');
-    if (!content) return;
-
-    const visitedCount = this.visitedScenes.size;
-    const discoveredHeroesCount = this.discoveredHeroes.size;
-    const totalHeroes = this.heroes.length;
-
-    content.innerHTML = `
-      <div style="text-align: center; margin-bottom: 32px;">
-        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-        <h2>Ваш прагрэс</h2>
+      <!-- Hero Detail Modal -->
+      <div class="modal" id="heroModal">
+        <div class="modal-header">
+          <h2 id="heroModalTitle"></h2>
+          <button class="modal-close" id="closeHeroModal">✕</button>
+        </div>
+        <div class="modal-body" id="heroModalBody"></div>
       </div>
 
-      <div style="display: grid; gap: 16px; margin-bottom: 32px;">
-        <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; text-align: center; border: 1px solid var(--gray-200);">
-          <div style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">${visitedCount}</div>
-          <div style="color: var(--gray-600);">Прагледжана сцэн</div>
+      <!-- Add Opinion Modal -->
+      <div class="modal" id="opinionModal">
+        <div class="modal-header">
+          <h2>Дадаць меркаванне</h2>
+          <button class="modal-close" id="cancelOpinion">✕</button>
         </div>
-
-        <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; text-align: center; border: 1px solid var(--gray-200);">
-          <div style="font-size: 24px; font-weight: 700; color: var(--secondary); margin-bottom: 8px;">${discoveredHeroesCount}</div>
-          <div style="color: var(--gray-600);">Адкрыта герояў</div>
-        </div>
-
-        <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; text-align: center; border: 1px solid var(--gray-200);">
-          <div style="font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">${totalHeroes}</div>
-          <div style="color: var(--gray-600);">Усяго герояў</div>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 24px;">
-        <h3 style="margin-bottom: 16px; color: var(--gray-900);">Наведаныя сцэны:</h3>
-        <div style="max-height: 200px; overflow-y: auto;">
-          ${Array.from(this.visitedScenes).map(sceneId => {
-            const scene = this.story.scenes[sceneId];
-            return scene ? `<div style="padding: 8px 0; border-bottom: 1px solid var(--gray-200); color: var(--gray-700);">${scene.title}</div>` : '';
-          }).join('')}
+        <div class="modal-body">
+          <textarea id="opinionText" placeholder="Напішыце ваша меркаванне пра гэтага героя..." rows="4"></textarea>
+          <div class="modal-footer">
+            <button id="submitOpinion" class="btn-primary">Дадаць</button>
+          </div>
         </div>
       </div>
     `;
 
-    this.showModal('progressModal');
+    this.renderStudyView();
+    this.renderProfileView();
   }
 
-  showHeroesList() {
-    this.hideModal('menuModal');
+  showView(viewName) {
+    // Update navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.getElementById(`${viewName}Tab`).classList.add('active');
 
-    const grid = document.getElementById('heroesGrid');
-    if (!grid) return;
+    // Update views
+    document.querySelectorAll('.view').forEach(view => {
+      view.classList.remove('active');
+    });
+    document.getElementById(`${viewName}View`).classList.add('active');
 
-    grid.innerHTML = '';
+    this.currentView = viewName;
+    this.saveUserData();
 
+    // Special handling for views
+    if (viewName === 'search') {
+      document.getElementById('searchInput').focus();
+    }
+  }
+
+  renderStudyView() {
+    const container = document.getElementById('fieldsContainer');
+    if (!container) return;
+
+    // Group heroes by field
+    const fields = {};
     this.heroes.forEach(hero => {
-      const item = document.createElement('div');
-      item.className = 'hero-grid-item';
-
-      const isDiscovered = this.discoveredHeroes.has(hero.id);
-
-      const imgSrc = hero.image.startsWith('http') ? hero.image : hero.image;
-
-      item.innerHTML = `
-        <img src="${imgSrc}" alt="${hero.name}" class="hero-grid-image" onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name.split(' ').map(n => n[0]).join('')}</text></svg>'">
-        <div class="hero-grid-name">${isDiscovered ? hero.name : '❓'}</div>
-      `;
-
-      if (isDiscovered) {
-        item.addEventListener('click', () => {
-          this.showHeroDetail(hero);
-          this.hideModal('heroesListModal');
-        });
+      if (!fields[hero.category]) {
+        fields[hero.category] = [];
       }
-
-      grid.appendChild(item);
+      fields[hero.category].push(hero);
     });
 
-    this.showModal('heroesListModal');
+    container.innerHTML = Object.entries(fields).map(([field, heroes]) => `
+      <div class="field-section">
+        <h3 class="field-title">${field}</h3>
+        <div class="heroes-grid">
+          ${heroes.map(hero => {
+            const isStudied = this.studiedHeroes.has(hero.id);
+            return `
+              <div class="hero-card ${isStudied ? 'studied' : ''}" data-hero-id="${hero.id}">
+                <img src="${hero.image}" alt="${hero.name}" class="hero-image" onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name.split(' ').map(n => n[0]).join('')}</text></svg>'">
+                <div class="hero-info">
+                  <h4 class="hero-name">${hero.name}</h4>
+                  <p class="hero-years">${hero.years}</p>
+                  <p class="hero-field">${hero.field}</p>
+                </div>
+                <div class="hero-actions">
+                  ${isStudied ?
+                    '<span class="studied-badge">✓ Вывучаны</span>' :
+                    `<button class="study-hero-btn btn-secondary" data-hero-id="${hero.id}">Вывучыць</button>`
+                  }
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `).join('');
   }
 
-  showHeroDetail(hero) {
-    // Create a temporary scene for hero detail
-    const heroScene = {
-      title: hero.name,
-      text: `${hero.years} • ${hero.field}\n\n${hero.fact}`,
-      image: hero.image,
-      choices: [
-        { text: 'Вярнуцца да спісу', next: null }
-      ]
-    };
+  handleSearch(query) {
+    const resultsContainer = document.getElementById('searchResults');
+    if (!resultsContainer) return;
 
-    this.renderScene(heroScene);
-    this.hideAllModals();
+    if (!query.trim()) {
+      resultsContainer.innerHTML = '<p class="no-results">Увядзіце тэкст для пошуку</p>';
+      return;
+    }
+
+    const filteredHeroes = this.heroes.filter(hero =>
+      hero.name.toLowerCase().includes(query.toLowerCase()) ||
+      hero.field.toLowerCase().includes(query.toLowerCase()) ||
+      hero.category.toLowerCase().includes(query.toLowerCase()) ||
+      hero.fact.toLowerCase().includes(query.toLowerCase())
+    );
+
+    if (filteredHeroes.length === 0) {
+      resultsContainer.innerHTML = '<p class="no-results">Героі не знойдзены</p>';
+      return;
+    }
+
+    resultsContainer.innerHTML = `
+      <div class="search-results-grid">
+        ${filteredHeroes.map(hero => {
+          const isStudied = this.studiedHeroes.has(hero.id);
+          return `
+            <div class="hero-card ${isStudied ? 'studied' : ''}" data-hero-id="${hero.id}">
+              <img src="${hero.image}" alt="${hero.name}" class="hero-image" onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name.split(' ').map(n => n[0]).join('')}</text></svg>'">
+              <div class="hero-info">
+                <h4 class="hero-name">${hero.name}</h4>
+                <p class="hero-years">${hero.years}</p>
+                <p class="hero-field">${hero.field}</p>
+              </div>
+              <div class="hero-actions">
+                ${isStudied ?
+                  '<span class="studied-badge">✓ Вывучаны</span>' :
+                  `<button class="study-hero-btn btn-secondary" data-hero-id="${hero.id}">Вывучыць</button>`
+                }
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
   }
 
-  showLoadingState() {
-    document.getElementById('loadingState').classList.remove('hidden');
-    document.getElementById('storyContainer').classList.add('hidden');
-  }
+  showRandomFact() {
+    const fact = this.facts[Math.floor(Math.random() * this.facts.length)];
+    const display = document.getElementById('randomFactDisplay');
 
-  hideLoadingState() {
-    document.getElementById('loadingState').classList.add('hidden');
-    document.getElementById('storyContainer').classList.remove('hidden');
-  }
-
-  resetJourney() {
-    this.hideModal('menuModal');
-
-    // Reset progress
-    this.currentScene = 'intro';
-    this.visitedScenes.clear();
-    this.discoveredHeroes.clear();
-
-    // Clear saved progress
-    localStorage.removeItem('belarusJourneyProgress');
-
-    // Restart journey
-    this.showScene('intro');
-    this.updateProgress();
-
-    this.showToast('🔄 Падарожжа пачата нанова!');
-  }
-
-  loadProgress() {
-    try {
-      const saved = localStorage.getItem('belarusJourneyProgress');
-      if (saved) {
-        const progress = JSON.parse(saved);
-        this.currentScene = progress.currentScene || 'intro';
-        this.visitedScenes = new Set(progress.visitedScenes || []);
-        this.discoveredHeroes = new Set(progress.discoveredHeroes || []);
-      }
-    } catch (e) {
-      console.warn('Failed to load progress:', e);
+    if (fact && display) {
+      const hero = this.heroes.find(h => h.id === fact.id);
+      display.innerHTML = `
+        <div class="fact-card">
+          <div class="fact-hero">${fact.name}</div>
+          <div class="fact-text">${fact.fact}</div>
+          ${hero ? `<button class="btn-secondary" onclick="window.app.showHeroDetail(${hero.id})">Пазнаць больш</button>` : ''}
+        </div>
+      `;
     }
   }
 
-  saveProgress() {
-    try {
-      const progress = {
-        currentScene: this.currentScene,
-        visitedScenes: Array.from(this.visitedScenes),
-        discoveredHeroes: Array.from(this.discoveredHeroes)
-      };
-      localStorage.setItem('belarusJourneyProgress', JSON.stringify(progress));
-    } catch (e) {
-      console.warn('Failed to save progress:', e);
+  renderProfileView() {
+    const list = document.getElementById('studiedHeroesList');
+    if (!list) return;
+
+    const studiedHeroes = Array.from(this.studiedHeroes)
+      .map(id => this.heroes.find(h => h.id === id))
+      .filter(h => h);
+
+    if (studiedHeroes.length === 0) {
+      list.innerHTML = '<p class="no-heroes">Вы яшчэ не вывучылі ніводнага героя</p>';
+      return;
     }
+
+    list.innerHTML = `
+      <h3>Вывучаныя героі</h3>
+      <div class="studied-heroes-grid">
+        ${studiedHeroes.map(hero => `
+          <div class="hero-card studied" data-hero-id="${hero.id}">
+            <img src="${hero.image}" alt="${hero.name}" class="hero-image" onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="8" fill="%23666" text-anchor="middle" dy=".3em">${hero.name.split(' ').map(n => n[0]).join('')}</text></svg>'">
+            <div class="hero-info">
+              <h4 class="hero-name">${hero.name}</h4>
+              <p class="hero-years">${hero.years}</p>
+              <p class="hero-field">${hero.field}</p>
+            </div>
+            <div class="hero-actions">
+              <button class="add-opinion-btn btn-secondary" data-hero-id="${hero.id}">Дадаць меркаванне</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
   }
 
+  showHeroDetail(heroId) {
+    const hero = this.heroes.find(h => h.id === heroId);
+    if (!hero) return;
+
+    const isStudied = this.studiedHeroes.has(heroId);
+    const opinions = this.heroOpinions[heroId] || [];
+
+    document.getElementById('heroModalTitle').textContent = hero.name;
+    document.getElementById('heroModalBody').innerHTML = `
+      <div class="hero-detail">
+        <div class="hero-detail-image">
+          <img src="${hero.image}" alt="${hero.name}" onerror="this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="50" font-family="Arial" font-size="12" fill="%23666" text-anchor="middle" dy=".3em">🖼️</text></svg>'">
+        </div>
+        <div class="hero-detail-info">
+          <div class="hero-meta">
+            <span class="hero-years">${hero.years}</span>
+            <span class="hero-field">${hero.field}</span>
+            <span class="hero-category">${hero.category}</span>
+          </div>
+          <div class="hero-fact">
+            <h4>Цікавы факт:</h4>
+            <p>${hero.fact}</p>
+          </div>
+          ${isStudied ? `
+            <div class="hero-actions">
+              <button class="add-opinion-btn btn-secondary" data-hero-id="${heroId}">Дадаць меркаванне</button>
+            </div>
+          ` : `
+            <div class="hero-actions">
+              <button class="study-hero-btn btn-primary" data-hero-id="${heroId}">Вывучыць гэтага героя</button>
+            </div>
+          `}
+        </div>
+        ${opinions.length > 0 ? `
+          <div class="hero-opinions">
+            <h4>Меркаванні карыстальнікаў:</h4>
+            ${opinions.map(opinion => `
+              <div class="opinion-item">
+                <div class="opinion-author">${opinion.author}</div>
+                <div class="opinion-text">${opinion.text}</div>
+                <div class="opinion-date">${new Date(opinion.date).toLocaleDateString('be-BY')}</div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    this.showModal('heroModal');
+
+    // Add event listener for close button
+    this.addEvent('#closeHeroModal', 'click', () => this.hideModal('heroModal'));
+  }
+
+  studyHero(heroId) {
+    this.studiedHeroes.add(heroId);
+    this.saveUserData();
+    this.renderStudyView();
+    this.renderProfileView();
+    this.showHeroDetail(heroId);
+    this.showToast('✅ Герой дададзены да вывучаных!');
+  }
+
+  showAddOpinionModal(heroId) {
+    this.currentHero = heroId;
+    document.getElementById('opinionText').value = '';
+    this.showModal('opinionModal');
+  }
+
+  submitOpinion() {
+    const text = document.getElementById('opinionText').value.trim();
+    if (!text) {
+      this.showToast('❌ Увядзіце тэкст меркавання');
+      return;
+    }
+
+    if (!this.heroOpinions[this.currentHero]) {
+      this.heroOpinions[this.currentHero] = [];
+    }
+
+    this.heroOpinions[this.currentHero].push({
+      author: this.user.firstName,
+      text: text,
+      date: new Date().toISOString()
+    });
+
+    this.saveUserData();
+    this.hideModal('opinionModal');
+    this.showHeroDetail(this.currentHero);
+    this.showToast('✅ Меркаванне дададзена!');
+  }
+
+  // Modal management
   showModal(modalId) {
-    document.getElementById(modalId).classList.remove('hidden');
-    document.getElementById('modalOverlay').classList.remove('hidden');
+    document.getElementById(modalId).classList.add('active');
+    document.getElementById('modalOverlay').classList.add('active');
   }
 
   hideModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-    document.getElementById('modalOverlay').classList.add('hidden');
+    document.getElementById(modalId).classList.remove('active');
+    document.getElementById('modalOverlay').classList.remove('active');
   }
 
   hideAllModals() {
-    document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
-    document.getElementById('modalOverlay').classList.add('hidden');
+    document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+    document.getElementById('modalOverlay').classList.remove('active');
   }
 
-  showAbout() {
-    this.hideModal('menuModal');
-
-    const aboutScene = {
-      title: 'Аб праекце',
-      text: 'Гэты інтэрактыўны праект прысвечаны памяці герояў Беларусі. Праз падарожжа па гісторыі вы зможаце пазнаёміцца з выдатнымі постацямі, якія зрабілі ўклад у развіццё нашай краіны.',
-      image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23c8102e"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">🇧🇾</text></svg>',
-      choices: [
-        { text: 'Пачаць падарожжа', next: 'intro' }
-      ]
-    };
-
-    this.renderScene(aboutScene);
-    this.hideAllModals();
+  showLoadingState() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+      <div class="loading-screen">
+        <div class="spinner"></div>
+        <p>Загружаем...</p>
+      </div>
+    `;
   }
 
-  showAbout() {
-    this.hideModal('menuModal');
-
-    const aboutHero = {
-      id: 'about',
-      name: 'Аб праекце',
-      image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23c8102e"/><text x="50" y="50" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dy=".3em">🇧🇾</text></svg>',
-      years: '2024',
-      field: 'Гісторыя і культура',
-      category: 'Адукацыя',
-      fact: 'Гэты праект прысвечаны памяці герояў Беларусі. Свайпайце карткі, каб адкрываць гісторыі: управа - прапусціць, улева - падабаецца, уверх - падрабязнасці, уніз - у закладкі.'
-    };
-
-    this.showDetailModal(aboutHero);
-  }
-
-  showInstructions() {
-    if (localStorage.getItem('journeyInstructionsShown')) return;
-
-    this.showModal('instructionsModal');
-    localStorage.setItem('journeyInstructionsShown', 'true');
+  hideLoadingState() {
+    // Will be replaced by renderApp
   }
 
   showToast(message, duration = 3000) {
@@ -472,7 +621,7 @@ class BelarusHeroesJourney {
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    window.app = new BelarusHeroesJourney();
+    window.app = new BelarusHeroesApp();
     await window.app.init();
   } catch (error) {
     console.error('Failed to initialize app:', error);
