@@ -188,6 +188,13 @@ body {
   position: sticky;
   top: var(--header-height);
   z-index: var(--z-sticky);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-tab {
@@ -1300,11 +1307,14 @@ body {
 
   .nav-tabs {
     padding: 0 var(--space-2);
+    min-width: max-content;
   }
 
   .nav-tab {
-    padding: var(--space-2) var(--space-1);
+    padding: var(--space-2) var(--space-3);
     font-size: var(--font-size-xs);
+    min-width: 3.5rem;
+    white-space: nowrap;
   }
 
   .nav-icon {
@@ -1969,6 +1979,12 @@ body {
 .timeline-event:nth-child(3) { animation-delay: 0.3s; }
 .timeline-event:nth-child(4) { animation-delay: 0.4s; }
 .timeline-event:nth-child(5) { animation-delay: 0.5s; }
+.timeline-event:nth-child(6) { animation-delay: 0.6s; }
+.timeline-event:nth-child(7) { animation-delay: 0.7s; }
+.timeline-event:nth-child(8) { animation-delay: 0.8s; }
+.timeline-event:nth-child(9) { animation-delay: 0.9s; }
+.timeline-event:nth-child(10) { animation-delay: 1.0s; }
+.timeline-event:nth-child(n+11) { animation-delay: 1.0s; }
 
 .timeline-marker {
   position: absolute;

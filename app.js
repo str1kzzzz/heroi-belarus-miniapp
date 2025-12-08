@@ -115,7 +115,7 @@ class BelarusHeroesApp {
             </div>
             <div class="feature">
               <span class="feature-icon">🧠</span>
-              <span>Правярай веды ў тэсце</span>
+              <span>Правярайце веды ў тэсце (15-20 пытанняў)</span>
             </div>
             <div class="feature">
               <span class="feature-icon">❤️</span>
@@ -126,9 +126,9 @@ class BelarusHeroesApp {
               <span>Сочыце за сваёй статыстыкай</span>
             </div>
             <div class="feature">
-              <span class="feature-icon"></span>
-              <span>Дадавай свае меркаванні</span>
-            </div>
+               <span class="feature-icon">💬</span>
+               <span>Дадавай свае меркаванні</span>
+             </div>
           </div>
 
           <button id="startAppBtn" class="btn-primary welcome-btn">
@@ -239,7 +239,6 @@ class BelarusHeroesApp {
       // Fallback
       this.studiedHeroes.add(1);
       this.studiedHeroes.add(3);
-      this.setTheme('light');
     }
   }
 
@@ -428,11 +427,11 @@ class BelarusHeroesApp {
           </div>
           <div class="quiz-container">
             <div id="quizStart" class="quiz-start">
-              <p>Пройдзіце тэст па беларускіх героях!</p>
+              <p>Пройдзіце тэст па беларускіх героях!<br><small>15-20 выпадковых пытанняў розных тыпаў</small></p>
               <button id="startQuiz" class="btn-primary">Пачаць тэст</button>
             </div>
             <div id="quizQuestion" class="quiz-question" style="display: none;">
-              <div class="question-counter">Пытанне <span id="questionNumber">1</span> з <span id="totalQuestions">10</span></div>
+              <div class="question-counter">Пытанне <span id="questionNumber">1</span> з <span id="totalQuestions">15-20</span></div>
               <div class="question-text" id="questionText"></div>
               <div class="answer-options" id="answerOptions"></div>
               <div class="quiz-actions">
@@ -619,7 +618,6 @@ class BelarusHeroesApp {
     `;
 
     this.renderStudyView();
-    this.renderStatsView();
     this.renderProfileView();
     this.renderCompareView();
     this.renderTimelineView();
@@ -645,6 +643,11 @@ class BelarusHeroesApp {
     if (viewName === 'search') {
       document.getElementById('searchInput').focus();
     }
+  }
+
+  renderSearchView() {
+    // This method is called when search view needs to be re-rendered
+    // The search results are already handled by handleSearch method
   }
 
   renderStudyView() {
@@ -1421,15 +1424,26 @@ class BelarusHeroesApp {
       this.generateNameQuestion.bind(this),
       this.generateFieldQuestion.bind(this),
       this.generateYearQuestion.bind(this),
-      this.generateFactQuestion.bind(this)
+      this.generateFactQuestion.bind(this),
+      this.generateCategoryQuestion.bind(this),
+      this.generateBioQuestion.bind(this)
     ];
 
-    while (questions.length < 10 && usedHeroes.size < this.heroes.length) {
+    // Generate 15-20 random questions
+    const targetQuestions = Math.floor(Math.random() * 6) + 15; // 15-20 questions
+
+    while (questions.length < targetQuestions && usedHeroes.size < this.heroes.length) {
       const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
       const question = questionType(usedHeroes);
       if (question) {
         questions.push(question);
       }
+    }
+
+    // Shuffle the questions for more randomness
+    for (let i = questions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [questions[i], questions[j]] = [questions[j], questions[i]];
     }
 
     return questions;
@@ -1528,6 +1542,56 @@ class BelarusHeroesApp {
     };
   }
 
+  generateCategoryQuestion(usedHeroes) {
+    const availableHeroes = this.heroes.filter(h => !usedHeroes.has(h.id));
+    if (availableHeroes.length === 0) return null;
+
+    const correctHero = availableHeroes[Math.floor(Math.random() * availableHeroes.length)];
+    usedHeroes.add(correctHero.id);
+
+    const categories = [...new Set(this.heroes.map(h => h.category))];
+    const wrongCategories = categories.filter(c => c !== correctHero.category)
+      .sort(() => Math.random() - 0.5).slice(0, 3);
+
+    const options = [correctHero.category, ...wrongCategories]
+      .sort(() => Math.random() - 0.5);
+
+    return {
+      question: `У якой катэгорыі працаваў ${correctHero.name}?`,
+      options: options,
+      correctAnswer: correctHero.category,
+      heroId: correctHero.id
+    };
+  }
+
+  generateBioQuestion(usedHeroes) {
+    const availableHeroes = this.heroes.filter(h => h.bio && !usedHeroes.has(h.id));
+    if (availableHeroes.length === 0) return null;
+
+    const correctHero = availableHeroes[Math.floor(Math.random() * availableHeroes.length)];
+    usedHeroes.add(correctHero.id);
+
+    // Create multiple choice from bio snippets
+    const bioSnippet = correctHero.bio.length > 100 ?
+      correctHero.bio.substring(0, 100) + '...' :
+      correctHero.bio;
+
+    // Get wrong answers from other heroes' bios
+    const wrongBios = this.heroes.filter(h => h.id !== correctHero.id && h.bio)
+      .map(h => h.bio.length > 100 ? h.bio.substring(0, 100) + '...' : h.bio)
+      .sort(() => Math.random() - 0.5).slice(0, 3);
+
+    const options = [bioSnippet, ...wrongBios]
+      .sort(() => Math.random() - 0.5);
+
+    return {
+      question: `Якая біяграфія адпавядае ${correctHero.name}?`,
+      options: options,
+      correctAnswer: bioSnippet,
+      heroId: correctHero.id
+    };
+  }
+
   startQuiz() {
     this.quizQuestions = this.generateQuizQuestions();
     this.currentQuestionIndex = 0;
@@ -1613,14 +1677,18 @@ class BelarusHeroesApp {
     document.getElementById('scorePercentage').textContent = `${percentage}%`;
 
     let feedback = '';
+    const totalQuestions = this.quizQuestions.length;
+
     if (percentage >= 90) {
-      feedback = 'Выдатна! Вы сапраўдны эксперт па беларускіх героях! 🏆';
-    } else if (percentage >= 70) {
-      feedback = 'Добрая работа! Вы добра ведаеце гісторыю Беларусі! 👍';
-    } else if (percentage >= 50) {
-      feedback = 'Нядрэнна! Ёсць над чым працаваць, але вы на правільным шляху! 📚';
+      feedback = `Выдатна! Вы сапраўдны эксперт па беларускіх героях! 🏆 (${this.quizScore}/${totalQuestions})`;
+    } else if (percentage >= 75) {
+      feedback = `Добрая работа! Вы добра ведаеце гісторыю Беларусі! 👍 (${this.quizScore}/${totalQuestions})`;
+    } else if (percentage >= 60) {
+      feedback = `Нядрэнна! Ёсць над чым працаваць, але вы на правільным шляху! 📚 (${this.quizScore}/${totalQuestions})`;
+    } else if (percentage >= 40) {
+      feedback = `Патрэбна больш вывучэння! Спрабуйце яшчэ раз. 💪 (${this.quizScore}/${totalQuestions})`;
     } else {
-      feedback = 'Працягвайце вывучаць! Беларуская гісторыя поўная цікавых герояў! 💪';
+      feedback = `Працягвайце вывучаць! Беларуская гісторыя поўная цікавых герояў! 📖 (${this.quizScore}/${totalQuestions})`;
     }
 
     document.getElementById('quizFeedback').textContent = feedback;
