@@ -2,30 +2,38 @@ import os
 import json
 import random
 from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, CallbackQueryHandler
 
 # Загружаем токен из .env
 load_dotenv()
-BOT_TOKEN = os.getenv("8110286798:AAH_jElbeGDvvpuVceB0gQrcY-069rqIdyY")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Загружаем данные героев
-with open("/Users/shubzda.yaroslaviclou.com/heroibelarus-miniapp/data/heroes.json", "r", encoding="utf-8") as f:
+with open("data/heroes.json", "r", encoding="utf-8") as f:
     heroes = json.load(f)
 
 # Загружаем факты
-with open("/Users/shubzda.yaroslaviclou.com/heroibelarus-miniapp/data/facts.json", "r", encoding="utf-8") as f:
+with open("data/facts.json", "r", encoding="utf-8") as f:
     facts = json.load(f)
 
 # Команда /start
 async def start(update: Update, context: CallbackContext):
+    # URL мини-приложения (нужно заменить на реальный URL после развертывания)
+    web_app_url = "https://your-domain.com/heroibelarus-miniapp"  # Замените на реальный URL
+
     keyboard = [
+        [InlineKeyboardButton("🚀 Открыть приложение", web_app=WebAppInfo(url=web_app_url))],
         [InlineKeyboardButton("🎖️ Случайный герой", callback_data="random_hero")],
         [InlineKeyboardButton("💡 Интересный факт", callback_data="random_fact")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        "🇧🇾 Привет! Это проект *Героі Беларусі*\n\nВыбери действие:",
+        "🇧🇾 Привет! Это проект *Героі Беларусі*\n\n"
+        "🎓 Изучай героев Беларуси в интерактивном приложении!\n"
+        "🧠 Проходи тесты и проверяй знания!\n"
+        "❤️ Добавляй героев в избранное!\n\n"
+        "Выбери действие:",
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )

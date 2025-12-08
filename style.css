@@ -426,6 +426,52 @@ body {
   gap: var(--space-4);
 }
 
+/* Large screens */
+@media (min-width: 1024px) {
+  .heroes-grid, .studied-heroes-grid, .search-results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-5);
+  }
+
+  .hero-card {
+    padding: var(--space-5);
+  }
+
+  .hero-image {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .hero-name {
+    font-size: var(--font-size-base);
+  }
+
+  .main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .stats-overview {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+/* Medium screens */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .heroes-grid, .studied-heroes-grid, .search-results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
 /* Hero Cards */
 .hero-card {
   background: var(--surface-color);
@@ -1322,6 +1368,84 @@ body {
   font-weight: var(--font-weight-semibold);
 }
 
+/* Tablet Responsive */
+@media (max-width: 768px) {
+  .nav-tabs {
+    padding: 0 var(--space-3);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-tab {
+    flex-shrink: 0;
+    min-width: 80px;
+    padding: var(--space-2) var(--space-1);
+    font-size: var(--font-size-xs);
+  }
+
+  .nav-icon {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-1);
+  }
+
+  .main-content {
+    padding: var(--space-3) var(--space-3) calc(var(--space-3) + var(--nav-height)) var(--space-3);
+  }
+
+  .view-header h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .hero-card {
+    padding: var(--space-3);
+  }
+
+  .hero-image {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .hero-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .hero-years, .hero-field {
+    font-size: var(--font-size-xs);
+  }
+
+  .modal {
+    margin: var(--space-2);
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100vh - 1rem);
+  }
+
+  .hero-detail {
+    gap: var(--space-3);
+  }
+
+  .hero-detail-image {
+    height: 10rem;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .stat-card {
+    padding: var(--space-3);
+  }
+
+  .studied-heroes-list {
+    padding: var(--space-3);
+  }
+}
+
 /* Mobile Responsive */
 @media (max-width: 480px) {
   .header-content {
@@ -1523,6 +1647,179 @@ body {
   select {
     font-size: 16px !important;
   }
+}
+
+/* Landscape orientation on mobile */
+@media screen and (max-width: 767px) and (orientation: landscape) {
+  .header {
+    height: var(--header-height);
+  }
+
+  .nav-tabs {
+    height: 3rem;
+  }
+
+  .main-content {
+    padding: var(--space-2) var(--space-2) calc(var(--space-2) + 3rem) var(--space-2);
+  }
+
+  .hero-card {
+    padding: var(--space-2);
+  }
+
+  .hero-image {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .modal {
+    max-height: calc(100vh - 2rem);
+  }
+
+  .hero-detail {
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+
+  .hero-detail-image {
+    flex: 0 0 8rem;
+    height: 8rem;
+  }
+
+  .hero-detail-info {
+    flex: 1;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .nav-tab {
+    min-width: 60px;
+    padding: var(--space-1);
+    font-size: 10px;
+  }
+
+  .nav-icon {
+    font-size: var(--font-size-sm);
+    margin-bottom: 2px;
+  }
+
+  .hero-card {
+    padding: var(--space-2);
+  }
+
+  .hero-image {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .hero-name {
+    font-size: var(--font-size-xs);
+  }
+
+  .stat-card {
+    padding: var(--space-2);
+  }
+
+  .stat-number {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .hero-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .hero-card {
+    min-height: 120px;
+  }
+
+  .btn-primary, .btn-secondary {
+    min-height: 44px;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .answer-option {
+    min-height: 48px;
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+/* Print styles */
+@media print {
+  .nav-tabs, .modal-overlay, .toast {
+    display: none !important;
+  }
+
+  .hero-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .hero-image {
+    max-width: 100px;
+    max-height: 100px;
+  }
+}
+
+/* Safe area for devices with notches */
+@supports (padding: max(0px)) {
+  .app {
+    padding-left: max(var(--space-4), env(safe-area-inset-left));
+    padding-right: max(var(--space-4), env(safe-area-inset-right));
+    padding-top: max(var(--space-4), env(safe-area-inset-top));
+    padding-bottom: max(calc(var(--space-4) + var(--nav-height)), env(safe-area-inset-bottom));
+  }
+
+  .header {
+    padding-top: max(0px, env(safe-area-inset-top));
+  }
+
+  .nav-tabs {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Focus management for accessibility */
+.nav-tab:focus,
+.btn-primary:focus,
+.btn-secondary:focus,
+.hero-card:focus,
+.answer-option:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .hero-card {
+    border: 2px solid var(--text-primary);
+  }
+
+  .btn-primary {
+    border: 2px solid var(--text-primary);
+  }
+
+  .btn-secondary {
+    border: 2px solid var(--text-primary);
+  }
+}
+
+/* Dark mode preference */
+@media (prefers-color-scheme: dark) {
+  /* App already uses dark theme by default */
+}
+
+/* Light mode preference - fallback for systems that might request it */
+@media (prefers-color-scheme: light) {
+  /* App uses dark theme regardless of system preference */
+  /* This ensures consistent experience in Telegram */
 }
 
 /* === QUIZ STYLES === */
