@@ -217,14 +217,14 @@ class BelarusHeroesApp {
   async loadData() {
     try {
       // Load heroes data
-      const heroesResponse = await fetch('heroes.json');
+      const heroesResponse = await fetch('data/heroes.json');
       if (!heroesResponse.ok) {
         throw new Error(`Failed to load heroes: ${heroesResponse.status}`);
       }
       this.heroes = await heroesResponse.json();
 
       // Load facts data
-      const factsResponse = await fetch('facts.json');
+      const factsResponse = await fetch('data/facts.json');
       if (!factsResponse.ok) {
         throw new Error(`Failed to load facts: ${factsResponse.status}`);
       }
