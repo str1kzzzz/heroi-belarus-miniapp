@@ -83,10 +83,13 @@ class BelarusHeroesApp {
     modal.className = 'modal-overlay active';
     modal.innerHTML = `
       <div class="modal welcome-modal active">
+        <div class="modal-header">
+          <h2>Вітаем у Героях Беларусі!</h2>
+          <button class="modal-close" id="closeWelcomeModal">✕</button>
+        </div>
         <div class="welcome-content">
           <div class="welcome-header">
             <div class="welcome-logo">🇧🇾</div>
-            <h1>Вітаем у Героях Беларусі!</h1>
             <p>Інтэрактыўная платформа для вывучэння гісторыі Беларусі</p>
           </div>
 
@@ -139,6 +142,28 @@ class BelarusHeroesApp {
     `;
 
     document.body.appendChild(modal);
+
+    // Add event listener for close button
+    document.getElementById('closeWelcomeModal').addEventListener('click', () => {
+      const userKey = `belarusHeroes_${this.user.id}`;
+      localStorage.setItem(`${userKey}_visited`, 'true');
+      document.body.removeChild(modal);
+      this.renderApp();
+      this.setupEventListeners();
+      this.showView(this.currentView);
+    });
+
+    // Add event listener for overlay click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        const userKey = `belarusHeroes_${this.user.id}`;
+        localStorage.setItem(`${userKey}_visited`, 'true');
+        document.body.removeChild(modal);
+        this.renderApp();
+        this.setupEventListeners();
+        this.showView(this.currentView);
+      }
+    });
 
     // Add event listener for start button
     document.getElementById('startAppBtn').addEventListener('click', () => {

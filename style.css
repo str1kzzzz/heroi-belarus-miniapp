@@ -1193,6 +1193,37 @@ body {
   background: var(--surface-color);
 }
 
+.welcome-modal .modal-header {
+  position: relative;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-color);
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+}
+
+.welcome-modal .modal-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: var(--surface-elevated);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: var(--transition-fast);
+  z-index: 1;
+}
+
+.welcome-modal .modal-close:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
 .welcome-content {
   padding: var(--space-8);
   text-align: center;
