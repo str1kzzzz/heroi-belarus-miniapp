@@ -2001,6 +2001,109 @@ body {
   }
 }
 
+/* === PROFILE ACTIONS === */
+.profile-actions {
+  background: var(--surface-color);
+  border-radius: var(--border-radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-color);
+  border: 1px solid var(--border-color);
+  margin-bottom: var(--space-6);
+}
+
+.profile-actions h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  text-align: center;
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+}
+
+.action-btn:hover {
+  background: var(--surface-color);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.action-icon {
+  font-size: var(--font-size-xl);
+}
+
+/* === MODAL CONTENT STYLES === */
+.stats-modal-content,
+.compare-modal-content,
+.timeline-modal-content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.stats-modal-content .stats-container,
+.compare-modal-content .compare-container,
+.timeline-modal-content .timeline-container {
+  padding: 0;
+}
+
+/* Mobile navigation improvements */
+@media (max-width: 480px) {
+  .nav-tabs {
+    padding: 0 var(--space-1);
+  }
+
+  .nav-tab {
+    padding: var(--space-2) var(--space-1);
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nav-text {
+    display: none;
+  }
+
+  .nav-icon {
+    font-size: var(--font-size-base);
+    margin-bottom: 0;
+  }
+
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .action-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: var(--space-3);
+  }
+
+  .action-icon {
+    font-size: var(--font-size-lg);
+    margin-right: var(--space-2);
+  }
+}
+
 /* === COMPARISON STYLES === */
 .compare-container {
   display: flex;

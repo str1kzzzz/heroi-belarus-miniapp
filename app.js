@@ -118,19 +118,27 @@ class BelarusHeroesApp {
             </div>
             <div class="feature">
               <span class="feature-icon">🧠</span>
-              <span>Правярайце веды ў тэсце (15-20 пытанняў)</span>
+              <span>Правярайце веды ў тэсце</span>
             </div>
             <div class="feature">
               <span class="feature-icon">❤️</span>
               <span>Дадавайце герояў да ўлюбёных</span>
             </div>
             <div class="feature">
+              <span class="feature-icon">⚖️</span>
+              <span>Параўноўвайце герояў</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">⏰</span>
+              <span>Даследуйце храналогію</span>
+            </div>
+            <div class="feature">
               <span class="feature-icon">📊</span>
-              <span>Сочыце за сваёй статыстыкай</span>
+              <span>Сочыце за статыстыкай</span>
             </div>
             <div class="feature">
                <span class="feature-icon">💬</span>
-               <span>Дадавай свае меркаванні</span>
+               <span>Дадавайце меркаванні</span>
              </div>
           </div>
 
@@ -289,8 +297,6 @@ class BelarusHeroesApp {
     this.addEvent('#searchTab', 'click', () => this.showView('search'));
     this.addEvent('#randomTab', 'click', () => this.showView('random'));
     this.addEvent('#quizTab', 'click', () => this.showView('quiz'));
-    this.addEvent('#compareTab', 'click', () => this.showView('compare'));
-    this.addEvent('#statsTab', 'click', () => this.showView('stats'));
     this.addEvent('#profileTab', 'click', () => this.showView('profile'));
 
 
@@ -352,6 +358,14 @@ class BelarusHeroesApp {
 
     // Modal close buttons
     this.addEvent('#closeHeroModal', 'click', () => this.hideModal('heroModal'));
+    this.addEvent('#closeStatsModal', 'click', () => this.hideModal('statsModal'));
+    this.addEvent('#closeCompareModal', 'click', () => this.hideModal('compareModal'));
+    this.addEvent('#closeTimelineModal', 'click', () => this.hideModal('timelineModal'));
+
+    // Profile action buttons
+    this.addEvent('#openStatsBtn', 'click', () => this.showStatsModal());
+    this.addEvent('#openCompareBtn', 'click', () => this.showCompareModal());
+    this.addEvent('#openTimelineBtn', 'click', () => this.showTimelineModal());
 
     // Modal overlay
     this.addEvent('#modalOverlay', 'click', () => this.hideAllModals());
@@ -373,7 +387,7 @@ class BelarusHeroesApp {
           <div class="logo">🇧🇾</div>
           <div class="title-section">
             <h1>Героі Беларусі</h1>
-            <p>Вывучай і пазнавай</p>
+            <p>Платформа для вывучэння</p>
           </div>
           <div class="user-info">
             <span class="user-name">${this.user.firstName}</span>
@@ -385,35 +399,23 @@ class BelarusHeroesApp {
       <nav class="nav-tabs">
         <button id="studyTab" class="nav-tab active" data-view="study">
           <span class="nav-icon">📚</span>
-          <span>Вывучэнне</span>
+          <span class="nav-text">Вывучэнне</span>
         </button>
         <button id="searchTab" class="nav-tab" data-view="search">
           <span class="nav-icon">🔍</span>
-          <span>Пошук</span>
+          <span class="nav-text">Пошук</span>
         </button>
         <button id="randomTab" class="nav-tab" data-view="random">
           <span class="nav-icon">💡</span>
-          <span>Факты</span>
+          <span class="nav-text">Факты</span>
         </button>
         <button id="quizTab" class="nav-tab" data-view="quiz">
           <span class="nav-icon">🧠</span>
-          <span>Тэст</span>
-        </button>
-        <button id="compareTab" class="nav-tab" data-view="compare">
-          <span class="nav-icon">⚖️</span>
-          <span>Параўнанне</span>
-        </button>
-        <button id="timelineTab" class="nav-tab" data-view="timeline">
-          <span class="nav-icon">⏰</span>
-          <span>Храналогія</span>
-        </button>
-        <button id="statsTab" class="nav-tab" data-view="stats">
-          <span class="nav-icon">📊</span>
-          <span>Статыстыка</span>
+          <span class="nav-text">Тэст</span>
         </button>
         <button id="profileTab" class="nav-tab" data-view="profile">
           <span class="nav-icon">👤</span>
-          <span>Профіль</span>
+          <span class="nav-text">Профіль</span>
         </button>
       </nav>
 
@@ -610,6 +612,25 @@ class BelarusHeroesApp {
                 <div class="stat-label">Дададзена меркаванняў</div>
               </div>
             </div>
+
+            <div class="profile-actions">
+              <h3>Дадатковыя функцыі</h3>
+              <div class="action-buttons">
+                <button id="openStatsBtn" class="btn-secondary action-btn">
+                  <span class="action-icon">📊</span>
+                  <span>Падрабязная статыстыка</span>
+                </button>
+                <button id="openCompareBtn" class="btn-secondary action-btn">
+                  <span class="action-icon">⚖️</span>
+                  <span>Параўнаць герояў</span>
+                </button>
+                <button id="openTimelineBtn" class="btn-secondary action-btn">
+                  <span class="action-icon">⏰</span>
+                  <span>Храналогія</span>
+                </button>
+              </div>
+            </div>
+
             <div id="studiedHeroesList" class="studied-heroes-list"></div>
           </div>
         </div>
@@ -639,6 +660,33 @@ class BelarusHeroesApp {
             <button id="submitOpinion" class="btn-primary">Дадаць</button>
           </div>
         </div>
+      </div>
+
+      <!-- Stats Modal -->
+      <div class="modal" id="statsModal">
+        <div class="modal-header">
+          <h2>Падрабязная статыстыка</h2>
+          <button class="modal-close" id="closeStatsModal">✕</button>
+        </div>
+        <div class="modal-body" id="statsModalBody"></div>
+      </div>
+
+      <!-- Compare Modal -->
+      <div class="modal" id="compareModal">
+        <div class="modal-header">
+          <h2>Параўнанне герояў</h2>
+          <button class="modal-close" id="closeCompareModal">✕</button>
+        </div>
+        <div class="modal-body" id="compareModalBody"></div>
+      </div>
+
+      <!-- Timeline Modal -->
+      <div class="modal" id="timelineModal">
+        <div class="modal-header">
+          <h2>Храналогія герояў</h2>
+          <button class="modal-close" id="closeTimelineModal">✕</button>
+        </div>
+        <div class="modal-body" id="timelineModalBody"></div>
       </div>
     `;
 
@@ -1890,6 +1938,40 @@ class BelarusHeroesApp {
       <text x="100" y="180" font-family="Arial, sans-serif" font-size="10" fill="#999" text-anchor="middle">${hero.years}</text>
     </svg>`;
     return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  }
+
+  // Modal functions for profile actions
+  showStatsModal() {
+    const statsHtml = `
+      <div class="stats-modal-content">
+        ${document.getElementById('statsView').innerHTML}
+      </div>
+    `;
+    document.getElementById('statsModalBody').innerHTML = statsHtml;
+    this.renderStatsView();
+    this.showModal('statsModal');
+  }
+
+  showCompareModal() {
+    const compareHtml = `
+      <div class="compare-modal-content">
+        ${document.getElementById('compareView').innerHTML}
+      </div>
+    `;
+    document.getElementById('compareModalBody').innerHTML = compareHtml;
+    this.renderCompareView();
+    this.showModal('compareModal');
+  }
+
+  showTimelineModal() {
+    const timelineHtml = `
+      <div class="timeline-modal-content">
+        ${document.getElementById('timelineView').innerHTML}
+      </div>
+    `;
+    document.getElementById('timelineModalBody').innerHTML = timelineHtml;
+    this.renderTimelineView();
+    this.showModal('timelineModal');
   }
 
   // Modal management
